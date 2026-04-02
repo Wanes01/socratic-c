@@ -1,0 +1,33 @@
+services:
+  web-app:
+    # TODO: replace with "node index.js" in production
+    command: npm run dev
+    build: .
+    container_name: socratic-tutor-app
+    ports:
+    # makes the application visible on port 5000
+      - "5000:5000"
+    volumes:
+    # shares this directory with the back-end/front-end container
+      - .:/app
+      - /app/node_modules
+    networks:
+      - llm-network
+    depends_on:
+      - ollama-service
+
+  ollama-service:
+    image: ollama/ollama:latest
+    container_name: socratic-ollama
+    # save the downloaded AI models so they don't have to be downloaded again after a restart
+    volumes:
+      - ollama_data:/root/.ollama
+    networks:
+      - llm-network
+
+networks:
+  llm-network:
+    driver: bridge
+
+volumes:
+  ollama_data:

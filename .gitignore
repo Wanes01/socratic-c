@@ -1,0 +1,26 @@
+# dependencies
+node_modules/
+frontend/node_modules/
+.vite/
+dist/
+
+# logs and debug
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# docker and os
+.dockerignore
+.DS_Store
+*.exe
+*.dll
+*.so
+*.out
+
+# configuration files
+.env
+.env.*
+
+# IDE
+.vscode

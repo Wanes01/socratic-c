@@ -3,7 +3,7 @@ const router = express.Router();
 const fs = require('fs')
 const path = require('path')
 
-const EXERCISES_DIR = path.join(__dirname, '../exercises');
+const EXERCISES_DIR = process.env.EXERCISES_DIR || path.join(__dirname, '../../exercises');
 
 /**
  * Recursive function to map a directory tree structure to JSON

@@ -6,10 +6,12 @@ services:
     ports:
       - "5000:5000"
     volumes:
-      - ./backend:/app          # monta il sorgente del backend
+      - ./backend:/app # mounts backend source
       - ./exercises:/app/exercises
-      - ./frontend/dist:/app/public   # dist del frontend (buildato separatamente)
-      - /app/node_modules       # preserva node_modules del backend
+      - ./frontend/dist:/app/public # shows the built frontend in public
+      - /app/node_modules # preserves backend node_modules
+    environment:
+      - EXERCISES_DIR=/app/exercises
     networks:
       - llm-network
     depends_on:

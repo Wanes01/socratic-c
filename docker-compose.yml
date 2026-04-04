@@ -3,13 +3,13 @@ services:
     command: npm run dev
     build: .
     container_name: socratic-tutor-app
+    working_dir: /app/backend
     ports:
       - "5000:5000"
     volumes:
-      - ./backend:/app # mounts backend source
-      - ./exercises:/app/exercises
-      - ./frontend/dist:/app/public # shows the built frontend in public
-      - /app/node_modules # preserves backend node_modules
+      - ./:/app
+      - /app/node_modules
+      - /app/frontend/node_modules
     environment:
       - EXERCISES_DIR=/app/exercises
     networks:

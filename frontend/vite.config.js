@@ -13,7 +13,8 @@ export default defineConfig({
       // redirects every /api call goes to the docker container
       '/api': {
         target: 'http://localhost:5000',
-        changeOrigin: true
+        changeOrigin: true,
+        ws: true
       }
     }
   }

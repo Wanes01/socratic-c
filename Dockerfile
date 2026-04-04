@@ -1,27 +1,23 @@
-FROM node:20-bookworm-slim
+# frontend build
+FROM node:20-bookworm-slim AS frontend-builder
+WORKDIR /app/frontend
+COPY frontend/package*.json ./
+RUN npm install
+COPY frontend/ ./
+RUN npm run build
 
+# backend setup
+FROM node:20-bookworm-slim
 RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
     gcc \
     && rm -rf /var/lib/apt/lists/*
-
 WORKDIR /app
-
-# installs backend dependencies
-COPY package*.json ./
+COPY backend/package*.json ./
 RUN npm install
+COPY backend/ ./
 
-# intalls frontend dependencies
-COPY frontend/package*.json ./frontend/
-RUN cd frontend && npm install
-
-# copy all the ramaining code
-COPY . .
-
-# frontend build
-RUN cd frontend && npm run build
-
-# the port that will be used to expose the web app
+# Copia il dist del frontend già buildato
+COPY --from=frontend-builder /app/frontend/dist ./public
 EXPOSE 5000
-
 CMD ["node", "index.js"]

@@ -12,7 +12,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
     gcc \
     && rm -rf /var/lib/apt/lists/*
-WORKDIR /app
+WORKDIR /app/backend
 COPY backend/package*.json ./
 RUN npm install
 COPY backend/ ./

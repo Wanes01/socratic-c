@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const filesController = require('../controllers/files')
+const filesController = require('../controllers/filesController')
 
 // gets the exercises files tree
 router.get('/tree', filesController.getTree);

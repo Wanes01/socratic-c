@@ -1,4 +1,4 @@
-const filesService = require('../services/files')
+const filesService = require('../services/filesService')
 
 // function called when the exercises files tree is requested 
 exports.getTree = (_, res) => {

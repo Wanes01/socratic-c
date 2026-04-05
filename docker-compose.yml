@@ -8,10 +8,12 @@ services:
       - "5000:5000"
     volumes:
       - ./:/app
-      - /app/node_modules
+      - /app/backend/node_modules
       - /app/frontend/node_modules
     environment:
       - EXERCISES_DIR=/app/exercises
+      - OLLAMA_URL=http://ollama-service:11434
+      - OLLAMA_MODEL=qwen2.5-coder:3b
     networks:
       - llm-network
     depends_on:

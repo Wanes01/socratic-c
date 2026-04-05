@@ -44,3 +44,14 @@ exports.getExercisesTree = () => {
     }
     return exports.getFileTree(EXERCISES_DIR);
 }
+
+/**
+ * Reads a file from the student's root directory
+ * @param {string} relPath a relative path from the student's root directory
+ * @returns a json containing the file's data
+ */
+exports.readExerciseFile = (exerciseDirName, relPath) => {
+    // es: es1/cartella/roba.c
+
+
+}

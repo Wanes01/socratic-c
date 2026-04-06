@@ -15,6 +15,7 @@
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.2.2",
+    "paneforge": "^1.0.2",
     "tailwindcss": "^4.2.2"
   }
 }

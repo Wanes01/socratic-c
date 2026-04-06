@@ -1,70 +1,66 @@
-<script>
-	let response = "";
-	let isStreaming = false;
-	let prompt = "";
-
-	async function sendRequest() {
-		if (!prompt.trim() || isStreaming) return;
-
-		response = "";
-		isStreaming = true;
-
-		const res = await fetch("/api/ollama", {
-			method: "POST",
-			headers: { "Content-Type": "application/json" },
-			body: JSON.stringify({
-				messages: [{ role: "user", content: prompt }],
-			}),
-		});
-
-		const reader = res.body.getReader();
-		const decoder = new TextDecoder();
-
-		while (true) {
-			const { done, value } = await reader.read();
-			if (done) break;
-
-			const text = decoder.decode(value);
-			text.split("\n")
-				.filter((l) => l.startsWith("data: "))
-				.forEach((line) => {
-					const data = JSON.parse(line.slice(6));
-					if (data.token) response += data.token;
-				});
-		}
-
-		isStreaming = false;
-	}
+<script lang="ts">
+	import { PaneGroup, Pane, PaneResizer } from "paneforge";
 </script>
 
-<div class="min-h-screen bg-gray-50 flex items-center justify-center p-8">
-	<div
-		class="w-full max-w-2xl bg-white rounded-2xl shadow p-6 flex flex-col gap-4"
-	>
-		<h1 class="text-lg font-medium text-gray-800">SSE Test</h1>
-
-		<textarea
-			bind:value={prompt}
-			placeholder="Scrivi un messaggio..."
-			rows="3"
-			class="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-blue-500"
-		></textarea>
-
-		<button
-			on:click={sendRequest}
-			disabled={isStreaming}
-			class="self-end bg-blue-600 text-white text-sm px-5 py-2 rounded-xl disabled:opacity-50"
+<div
+	class="h-screen w-screen bg-neutral-800 text-gray-300 font-sans overflow-hidden"
+>
+	<!-- intera schermata tranne l'heading -->
+	<PaneGroup direction="vertical" class="h-full w-full">
+		<!-- parte orizzontale divisa in 3 -->
+		<Pane
+			defaultSize={70}
+			minSize={5}
+			maxSize={95}
+			class="border border-white/10"
 		>
-			{isStreaming ? "Streaming..." : "Invia"}
-		</button>
-
-		{#if response || isStreaming}
-			<div
-				class="border border-gray-100 rounded-xl bg-gray-50 px-4 py-3 text-sm text-gray-800 min-h-[80px] whitespace-pre-wrap"
-			>
-				{response}{#if isStreaming}<span class="animate-pulse">▋</span
-					>{/if}
-			</div>
-		{/if}
-	</div>
+			<PaneGroup direction="horizontal">
+				<!-- file explorer -->
+				<Pane
+					defaultSize={25}
+					minSize={0}
+					maxSize={75}
+					class="border border-white/10"
+				>
+					<div class="p-4">File explorer</div>
+				</Pane>
+				<PaneResizer
+					class="w-1 bg-neutral-700 hover:bg-blue-500 transition-colors"
+				/>
+				<!-- file editor -->
+				<Pane
+					defaultSize={55}
+					minSize={20}
+					maxSize={100}
+					class="border border-white/10"
+				>
+					<div class="p-4">File editor</div>
+				</Pane>
+				<PaneResizer
+					class="w-1 bg-neutral-700 hover:bg-blue-500 transition-colors"
+				/>
+				<!-- chat con ollama -->
+				<Pane
+					defaultSize={20}
+					minSize={0}
+					maxSize={50}
+					class="border border-white/10"
+				>
+					<div class="p-4">Chat con ollama</div>
+				</Pane>
+			</PaneGroup>
+		</Pane>
+		<PaneResizer
+			class="h-1 bg-neutral-700 hover:bg-blue-500 transition-colors"
+		/>
+		<!-- Terminale -->
+		<Pane
+			defaultSize={30}
+			minSize={0}
+			maxSize={90}
+			class="border border-white/10"
+		>
+			<div class="p-4">Terminale</div>
+		</Pane>
+	</PaneGroup>
 </div>

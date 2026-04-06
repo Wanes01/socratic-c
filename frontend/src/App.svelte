@@ -1,12 +1,14 @@
 <script lang="ts">
 	import { PaneGroup, Pane, PaneResizer } from "paneforge";
+	import AppBar from "./lib/AppBar.svelte";
 </script>
 
 <div
-	class="h-screen w-screen bg-neutral-800 text-gray-300 font-sans overflow-hidden"
+	class="h-screen w-screen bg-neutral-800 text-gray-300 flex flex-col font-sans overflow-hidden"
 >
+	<AppBar />
 	<!-- intera schermata tranne l'heading -->
-	<PaneGroup direction="vertical" class="h-full w-full">
+	<PaneGroup direction="vertical" class="w-full flex-1">
 		<!-- parte orizzontale divisa in 3 -->
 		<Pane
 			defaultSize={70}

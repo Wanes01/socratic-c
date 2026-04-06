@@ -1,0 +1,10 @@
+{
+  "folders": [
+    { "name": "root", "path": "." },
+    { "name": "frontend", "path": "frontend" },
+    { "name": "backend", "path": "backend" }
+  ],
+  "settings": {
+    "svelte.language-server.runtime": "node"
+  }
+}

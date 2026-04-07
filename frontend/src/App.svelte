@@ -1,14 +1,21 @@
 <script lang="ts">
 	import { PaneGroup, Pane } from "paneforge";
-	import HandleResizer from "./lib/HandleResizer.svelte";
-	import AppBar from "./lib/AppBar.svelte";
-	import FileEditor from "./lib/FileEditor.svelte";
+	import HandleResizer from "./lib/components/HandleResizer.svelte";
+	import AppBar from "./lib/components/AppBar.svelte";
+	import FileEditor from "./lib/components/FileEditor.svelte";
+	import Explorer from "./lib/components/Explorer.svelte";
+	import { appState } from "./lib/state/app-state.svelte";
+
+	$effect(() => {
+		// loads the file tree
+		appState.loadFiles();
+	});
 
 	let editorValue = $state("");
 </script>
 
 <div
-	class="h-screen w-screen bg-neutral-800 text-gray-300 flex flex-col font-sans overflow-hidden"
+	class="h-screen w-screen bg-neutral-800 text-gray-300 flex flex-col font-sans overflow-hidden text-sm"
 >
 	<AppBar />
 	<PaneGroup direction="horizontal" class="w-full flex-1">
@@ -19,7 +26,7 @@
 			maxSize={40}
 			class="border border-white/10"
 		>
-			<div class="p-4">File explorer</div>
+			<Explorer />
 		</Pane>
 		<HandleResizer direction="vertical" />
 		<!-- Editor e terminale -->
@@ -37,7 +44,7 @@
 					maxSize={100}
 					class="border border-white/10"
 				>
-					<FileEditor bind:value={editorValue} />
+					<FileEditor bind:value={editorValue} language=".c" />
 				</Pane>
 				<HandleResizer direction="horizontal" />
 				<!-- Terminale -->

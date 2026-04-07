@@ -2,7 +2,7 @@
     import Button from "./Button.svelte";
 </script>
 
-<div class="flex flex-row p-3 justify-between items-center">
+<div class="flex flex-row px-3 py-2 justify-between items-center">
     <p class="font-mono font-extrabold text-2xl text-white">
         socrati<span class="text-purple-400">c_c</span>
     </p>

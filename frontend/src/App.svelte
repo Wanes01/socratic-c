@@ -1,6 +1,10 @@
 <script lang="ts">
-	import { PaneGroup, Pane, PaneResizer } from "paneforge";
+	import { PaneGroup, Pane } from "paneforge";
+	import HandleResizer from "./lib/HandleResizer.svelte";
 	import AppBar from "./lib/AppBar.svelte";
+	import FileEditor from "./lib/FileEditor.svelte";
+
+	let editorValue = $state("");
 </script>
 
 <div
@@ -19,28 +23,24 @@
 			<PaneGroup direction="horizontal">
 				<!-- file explorer -->
 				<Pane
-					defaultSize={25}
+					defaultSize={15}
 					minSize={0}
 					maxSize={75}
 					class="border border-white/10"
 				>
 					<div class="p-4">File explorer</div>
 				</Pane>
-				<PaneResizer
-					class="w-1 bg-neutral-700 hover:bg-blue-500 transition-colors"
-				/>
+				<HandleResizer direction="vertical" />
 				<!-- file editor -->
 				<Pane
-					defaultSize={55}
+					defaultSize={65}
 					minSize={20}
 					maxSize={100}
 					class="border border-white/10"
 				>
-					<div class="p-4">File editor</div>
+					<FileEditor bind:value={editorValue} />
 				</Pane>
-				<PaneResizer
-					class="w-1 bg-neutral-700 hover:bg-blue-500 transition-colors"
-				/>
+				<HandleResizer direction="vertical" />
 				<!-- chat con ollama -->
 				<Pane
 					defaultSize={20}
@@ -52,9 +52,7 @@
 				</Pane>
 			</PaneGroup>
 		</Pane>
-		<PaneResizer
-			class="h-1 bg-neutral-700 hover:bg-blue-500 transition-colors"
-		/>
+		<HandleResizer direction="horizontal" />
 		<!-- Terminale -->
 		<Pane
 			defaultSize={30}

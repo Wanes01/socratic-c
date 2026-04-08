@@ -7,3 +7,11 @@ export async function fetchFileTree() {
     }
     return await res.json();
 }
+
+export async function readFile(relPath) {
+    const res = await fetch(`${FILES_API_BASE_URL}/read?path=${relPath}`);
+    if (!res.ok) {
+        throw new Error('Could not read file');
+    }
+    return await res.json();
+}

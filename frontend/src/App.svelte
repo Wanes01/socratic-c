@@ -2,7 +2,7 @@
 	import { PaneGroup, Pane } from "paneforge";
 	import HandleResizer from "./lib/components/HandleResizer.svelte";
 	import AppBar from "./lib/components/AppBar.svelte";
-	import FileEditor from "./lib/components/FileEditor.svelte";
+	import MultiFileEditor from "./lib/components/MultiFileEditor.svelte";
 	import Explorer from "./lib/components/explorer/Explorer.svelte";
 	import { appState } from "./lib/state/app-state.svelte";
 
@@ -37,14 +37,14 @@
 			class="border border-white/10"
 		>
 			<PaneGroup direction="vertical">
-				<!-- Editor -->
+				<!-- Opened file selector and editor -->
 				<Pane
 					defaultSize={83}
 					minSize={20}
 					maxSize={100}
 					class="border border-white/10"
 				>
-					<FileEditor bind:value={editorValue} language=".c" />
+					<MultiFileEditor />
 				</Pane>
 				<HandleResizer direction="horizontal" />
 				<!-- Terminale -->

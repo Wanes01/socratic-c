@@ -18,7 +18,14 @@
 
         // it's a file: selects it
         appState.selectedFilePath = node.path;
-        console.log(appState.selectedFilePath);
+        // adds the file to the opened ones
+        if (!appState.openedFiles.some((file) => file.path === node.path)) {
+            appState.openedFiles.push({
+                path: node.path,
+                name: node.name,
+                content: null, // TODO
+            });
+        }
     };
 </script>
 

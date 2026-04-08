@@ -10,21 +10,10 @@
 
     // user click on a directory/file
     const onclick = () => {
-        // it's a directory: opens/closes it
         if (isDirectory) {
             isOpen = !isOpen;
-            return;
-        }
-
-        // it's a file: selects it
-        appState.selectedFilePath = node.path;
-        // adds the file to the opened ones
-        if (!appState.openedFiles.some((file) => file.path === node.path)) {
-            appState.openedFiles.push({
-                path: node.path,
-                name: node.name,
-                content: null, // TODO
-            });
+        } else {
+            appState.openFile(node);
         }
     };
 </script>

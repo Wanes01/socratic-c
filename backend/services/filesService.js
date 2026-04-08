@@ -28,14 +28,19 @@ exports.getFileTree = (dirPath, condition = (item) => true) => {
         return null;
     }
 
-    // recursevly elborate directories
+    // recursevly elaborate directories
     if (stats.isDirectory()) {
         info.children = fs.readdirSync(dirPath)
-            .map(child => {
-                return exports.getFileTree(path.join(dirPath, child), condition);
-            })
-            // filters out all the nodes that did not comply the condition
-            .filter(child => child !== null);
+            .reduce((acc, childName) => {
+                const childResult = exports.getFileTree(path.join(dirPath, childName), condition);
+
+                // filters out all the nodes that did not comply the condition
+                if (childResult !== null) {
+                    acc[childResult.name] = childResult;
+                }
+
+                return acc;
+            }, {});
     }
 
     return info;
@@ -51,12 +56,28 @@ exports.getExercisesTree = () => {
         fs.mkdirSync(EXERCISES_DIR);
     }
 
-    const viewableDirs = ['/student-root', '/tests'];
-    let exercises = exports.getFileTree(
+    const viewableDirs = ['student-root', 'tests'];
+
+    const tree = exports.getFileTree(
         EXERCISES_DIR,
-        // students can't see solutions or ai-configuration
-        (item) => !item.path.includes("/") || viewableDirs.some(dir => item.path.includes(dir))
-    ).children;
+        (item) => !item.path.includes("/") || viewableDirs.some(dir => item.path.includes(`/${dir}`))
+    );
+
+    const rawExercises = tree.children || {};
+
+    const exercises = Object.values(rawExercises).reduce((acc, exercise) => {
+        const sRoot = exercise.children?.['student-root'];
+        const tRoot = exercise.children?.['tests'];
+
+        acc[exercise.name] = {
+            path: exercise.path,
+            // makes access to data easier on frontend
+            studentRoot: sRoot?.children || {},
+            tests: tRoot?.children || {}
+        };
+
+        return acc;
+    }, {});
 
     return exercises;
 }

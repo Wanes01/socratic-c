@@ -1,8 +1,8 @@
 const fs = require('fs')
 const path = require('path')
 
-const EXERCISES_DIR = process.env.EXERCISES_DIR || path.join(__dirname, '../../exercises');
-
+exports.EXERCISES_DIR = process.env.EXERCISES_DIR || path.join(__dirname, '../../exercises');
+EXERCISES_DIR = exports.EXERCISES_DIR
 /**
  * Recursive function to map a directory tree structure to JSON with filtering
  * @param {string} dirPath : the absolute path
@@ -83,12 +83,17 @@ exports.getExercisesTree = () => {
 }
 
 /**
- * Reads a file from the student's root directory
- * @param {string} relPath a relative path from the student's root directory
- * @returns a json containing the file's data
+ * Reads
+ * @param {string} relPath 
+ * @returns 
  */
-exports.readExerciseFile = (exerciseDirName, relPath) => {
-    // es: es1/cartella/roba.c
+exports.readExerciseFile = (relPath) => {
+    const fullPath = path.join(EXERCISES_DIR, relPath);
 
-
+    try {
+        return fs.readFileSync(fullPath, 'utf-8');
+    } catch (error) {
+        console.error(`An error occurred while reading ${fullPath}:`, error.message);
+        return null;
+    }
 }

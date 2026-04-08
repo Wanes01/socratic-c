@@ -15,7 +15,7 @@
 </script>
 
 <div
-	class="h-screen w-screen bg-neutral-800 text-gray-300 flex flex-col font-sans overflow-hidden text-sm"
+	class="h-screen w-screen bg-neutral-800 text-gray-300 flex flex-col font-inter overflow-hidden text-sm"
 >
 	<AppBar />
 	<PaneGroup direction="horizontal" class="w-full flex-1">

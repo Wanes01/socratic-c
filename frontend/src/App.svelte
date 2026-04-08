@@ -3,7 +3,7 @@
 	import HandleResizer from "./lib/components/HandleResizer.svelte";
 	import AppBar from "./lib/components/AppBar.svelte";
 	import FileEditor from "./lib/components/FileEditor.svelte";
-	import Explorer from "./lib/components/Explorer.svelte";
+	import Explorer from "./lib/components/explorer/Explorer.svelte";
 	import { appState } from "./lib/state/app-state.svelte";
 
 	$effect(() => {

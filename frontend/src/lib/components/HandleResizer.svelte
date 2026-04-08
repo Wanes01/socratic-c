@@ -13,7 +13,7 @@
 <PaneResizer
     class="{direction == 'vertical'
         ? 'w-1.5 flex-col h-full'
-        : 'h-1 flex-row w-full'} relative bg-neutral-700 hover:bg-blue-500 transition-colors
+        : 'h-1.5 flex-row w-full'} relative bg-neutral-700 hover:bg-blue-500 transition-colors
         flex justify-center items-center"
 >
     <!-- handle -->

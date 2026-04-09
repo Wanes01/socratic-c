@@ -137,6 +137,10 @@ exports.renameNode = (oldRelPath, newRelPath) => {
         throw new Error("Unauthorized path access");
     }
 
+    if (fs.existsSync(newFullPath)) {
+        throw new Error("Un file o una directory con questo nome esiste già");
+    }
+
     try {
         // if the destination folder does not exist, create it
         const newDir = path.dirname(newFullPath);

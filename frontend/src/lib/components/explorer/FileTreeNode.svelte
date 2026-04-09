@@ -27,7 +27,7 @@
         <!-- colored div background wrapper, visible if file is selected -->
         <div
             class={appState.selectedFilePath === node.path
-                ? "bg-neutral-700 pl-0.5 pr-5 rounded-md text-white"
+                ? "bg-neutral-700 px-0.5 rounded-xs text-white"
                 : "text-neutral-400"}
         >
             {#if isDirectory}

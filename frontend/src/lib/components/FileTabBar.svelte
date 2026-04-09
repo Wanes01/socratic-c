@@ -28,7 +28,7 @@
 </script>
 
 <ul
-    class="flex flex-row w-full bg-neutral-800 text-white select-none overflow-x-auto"
+    class="flex flex-row w-full bg-neutral-800 text-white select-none overflow-x-auto border-b border-b-[#333333]"
 >
     {#each openFiles as file}
         {@const isSelected = file.path === appState.selectedFilePath}

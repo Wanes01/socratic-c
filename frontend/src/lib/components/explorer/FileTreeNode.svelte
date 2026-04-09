@@ -3,6 +3,7 @@
     import { tick } from "svelte";
     import type { FileNode } from "../../types";
     import FileTreeNode from "./FileTreeNode.svelte";
+    import { isValidFileName } from "../../util/utilities";
 
     let { node }: { node: FileNode } = $props();
     let isOpen = $state(false); // if a directory is open or not
@@ -12,6 +13,28 @@
     let inputElement: HTMLInputElement | null = $state(null);
 
     const isDirectory = $derived(node.type === "directory");
+
+    // opens the context menu on right click
+    const oncontextmenu = (e: MouseEvent) => {
+        e.preventDefault();
+        e.stopPropagation();
+
+        // the specific operations that can be done on this node
+        const options = [
+            { label: "Rinomina", icon: "✏️", action: () => onRename() },
+            {
+                label: "Elimina",
+                icon: "🗑️",
+                action: () => {
+                    if (confirm(`Eliminare ${node.name}?`)) {
+                        //appState.deleteNode(node);
+                    }
+                },
+            },
+        ];
+
+        appState.openContextMenu(e.clientX, e.clientY, options);
+    };
 
     // user click on a directory/file
     const onclick = () => {
@@ -39,8 +62,8 @@
     const submitRename = async () => {
         if (!isEditing) return;
 
-        if (newName.trim() !== "" && newName !== node.name) {
-            //await appState.renameNode(node, newName);
+        if (newName !== node.name && isValidFileName(newName)) {
+            await appState.renameNode(node, newName);
         }
 
         isEditing = false;
@@ -67,11 +90,11 @@
         type="button"
         class="flex items-center gap-2 py-1 px-2 rounded cursor-pointer text-left w-full hover:bg-neutral-800/50"
         {onclick}
-        ondblclick={onRename}
+        {oncontextmenu}
     >
         <div
-            class="flex items-baseline gap-2 {appState.selectedFile?.path ===
-            node.path
+            class="flex flex-row items-baseline gap-2 {appState.selectedFile
+                ?.path === node.path
                 ? 'text-white bg-neutral-700 px-0.5 rounded-xs'
                 : 'text-neutral-400'}"
         >

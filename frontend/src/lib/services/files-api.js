@@ -30,3 +30,23 @@ export async function saveFileContent(relPath, content) {
     }
     return await res.json();
 }
+
+export async function renameFile(oldPath, newPath) {
+    const res = await fetch(`${FILES_API_BASE_URL}/rename`, {
+        method: "PATCH",
+        headers: {
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+            oldPath,
+            newPath
+        })
+    });
+
+    if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.error || 'Errore nella rinomina');
+    }
+
+    return await res.json();
+}

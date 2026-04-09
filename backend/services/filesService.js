@@ -121,3 +121,31 @@ exports.saveExerciseFile = (relPath, content) => {
         return false;
     }
 }
+
+/**
+ * Renames a file or directory.
+ * @param {string} oldRelPath : current relative path
+ * @param {string} newRelPath : new relative path
+ */
+exports.renameNode = (oldRelPath, newRelPath) => {
+    const oldFullPath = path.join(EXERCISES_DIR, oldRelPath);
+    const newFullPath = path.join(EXERCISES_DIR, newRelPath);
+
+    if (!oldFullPath.startsWith(EXERCISES_DIR) || !newFullPath.startsWith(EXERCISES_DIR)) {
+        throw new Error("Unauthorized path access");
+    }
+
+    try {
+        // if the destination folder does not exist, create it
+        const newDir = path.dirname(newFullPath);
+        if (!fs.existsSync(newDir)) {
+            fs.mkdirSync(newDir, { recursive: true });
+        }
+
+        fs.renameSync(oldFullPath, newFullPath);
+        return true;
+    } catch (error) {
+        console.error(`Errore durante la rinomina da ${oldRelPath} a ${newRelPath}:`, error.message);
+        return false;
+    }
+}

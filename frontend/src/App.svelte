@@ -1,16 +1,27 @@
 <script lang="ts">
+	import { appState } from "./lib/state/app-state.svelte";
 	import { PaneGroup, Pane } from "paneforge";
 	import HandleResizer from "./lib/components/HandleResizer.svelte";
 	import AppBar from "./lib/components/AppBar.svelte";
 	import MultiFileEditor from "./lib/components/MultiFileEditor.svelte";
 	import Explorer from "./lib/components/explorer/Explorer.svelte";
-	import { appState } from "./lib/state/app-state.svelte";
+	import ContextMenu from "./lib/components/ContextMenu.svelte";
 
 	$effect(() => {
 		// loads the file tree
 		appState.loadFiles();
 	});
 </script>
+
+<!-- the singleton context menu -->
+{#if appState.contextMenu}
+	<ContextMenu
+		x={appState.contextMenu.x}
+		y={appState.contextMenu.y}
+		options={appState.contextMenu.options}
+		onclose={() => appState.closeContextMenu()}
+	/>
+{/if}
 
 <div
 	class="h-screen w-screen bg-neutral-800 text-gray-300 flex flex-col font-inter overflow-hidden text-sm"

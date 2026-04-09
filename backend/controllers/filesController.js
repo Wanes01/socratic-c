@@ -55,3 +55,25 @@ exports.setFileContent = (req, res) => {
         res.status(500).json({ error: "Non è stato possibile salvare il file" });
     }
 }
+
+// handles the request for renaming a file/folder
+exports.renameNode = (req, res) => {
+    const { oldPath, newPath } = req.body;
+
+    if (!oldPath || !newPath) {
+        return res.status(400).json({ error: "Percorsi vecchio e nuovo sono obbligatori" });
+    }
+
+    try {
+        const success = filesService.renameNode(oldPath, newPath);
+
+        if (success) {
+            return res.status(200).json({ message: "Rinomina completata con successo" });
+        } else {
+            return res.status(500).json({ error: "Errore durante la rinomina del file" });
+        }
+    } catch (error) {
+        console.error("Errore controller renameNode:", error.message);
+        return res.status(400).json({ error: error.message });
+    }
+};

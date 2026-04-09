@@ -109,17 +109,35 @@ export const appState = $state({
         try {
             await deleteFile(node.path);
 
-            // closes the file if it was open
-            this.openedFiles = this.openedFiles.filter(f => f.path !== node.path);
+            const isDir = node.type === 'directory';
 
-            // if it was the selected file then unselectes it
-            if (this.selectedFile?.path === node.path) {
-                this.selectedFile = this.openedFiles[0] || null;
+            if (isDir) {
+                // removes all the files that are inside the directory to delete
+                this.openedFiles = this.openedFiles.filter(f =>
+                    !f.path.startsWith(node.path + '/') && f.path !== node.path
+                );
+
+                // destroys all bound CodeMirror instances
+                Object.keys(this.editorViews).forEach(viewPath => {
+                    if (viewPath.startsWith(node.path + '/') || viewPath === node.path) {
+                        this.editorViews[viewPath].destroy();
+                        delete this.editorViews[viewPath];
+                    }
+                });
+            } else {
+                this.openedFiles = this.openedFiles.filter(f => f.path !== node.path);
+
+                if (this.editorViews[node.path]) {
+                    this.editorViews[node.path].destroy();
+                    delete this.editorViews[node.path];
+                }
             }
 
-            if (this.editorViews[node.path]) {
-                this.editorViews[node.path].destroy();
-                delete this.editorViews[node.path];
+            const isSelectedInsideDeleted = this.selectedFile?.path.startsWith(node.path + '/')
+                || this.selectedFile?.path === node.path;
+
+            if (isSelectedInsideDeleted) {
+                this.selectedFile = this.openedFiles[0] || null;
             }
 
             await this.loadFiles();

@@ -10,8 +10,6 @@
 		// loads the file tree
 		appState.loadFiles();
 	});
-
-	let editorValue = $state("");
 </script>
 
 <div

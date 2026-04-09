@@ -83,9 +83,9 @@ exports.getExercisesTree = () => {
 }
 
 /**
- * Reads
- * @param {string} relPath 
- * @returns 
+ * Reads the content of the file in the exercises directory given the relative path
+ * @param {string} relPath : the relative path of the file from the exercises directory
+ * @returns the content of the file as a string
  */
 exports.readExerciseFile = (relPath) => {
     const fullPath = path.join(EXERCISES_DIR, relPath);
@@ -95,5 +95,29 @@ exports.readExerciseFile = (relPath) => {
     } catch (error) {
         console.error(`An error occurred while reading ${fullPath}:`, error.message);
         return null;
+    }
+}
+
+/**
+ * Saves (overwrites) the content of a file.
+ * @param {string} relPath : the relative path of the file from EXERCISES_DIR
+ * @param {string} content : the new content to save
+ * @returns {boolean} : true if success, false otherwise
+ */
+exports.saveExerciseFile = (relPath, content) => {
+    const fullPath = path.join(EXERCISES_DIR, relPath);
+
+    if (!fullPath.startsWith(EXERCISES_DIR)) {
+        console.error(`Tentativo di accesso non autorizzato al percorso: ${fullPath}`);
+        return false;
+    }
+
+    try {
+        /* writes the file. If it doesn't exist then it gets created */
+        fs.writeFileSync(fullPath, content, 'utf-8');
+        return true;
+    } catch (error) {
+        console.error(`Errore durante il salvataggio di ${fullPath}:`, error.message);
+        return false;
     }
 }

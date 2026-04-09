@@ -1,5 +1,4 @@
 <script lang="ts">
-    import { untrack } from "svelte";
     import { indentUnit } from "@codemirror/language";
     import { EditorView, basicSetup } from "codemirror";
     import { keymap } from "@codemirror/view";
@@ -7,25 +6,31 @@
     import { cpp } from "@codemirror/lang-cpp";
     import { Compartment } from "@codemirror/state";
     import { oneDark } from "@codemirror/theme-one-dark";
+    import { appState } from "../state/app-state.svelte";
 
-    let { value = $bindable(""), extension = ".c" } = $props();
+    let { file } = $props(); // { path, name, extension, initialContent }
 
     let editorContainer: HTMLElement;
     let view: EditorView;
-
-    // used to dinamically change file extension without having to destroy the component
     const languageConf = new Compartment();
 
-    // helper function to map the file extension to the CodeMirror file extension.
+    let saved = $state(false);
+    let saveTimeout: ReturnType<typeof setTimeout>;
+
+    // prevents the toast to appear multiple times if the user spams the save shortcut
+    function showSavedFeedback() {
+        saved = true;
+        clearTimeout(saveTimeout);
+        saveTimeout = setTimeout(() => (saved = false), 2000);
+    }
+
     function getLanguageExtension() {
-        return [".c", ".h", ".cpp"].includes(extension) ? cpp() : [];
+        return [".c", ".h", ".cpp"].includes(file.extension) ? cpp() : [];
     }
 
     const darkBackground = EditorView.theme(
         {
-            "&": {
-                backgroundColor: "#262626 !important",
-            },
+            "&": { backgroundColor: "#262626 !important" },
             ".cm-gutters": {
                 backgroundColor: "#1a1a1a !important",
                 color: "#5c6370",
@@ -36,78 +41,64 @@
             },
             ".cm-activeLineGutter": {
                 backgroundColor: "transparent",
-                color: "#abb2bf", // Numero riga attiva più luminoso
+                color: "#abb2bf",
             },
         },
         { dark: true },
     );
 
-    // mounts the editor. Runs only once.
     $effect(() => {
-        // untracks the initial value without creating a depencendy
-        const initialValue = untrack(() => value);
-
         view = new EditorView({
-            doc: initialValue,
+            doc: file.initialContent,
             extensions: [
                 basicSetup,
                 oneDark,
                 darkBackground,
-                indentUnit.of("    "),
-                keymap.of([indentWithTab]),
+                indentUnit.of("    "), // default indentation to 4 spaces
+                keymap.of([
+                    indentWithTab, // maps the 'Tab' key to indentation in the editor
+                    {
+                        key: "Mod-s", // maps 'ctrl + s' to a function that saves the file
+                        run: () => {
+                            appState.saveFile(file).then(showSavedFeedback);
+                            return true;
+                        },
+                    },
+                ]),
                 languageConf.of(getLanguageExtension()),
-                EditorView.updateListener.of((update) => {
-                    if (update.docChanged) {
-                        const newValue = update.state.doc.toString();
-                        // updates the value only if it has changed
-                        if (newValue !== value) {
-                            value = newValue;
-                        }
-                    }
-                }),
             ],
             parent: editorContainer,
         });
 
+        appState.editorViews[file.path] = view;
+
         return () => {
-            if (view) view.destroy();
+            delete appState.editorViews[file.path];
+            view.destroy();
         };
-    });
-
-    // changes editor language if the 'language' prop changes
-    $effect(() => {
-        if (view) {
-            view.dispatch({
-                effects: languageConf.reconfigure(getLanguageExtension()),
-            });
-        }
-    });
-
-    // syncronizes the editor value
-    $effect(() => {
-        /* updates the value if it changes from the outside (ex. when laoding a file),
-        updates the editor but only if the text has changed. */
-        if (view && value !== view.state.doc.toString()) {
-            view.dispatch({
-                changes: { from: 0, to: view.state.doc.length, insert: value },
-            });
-        }
     });
 </script>
 
-<div bind:this={editorContainer} class="editor-wrapper h-full w-full"></div>
+<div class="relative h-full w-full">
+    <div bind:this={editorContainer} class="editor-wrapper h-full w-full"></div>
+    {#if saved}
+        <div
+            class="absolute bottom-4 right-4 bg-neutral-700 text-white text-sm px-3 py-1.5 rounded shadow-lg"
+        >
+            File Salvato
+        </div>
+    {/if}
+</div>
 
 <style>
     .editor-wrapper {
         height: 100%;
         width: 100%;
-        background-color: #1e1e1e; /* fallback color to avoid visual glitches on loading */
+        background-color: #1e1e1e;
     }
-
     .editor-wrapper :global(.cm-editor) {
         height: 100%;
     }
-
     .editor-wrapper :global(.cm-scroller) {
         height: 100%;
         overflow: auto;

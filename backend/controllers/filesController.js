@@ -11,6 +11,7 @@ exports.getTree = (_, res) => {
     }
 }
 
+// retrives the content of the file specified in the path query parameter
 exports.getFileContent = (req, res) => {
     // reads the relative file path from the query string
     const relPath = req.query.path;
@@ -40,5 +41,17 @@ exports.getFileContent = (req, res) => {
         });
     } catch (err) {
         res.status(500).json({ error: "Errore durante la lettura del file" });
+    }
+}
+
+// saves the content of the file specified in request body
+exports.setFileContent = (req, res) => {
+    const { relPath, content } = req.body;
+    const success = filesService.saveExerciseFile(relPath, content);
+
+    if (success) {
+        res.status(200).json({ message: "File salvato con successo" });
+    } else {
+        res.status(500).json({ error: "Non è stato possibile salvare il file" });
     }
 }

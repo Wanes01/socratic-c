@@ -15,3 +15,18 @@ export async function readFile(relPath) {
     }
     return await res.json();
 }
+
+export async function saveFileContent(relPath, content) {
+    const res = await fetch(`${FILES_API_BASE_URL}/save`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+            content,
+            relPath
+        })
+    });
+    if (!res.ok) {
+        throw new Error('Could not save the file');
+    }
+    return await res.json();
+}

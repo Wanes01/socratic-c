@@ -8,5 +8,8 @@ router.get('/tree', filesController.getTree);
 // reads an exercise file content
 router.get('/read', filesController.getFileContent);
 
+// saves an exercise file content
+router.post('/save', filesController.setFileContent)
+
 // exports the router to be seen by the main app
 module.exports = router;

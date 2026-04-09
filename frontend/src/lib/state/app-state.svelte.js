@@ -1,4 +1,4 @@
-import { fetchFileTree, readFile, saveFileContent, renameFile } from '../services/files-api'
+import { fetchFileTree, readFile, saveFileContent, renameFile, deleteFile } from '../services/files-api'
 
 export const appState = $state({
     fileTree: {},
@@ -6,6 +6,7 @@ export const appState = $state({
     openedFiles: [], // { path, name, extension, initialContent }
     editorViews: {}, // path -> CodeMirror's EditorView
     contextMenu: null, // treats the context menu as a singleton
+    modal: null, // treats the modal as a singleton
 
     closeContextMenu() {
         this.contextMenu = null;
@@ -13,6 +14,14 @@ export const appState = $state({
 
     openContextMenu(x, y, options) {
         this.contextMenu = { x, y, options };
+    },
+
+    showModal(title, message, onConfirm, confirmText = "Conferma", cancelText = "Annulla") {
+        this.modal = { title, message, onConfirm, confirmText, cancelText };
+    },
+
+    closeModal() {
+        this.modal = null;
     },
 
     // gets the content of an already open file
@@ -92,6 +101,31 @@ export const appState = $state({
 
         } catch (err) {
             console.error("Impossibile rinominare il file");
+        }
+    },
+
+    // deletes a file/directory (recursively)
+    async deleteNode(node) {
+        try {
+            await deleteFile(node.path);
+
+            // closes the file if it was open
+            this.openedFiles = this.openedFiles.filter(f => f.path !== node.path);
+
+            // if it was the selected file then unselectes it
+            if (this.selectedFile?.path === node.path) {
+                this.selectedFile = this.openedFiles[0] || null;
+            }
+
+            if (this.editorViews[node.path]) {
+                this.editorViews[node.path].destroy();
+                delete this.editorViews[node.path];
+            }
+
+            await this.loadFiles();
+
+        } catch (err) {
+            alert("Errore durante l'eliminazione: " + err.message);
         }
     }
 });

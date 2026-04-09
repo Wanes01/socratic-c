@@ -56,24 +56,26 @@ exports.getExercisesTree = () => {
         fs.mkdirSync(EXERCISES_DIR);
     }
 
-    const viewableDirs = ['student-root', 'tests'];
+    const viewableDirs = ['root', 'tests'];
 
     const tree = exports.getFileTree(
         EXERCISES_DIR,
-        (item) => !item.path.includes("/") || viewableDirs.some(dir => item.path.includes(`/${dir}`))
+        (item) =>
+            !item.path.includes("/") // accepts first level nodes
+            || viewableDirs.some(dir => item.path.includes(`/${dir}`)) // accept root, tests and all their content
     );
 
     const rawExercises = tree.children || {};
 
     const exercises = Object.values(rawExercises).reduce((acc, exercise) => {
-        const sRoot = exercise.children?.['student-root'];
+        const sRoot = exercise.children?.['root'];
         const tRoot = exercise.children?.['tests'];
 
         acc[exercise.name] = {
             path: exercise.path,
             // makes access to data easier on frontend
-            studentRoot: sRoot?.children || {},
-            tests: tRoot?.children || {}
+            studentRoot: sRoot || {},
+            tests: tRoot || {}
         };
 
         return acc;
@@ -149,3 +151,28 @@ exports.renameNode = (oldRelPath, newRelPath) => {
         return false;
     }
 }
+
+/**
+ * Deletes a file ora a directory (and all its content)
+ * @param {string} relativePath : the relative path from the exercises folder
+ */
+exports.deleteNode = (relativePath) => {
+    const fullPath = path.join(EXERCISES_DIR, relativePath);
+
+    if (!fullPath.startsWith(EXERCISES_DIR)) {
+        throw new Error("Accesso non autorizzato al percorso");
+    }
+
+    if (!fs.existsSync(fullPath)) {
+        throw new Error("Il file o la directory non esiste");
+    }
+
+    try {
+        fs.rmSync(fullPath, { recursive: true, force: true });
+
+        return { success: true, message: "Eliminazione completata" };
+    } catch (error) {
+        console.error(`Errore durante l'eliminazione di ${relativePath}:`, error.message);
+        throw new Error(`Impossibile eliminare la risorsa: ${error.message}`);
+    }
+};

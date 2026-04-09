@@ -77,3 +77,16 @@ exports.renameNode = (req, res) => {
         return res.status(400).json({ error: error.message });
     }
 };
+
+// handles the request for deleting a file/dir
+exports.deleteNode = (req, res) => {
+    const relativePath = req.query.path;
+
+    try {
+        const result = filesService.deleteNode(relativePath);
+        return res.status(200).json(result);
+    } catch (error) {
+        console.error("Errore eliminazione:", error.message);
+        return res.status(500).json({ error: error.message });
+    }
+};

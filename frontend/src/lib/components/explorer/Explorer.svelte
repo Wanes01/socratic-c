@@ -6,16 +6,16 @@
     let currentExercise = $derived(
         appState.fileTree[appState.selectedExercise],
     );
-    let studentRoot = $derived(currentExercise?.studentRoot || {});
-    let tests = $derived(currentExercise?.tests || {});
+    let studentRoot = $derived(currentExercise?.studentRoot || null);
+    let tests = $derived(currentExercise?.tests || null);
 
-    let hasTests = $derived(Object.keys(tests).length > 0);
+    let hasTests = $derived(tests !== null && Object.keys(tests).length > 0);
 </script>
 
 <div class="flex flex-col w-full h-full py-2">
     <ExerciseSelector />
-    <FileTree title="sorgenti" rootDir={studentRoot} />
+    <FileTree title="sorgenti" rootNode={studentRoot} />
     {#if hasTests}
-        <FileTree title="tests" rootDir={tests} />
+        <FileTree title="tests" rootNode={tests} />
     {/if}
 </div>

@@ -14,5 +14,8 @@ router.post('/save', filesController.setFileContent)
 // renames a file/directory
 router.patch('/rename', filesController.renameNode);
 
+// deletes a file/directory
+router.delete('/delete', filesController.deleteNode);
+
 // exports the router to be seen by the main app
 module.exports = router;

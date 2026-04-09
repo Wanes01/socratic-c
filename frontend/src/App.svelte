@@ -6,6 +6,7 @@
 	import MultiFileEditor from "./lib/components/MultiFileEditor.svelte";
 	import Explorer from "./lib/components/explorer/Explorer.svelte";
 	import ContextMenu from "./lib/components/ContextMenu.svelte";
+	import ConfirmModal from "./lib/components/ConfirmModal.svelte";
 
 	$effect(() => {
 		// loads the file tree
@@ -14,6 +15,7 @@
 </script>
 
 <!-- the singleton context menu -->
+<ConfirmModal />
 {#if appState.contextMenu}
 	<ContextMenu
 		x={appState.contextMenu.x}

@@ -26,9 +26,13 @@
                 label: "Elimina",
                 icon: "🗑️",
                 action: () => {
-                    if (confirm(`Eliminare ${node.name}?`)) {
-                        //appState.deleteNode(node);
-                    }
+                    appState.showModal(
+                        `Elimina ${isDirectory ? "cartella" : "file"}`,
+                        `Sei sicuro di voler eliminare "${node.name}"?`,
+                        () => appState.deleteNode(node),
+                        "Elimina",
+                        "Mantieni",
+                    );
                 },
             },
         ];
@@ -58,6 +62,8 @@
         inputElement?.select();
     };
 
+    const onDelete = async () => {};
+
     // renames the file
     const submitRename = async () => {
         if (!isEditing) return;
@@ -85,7 +91,7 @@
     };
 </script>
 
-<div class="flex flex-col ml-4">
+<div class="flex flex-col ml-2">
     <button
         type="button"
         class="flex items-center gap-2 py-1 px-2 rounded cursor-pointer text-left w-full hover:bg-neutral-800/50"

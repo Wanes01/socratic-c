@@ -3,7 +3,7 @@ import { fetchFileTree, readFile } from '../services/files-api'
 export const appState = $state({
     fileTree: {},
     selectedExercise: null,
-    selectedFilePath: null,
+    selectedFile: null,
     openedFiles: [],
 
     // loads the file tree
@@ -17,22 +17,27 @@ export const appState = $state({
 
     // loads the content of file, making it open
     async openFile(file) {
-        this.selectedFilePath = file.path;
 
         // checks if it's already open
-        const existing = this.openedFiles.find(f => f.path === file.path);
+        const openedFile = this.openedFiles.find(f => f.path === file.path);
 
-        if (!existing) {
+        if (!openedFile) {
             try {
                 const data = await readFile(file.path);
-                this.openedFiles.push({
+                const fileData = {
                     path: file.path,
                     name: file.name,
+                    extension: file.extension,
                     content: data.content
-                });
+                };
+                this.selectedFile = fileData;
+                this.openedFiles.push(fileData);
             } catch (err) {
                 console.error("Errore nel caricamento del file", err);
             }
+            // if the file already exists retrive it
+        } else {
+            this.selectedFile = openedFile;
         }
     }
 });

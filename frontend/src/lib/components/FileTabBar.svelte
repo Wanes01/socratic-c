@@ -5,7 +5,7 @@
 
     // user clicks on a tab
     const onTabClick = (file) => {
-        appState.selectedFilePath = file.path;
+        appState.selectedFile = file;
     };
 
     // user clicks on a tab's cross
@@ -15,11 +15,11 @@
         );
 
         // the closed file is the currently selected one
-        if (appState.selectedFilePath === file.path) {
+        if (appState.selectedFile?.path === file.path) {
             // if another file is open in the editor, show that one
-            appState.selectedFilePath =
+            appState.selectedFile =
                 appState.openedFiles.length > 0
-                    ? appState.openedFiles[0].path
+                    ? appState.openedFiles[0]
                     : null;
         }
 
@@ -31,7 +31,7 @@
     class="flex flex-row w-full bg-neutral-800 text-white select-none overflow-x-auto border-b border-b-[#333333]"
 >
     {#each openFiles as file}
-        {@const isSelected = file.path === appState.selectedFilePath}
+        {@const isSelected = file.path === appState.selectedFile?.path}
 
         <li
             class="flex items-center border-r border-neutral-900 transition-colors cursor-pointer {isSelected

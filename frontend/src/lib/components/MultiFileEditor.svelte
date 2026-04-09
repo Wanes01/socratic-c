@@ -3,15 +3,24 @@
     import FileTabBar from "./FileTabBar.svelte";
     import FileEditor from "./FileEditor.svelte";
 
-    let file = $derived(
-        appState.openedFiles.find((f) => f.path === appState.selectedFilePath),
-    );
-    let code = $derived(file?.content || "");
+    let codeProxy = {
+        get value() {
+            return appState.selectedFile?.content || "";
+        },
+        set value(newValue) {
+            if (appState.selectedFile) {
+                appState.selectedFile.content = newValue;
+            }
+        },
+    };
 </script>
 
 <div class="flex flex-col w-full h-full">
     <FileTabBar />
-    {#if appState.selectedFilePath}
-        <FileEditor language=".c" bind:value={code} />
+    {#if appState.selectedFile?.path}
+        <FileEditor
+            extension={appState.selectedFile.extension}
+            bind:value={codeProxy.value}
+        />
     {/if}
 </div>

@@ -20,22 +20,37 @@
         e.stopPropagation();
 
         // the specific operations that can be done on this node
-        const options = [
-            { label: "Rinomina", icon: "✏️", action: () => onRename() },
-            {
-                label: "Elimina",
-                icon: "🗑️",
-                action: () => {
-                    appState.showModal(
-                        `Elimina ${isDirectory ? "cartella" : "file"}`,
-                        `Sei sicuro di voler eliminare "${node.name}"?`,
-                        () => appState.deleteNode(node),
-                        "Elimina",
-                        "Mantieni",
-                    );
+        const options: {
+            label: string;
+            icon: string;
+            action: () => void | Promise<void>;
+        }[] = [];
+
+        const unmodifiablePaths = ["root", "tests"].map(
+            (top) => `${appState.selectedExercise}/${top}`,
+        );
+
+        // top level directories can't be deleted or renamed
+        if (!unmodifiablePaths.includes(node.path)) {
+            options.push(
+                // renames a file/dir
+                { label: "Rinomina", icon: "✏️", action: () => onRename() },
+                // deletes a file/dir
+                {
+                    label: "Elimina",
+                    icon: "🗑️",
+                    action: () => {
+                        appState.showModal(
+                            `Elimina ${isDirectory ? "cartella" : "file"}`,
+                            `Sei sicuro di voler eliminare "${node.name}"?`,
+                            () => appState.deleteNode(node),
+                            "Elimina",
+                            "Mantieni",
+                        );
+                    },
                 },
-            },
-        ];
+            );
+        }
 
         appState.openContextMenu(e.clientX, e.clientY, options);
     };

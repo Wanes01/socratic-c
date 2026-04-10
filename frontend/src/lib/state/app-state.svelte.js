@@ -3,6 +3,7 @@ import { fetchFileTree, readFile, saveFileContent, renameFile, deleteFile } from
 export const appState = $state({
     fileTree: {},
     selectedFile: null,
+    selectedExercise: null, // the selected exercise name
     openedFiles: [], // { path, name, extension, initialContent }
     editorViews: {}, // path -> CodeMirror's EditorView
     contextMenu: null, // treats the context menu as a singleton

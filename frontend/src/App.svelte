@@ -33,8 +33,10 @@
 	<PaneGroup direction="horizontal" class="w-full flex-1">
 		<!-- file explorer -->
 		<Pane
+			collapsible={true}
+			collapsedSize={0}
+			minSize={8}
 			defaultSize={10}
-			minSize={0}
 			maxSize={40}
 			class="border border-white/10"
 		>

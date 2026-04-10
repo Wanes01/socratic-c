@@ -86,3 +86,16 @@ export async function createNodeApi(path: string, type: string) {
 
     return await res.json();
 }
+
+export function downloadExerciseZip(exerciseName: string): void {
+    const encodedName = encodeURIComponent(exerciseName);
+    const url = `${FILES_API_BASE_URL}/download?name=${encodedName}`;
+
+    // creates a temporary element to start the download
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', `${exerciseName}.zip`);
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+}

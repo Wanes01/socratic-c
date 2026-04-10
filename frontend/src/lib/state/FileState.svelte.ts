@@ -130,6 +130,15 @@ class FileState {
             console.error("Errore creazione nodo:", err);
         }
     }
+
+    // downloads the entire exercise as a ZIP
+    downloadExercise = (exerciseName: string): void => {
+        try {
+            filesApi.downloadExerciseZip(exerciseName);
+        } catch (err) {
+            console.error("Errore durante il download dell'esercizio:", err);
+        }
+    }
 }
 
 export const fs = new FileState();

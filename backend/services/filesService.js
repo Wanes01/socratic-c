@@ -1,8 +1,12 @@
-const fs = require('fs')
-const path = require('path')
+const fs = require('fs');
+const path = require('path');
+const archiver = require('archiver');
 
 exports.EXERCISES_DIR = process.env.EXERCISES_DIR || path.join(__dirname, '../../exercises');
 EXERCISES_DIR = exports.EXERCISES_DIR
+
+const viewableDirs = ['root', 'tests'];
+
 /**
  * Recursive function to map a directory tree structure to JSON with filtering
  * @param {string} dirPath : the absolute path
@@ -55,8 +59,6 @@ exports.getExercisesTree = () => {
     if (!fs.existsSync(EXERCISES_DIR)) {
         fs.mkdirSync(EXERCISES_DIR);
     }
-
-    const viewableDirs = ['root', 'tests'];
 
     const tree = exports.getFileTree(
         EXERCISES_DIR,
@@ -213,4 +215,32 @@ exports.createNode = (relativePath, type) => {
         console.error(`Errore creazione ${type} in ${relativePath}:`, error.message);
         throw new Error(`Errore durante la creazione: ${error.message}`);
     }
+};
+
+/**
+ * Creates the ZIP of an exercise directory
+ * @param {string} exerciseName the name of the exercise
+ * @returns {Archiver} the archiver instance
+ */
+exports.createExerciseZip = (exerciseName) => {
+    const exercisePath = path.join(exports.EXERCISES_DIR, exerciseName);
+
+    if (!fs.existsSync(exercisePath) || !fs.statSync(exercisePath).isDirectory()) {
+        throw new Error("Esercizio non trovato");
+    }
+
+    const archive = archiver('zip', {
+        zlib: { level: 9 } // the compression level
+    });
+
+    viewableDirs.forEach(dir => {
+        const fullSubPath = path.join(exercisePath, dir);
+        if (fs.existsSync(fullSubPath) && fs.statSync(fullSubPath).isDirectory()) {
+            archive.directory(fullSubPath, dir);
+        }
+    });
+
+    archive.finalize();
+
+    return archive;
 };

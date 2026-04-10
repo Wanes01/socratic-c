@@ -112,3 +112,31 @@ exports.createNode = (req, res) => {
         return res.status(statusCode).json({ error: error.message });
     }
 };
+
+// downloads an exercise as a zip file
+exports.downloadExercise = (req, res) => {
+    const exerciseName = req.query.name;
+
+    if (!exerciseName) {
+        return res.status(400).json({ error: "Esercizio non trovato" });
+    }
+
+    try {
+        const archive = filesService.createExerciseZip(exerciseName);
+
+        // sets the headers to make the file downloadable
+        res.attachment(`${exerciseName}.zip`);
+        res.setHeader('Content-Type', 'application/zip');
+
+        archive.on('error', (err) => {
+            console.error("Errore durante la creazione dello ZIP:", err);
+            res.status(500).send({ error: "Errore durante la generazione dello ZIP" });
+        });
+
+        archive.pipe(res);
+
+    } catch (error) {
+        console.error("Errore downloadExercise:", error.message);
+        res.status(404).json({ error: error.message });
+    }
+}

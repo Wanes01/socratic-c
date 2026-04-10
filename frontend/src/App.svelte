@@ -8,6 +8,7 @@
 	import Explorer from "./lib/components/explorer/Explorer.svelte";
 	import ContextMenu from "./lib/components/ui/ContextMenu.svelte";
 	import ConfirmModal from "./lib/components/ui/ConfirmModal.svelte";
+	import Terminal from "./lib/components/terminal/Terminal.svelte";
 
 	$effect(() => {
 		// loads the file tree
@@ -68,7 +69,7 @@
 					maxSize={90}
 					class="border border-white/10"
 				>
-					<div class="p-4">Terminale</div>
+					<Terminal />
 				</Pane>
 			</PaneGroup>
 		</Pane>

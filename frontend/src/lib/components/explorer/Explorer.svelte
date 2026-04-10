@@ -13,10 +13,10 @@
     let hasTests = $derived(tests !== null && Object.keys(tests).length > 0);
 </script>
 
-<div class="flex flex-col w-full h-full py-2">
+<aside class="flex flex-col w-full h-full py-2">
     <ExerciseSelector />
     <FileTree title="sorgenti" rootNode={studentRoot} />
     {#if hasTests}
         <FileTree title="tests" rootNode={tests} />
     {/if}
-</div>
+</aside>

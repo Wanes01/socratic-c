@@ -20,5 +20,8 @@ router.delete('/delete', filesController.deleteNode);
 // creates a new node (file/directory)
 router.post('/create', filesController.createNode);
 
+// downloads an exercise as a zip
+router.get('/download', filesController.downloadExercise);
+
 // exports the router to be seen by the main app
 module.exports = router;

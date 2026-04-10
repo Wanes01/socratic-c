@@ -1,4 +1,5 @@
 <script lang="ts">
+    import { fs } from "../../state/FileState.svelte";
     import { indentUnit } from "@codemirror/language";
     import { EditorView, basicSetup } from "codemirror";
     import { keymap } from "@codemirror/view";
@@ -6,7 +7,6 @@
     import { cpp } from "@codemirror/lang-cpp";
     import { Compartment } from "@codemirror/state";
     import { oneDark } from "@codemirror/theme-one-dark";
-    import { appState } from "../state/app-state.svelte";
 
     let { file } = $props(); // { path, name, extension, initialContent }
 
@@ -60,7 +60,7 @@
                     {
                         key: "Mod-s", // maps 'ctrl + s' to a function that saves the file
                         run: () => {
-                            appState.saveFile(file).then(showSavedFeedback);
+                            fs.saveFile(file).then(showSavedFeedback);
                             return true;
                         },
                     },
@@ -70,10 +70,10 @@
             parent: editorContainer,
         });
 
-        appState.editorViews[file.path] = view;
+        fs.editorViews[file.path] = view;
 
         return () => {
-            delete appState.editorViews[file.path];
+            delete fs.editorViews[file.path];
             view.destroy();
         };
     });

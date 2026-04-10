@@ -1,16 +1,16 @@
-<script>
-    import { appState } from "../../state/app-state.svelte";
+<script lang="ts">
+    import { fs } from "../../state/FileState.svelte";
     import { stringToColor } from "../../util/utilities";
     import ExplorerSection from "./ExplorerSection.svelte";
 
     // the list of available exercises
-    let exercises = $derived(Object.keys(appState.fileTree));
+    let exercises = $derived(Object.keys(fs.fileTree));
 </script>
 
 <ExplorerSection title="esercizi">
     <ul class="flex flex-col w-full">
         {#each exercises as exName}
-            {@const isSelected = appState.selectedExercise === exName}
+            {@const isSelected = fs.selectedExercise === exName}
             {@const color = stringToColor(exName)}
             <li
                 class="w-full"
@@ -23,7 +23,7 @@
                         ? 'bg-neutral-700 text-white'
                         : 'text-neutral-400 hover:bg-neutral-800 hover:text-neutral-200'}"
                     onclick={() => {
-                        appState.selectedExercise = exName;
+                        fs.selectedExercise = exName;
                     }}
                 >
                     <div

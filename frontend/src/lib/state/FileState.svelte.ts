@@ -1,47 +1,32 @@
 import * as filesApi from '../services/files-api';
+import type { EditorView } from 'codemirror';
+import type { FileNode, OpenedFile } from '../types';
 
-export const appState = $state({
-    fileTree: {},
-    selectedFile: null,
-    selectedExercise: null, // the selected exercise name
-    openedFiles: [], // { path, name, extension, initialContent }
-    editorViews: {}, // path -> CodeMirror's EditorView
-    contextMenu: null, // treats the context menu as a singleton
-    modal: null, // treats the modal as a singleton
-
-    closeContextMenu() {
-        this.contextMenu = null;
-    },
-
-    openContextMenu(x, y, options) {
-        this.contextMenu = { x, y, options };
-    },
-
-    showModal(title, message, onConfirm, confirmText = "Conferma", cancelText = "Annulla") {
-        this.modal = { title, message, onConfirm, confirmText, cancelText };
-    },
-
-    closeModal() {
-        this.modal = null;
-    },
+class FileState {
+    fileTree = $state<FileNode | {}>({});
+    selectedExercise = $state<string | null>(null);
+    openedFiles = $state<OpenedFile[]>([]);
+    selectedFile = $state<OpenedFile | null>(null);
+    
+    editorViews = $state<Record<string, EditorView>>({});
 
     // gets the content of an already open file
-    getContent(path) {
-        return this.editorViews[path]?.state.doc.toString() ?? null;
-    },
+    getContent = (path: string): string | null => {
+       return this.editorViews[path]?.state.doc.toString() ?? null;
+    }
 
     // loads the file tree
-    async loadFiles() {
+    loadFiles = async(): Promise<void> => {
         try {
             this.fileTree = await filesApi.fetchFileTree();
         } catch (e) {
             this.fileTree = {};
         }
-    },
+    }
 
     // reads the content of a file on the server
-    async openFile(file) {
-        // checks if the file to open altready exists
+    openFile = async (file: FileNode): Promise<void> => {
+        // checks if the file to open already exists
         const alreadyOpen = this.openedFiles.find(f => f.path === file.path);
         if (!alreadyOpen) {
             try {
@@ -49,7 +34,7 @@ export const appState = $state({
                 const fileData = {
                     path: file.path,
                     name: file.name,
-                    extension: file.extension,
+                    extension: file.extension ?? '',
                     initialContent: data.content
                 };
                 this.openedFiles.push(fileData);
@@ -60,18 +45,18 @@ export const appState = $state({
         } else {
             this.selectedFile = alreadyOpen;
         }
-    },
+    }
 
     // saves the file content on the server
-    async saveFile(file) {
+    saveFile = async (file: OpenedFile): Promise<void> => {
         const content = this.getContent(file.path);
         if (content !== null) {
             await filesApi.saveFileContent(file.path, content);
         }
-    },
+    }
 
     // renames a file/directory
-    async renameNode(node, replName) {
+    renameNode = async (node: FileNode, replName: string): Promise<void> => {
         const oldPath = node.path;
         const newName = replName.trim();
         // compute the new path in the original directory
@@ -102,10 +87,10 @@ export const appState = $state({
         } catch (err) {
             console.error("Impossibile rinominare il file");
         }
-    },
+    }
 
     // deletes a file/directory (recursively)
-    async deleteNode(node) {
+    deleteNode = async (node: FileNode): Promise<void> => {
         try {
             await filesApi.deleteFile(node.path);
 
@@ -128,13 +113,13 @@ export const appState = $state({
 
             await this.loadFiles();
 
-        } catch (err) {
+        } catch (err: any) {
             console.error("Errore durante l'eliminazione: " + err.message);
         }
-    },
+    }
 
     // creates a new file/directory
-    async createNode(path, type) {
+    createNode = async (path: string, type: 'file' | 'directory'): Promise<void> => {
         try {
             await filesApi.createNodeApi(path, type);
 
@@ -145,4 +130,6 @@ export const appState = $state({
             console.error("Errore creazione nodo:", err);
         }
     }
-});
+}
+
+export const fs = new FileState();

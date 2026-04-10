@@ -1,22 +1,19 @@
-<script>
-    import { appState } from "../state/app-state.svelte";
+<script lang="ts">
+    import { fs } from "../../state/FileState.svelte";
+    import type { OpenedFile } from "../../types";
 
-    const onTabClick = (file) => {
-        appState.selectedFile = file;
+    const onTabClick = (file: OpenedFile): void => {
+        fs.selectedFile = file;
     };
 
-    const onCrossClick = async (file) => {
-        await appState.saveFile(file);
+    const onCrossClick = async (file: OpenedFile): Promise<void> => {
+        await fs.saveFile(file);
         // removes the metadata of the file that is getting closed
-        appState.openedFiles = appState.openedFiles.filter(
-            (f) => f.path !== file.path,
-        );
+        fs.openedFiles = fs.openedFiles.filter((f) => f.path !== file.path);
         // shows another file that is already open, if it exists
-        if (appState.selectedFile?.path === file.path) {
-            appState.selectedFile =
-                appState.openedFiles.length > 0
-                    ? appState.openedFiles[0]
-                    : null;
+        if (fs.selectedFile?.path === file.path) {
+            fs.selectedFile =
+                fs.openedFiles.length > 0 ? fs.openedFiles[0] : null;
         }
     };
 </script>
@@ -24,8 +21,8 @@
 <ul
     class="flex flex-row w-full bg-neutral-800 text-white select-none overflow-x-auto border-b border-b-[#333333]"
 >
-    {#each appState.openedFiles as file (file.path)}
-        {@const isSelected = file.path === appState.selectedFile?.path}
+    {#each fs.openedFiles as file (file.path)}
+        {@const isSelected = file.path === fs.selectedFile?.path}
         <li
             class="flex items-center border-r border-neutral-900 transition-colors cursor-pointer {isSelected
                 ? 'bg-neutral-700'

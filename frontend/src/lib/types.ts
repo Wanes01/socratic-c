@@ -1,26 +1,34 @@
-/**
- * Rapresents a single node of the File Tree.
- * It's a recursive structure as children may contain another FileNode 
- */
-export type FileNode = {
+export interface FileNode {
+    path: string;
     name: string;
-    path: string;
     type: 'file' | 'directory';
-    extension?: string; // Presente solo se type è 'file'
-    // Usiamo Record<string, FileNode> per mappare nome -> nodo
-    children?: Record<string, FileNode>;
-};
+    extension?: string;
+    children?: FileNode[];
+}
 
-/**
- * Rapresents the data structure of an exercise
- */
-export type ExerciseData = {
+export interface OpenedFile {
     path: string;
-    studentRoot: Record<string, FileNode>;
-    tests?: Record<string, FileNode>;
-};
+    name: string;
+    extension: string;
+    initialContent: string;
+}
 
-/**
- * Rappresenta lo stato globale degli esercizi
- */
-// export type ExerciseMap = Record<string, ExerciseData>;
+export interface ContextMenuOption {
+    label: string;
+    icon?: string;
+    action: () => void | Promise<void>;
+}
+
+export interface ContextMenuState {
+    x: number;
+    y: number;
+    options: ContextMenuOption[];
+}
+
+export interface ModalState {
+    title: string;
+    message: string;
+    onConfirm: () => void | Promise<void>;
+    confirmText: string;
+    cancelText: string;
+}

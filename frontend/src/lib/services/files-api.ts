@@ -8,7 +8,7 @@ export async function fetchFileTree() {
     return await res.json();
 }
 
-export async function readFile(relPath) {
+export async function readFile(relPath: string) {
     const encodedPath = encodeURIComponent(relPath);
     const res = await fetch(`${FILES_API_BASE_URL}/read?path=${encodedPath}`);
     if (!res.ok) {
@@ -17,7 +17,7 @@ export async function readFile(relPath) {
     return await res.json();
 }
 
-export async function saveFileContent(relPath, content) {
+export async function saveFileContent(relPath: string, content: string) {
     const res = await fetch(`${FILES_API_BASE_URL}/save`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -32,7 +32,7 @@ export async function saveFileContent(relPath, content) {
     return await res.json();
 }
 
-export async function renameFile(oldPath, newPath) {
+export async function renameFile(oldPath: string, newPath: string) {
     const res = await fetch(`${FILES_API_BASE_URL}/rename`, {
         method: "PATCH",
         headers: {
@@ -52,7 +52,7 @@ export async function renameFile(oldPath, newPath) {
     return await res.json();
 }
 
-export async function deleteFile(path) {
+export async function deleteFile(path: string) {
     const encodedPath = encodeURIComponent(path);
 
     const res = await fetch(`${FILES_API_BASE_URL}/delete?path=${encodedPath}`, {
@@ -70,7 +70,7 @@ export async function deleteFile(path) {
     return await res.json();
 }
 
-export async function createNodeApi(path, type) {
+export async function createNodeApi(path: string, type: string) {
     const res = await fetch(`${FILES_API_BASE_URL}/create`, {
         method: "POST",
         headers: {

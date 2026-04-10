@@ -1,5 +1,5 @@
 // maps a string to a color
-export const stringToColor = (str) => {
+export const stringToColor = (str: string): string => {
     let hash = 0;
     for (let i = 0; i < str.length; i++) {
         hash = str.charCodeAt(i) + ((hash << 5) - hash);
@@ -13,7 +13,7 @@ export const stringToColor = (str) => {
 };
 
 // checks if a name can be used a file/directory identifier 
-export const isValidFileName = (name) => {
+export const isValidFileName = (name: string): boolean => {
     // can't be empty or use only spaces
     if (!name || name.trim().length === 0) return false;
 

@@ -1,7 +1,8 @@
 <script lang="ts">
-    import { appState } from "../../state/app-state.svelte";
+    import { fs } from "../../state/FileState.svelte";
+    import { ui } from "../../state/UIState.svelte";
     import { tick } from "svelte";
-    import type { FileNode } from "../../types";
+    import type { FileNode, ContextMenuOption } from "../../types";
     import FileTreeNode from "./FileTreeNode.svelte";
     import { isValidFileName } from "../../util/utilities";
 
@@ -25,14 +26,10 @@
         e.stopPropagation();
 
         // the specific operations that can be done on this node
-        const options: {
-            label: string;
-            icon: string;
-            action: () => void | Promise<void>;
-        }[] = [];
+        const options: ContextMenuOption[] = [];
 
         const unmodifiablePaths = ["root", "tests"].map(
-            (top) => `${appState.selectedExercise}/${top}`,
+            (top) => `${fs.selectedExercise}/${top}`,
         );
 
         // top level directories can't be deleted or renamed
@@ -60,7 +57,7 @@
             );
         }
 
-        appState.openContextMenu(e.clientX, e.clientY, options);
+        ui.openContextMenu(e.clientX, e.clientY, options);
     };
 
     // user click on a directory/file
@@ -72,7 +69,7 @@
         if (isDirectory) {
             isOpen = !isOpen;
         } else {
-            appState.openFile(node);
+            fs.openFile(node);
         }
     };
 
@@ -88,10 +85,10 @@
 
     // user wants to delete a node
     const onDelete = async () => {
-        appState.showModal(
+        ui.showModal(
             `Elimina ${isDirectory ? "cartella" : "file"}`,
             `Sei sicuro di voler eliminare "${node.name}"?`,
-            () => appState.deleteNode(node),
+            () => fs.deleteNode(node),
             "Elimina",
             "Mantieni",
         );
@@ -102,7 +99,7 @@
         if (!isEditing) return;
 
         if (newName !== node.name && isValidFileName(newName)) {
-            await appState.renameNode(node, newName);
+            await fs.renameNode(node, newName);
         }
 
         isEditing = false;
@@ -124,7 +121,7 @@
         if (name && isValidFileName(name)) {
             // builds the new node's path
             const newPath = `${node.path}/${name}`;
-            await appState.createNode(newPath, isCreating);
+            await fs.createNode(newPath, isCreating);
         }
 
         isCreating = null;
@@ -159,8 +156,8 @@
         {oncontextmenu}
     >
         <div
-            class="flex flex-row items-baseline gap-2 {appState.selectedFile
-                ?.path === node.path
+            class="flex flex-row items-baseline gap-2 {fs.selectedFile?.path ===
+            node.path
                 ? 'text-white bg-neutral-700 px-0.5 rounded-xs'
                 : 'text-neutral-400'}"
         >
@@ -169,7 +166,7 @@
             {:else}
                 <span
                     class="text-[10px] font-bold w-4 text-center {getIconColor(
-                        node.extension,
+                        node.extension ?? '',
                     )}"
                 >
                     {node.extension?.replace(".", "").toUpperCase() || "📄"}

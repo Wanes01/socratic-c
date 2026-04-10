@@ -1,27 +1,28 @@
 <script lang="ts">
-	import { appState } from "./lib/state/app-state.svelte";
+	import { ui } from "./lib/state/UIState.svelte";
+	import { fs } from "./lib/state/FileState.svelte";
 	import { PaneGroup, Pane } from "paneforge";
-	import HandleResizer from "./lib/components/HandleResizer.svelte";
-	import AppBar from "./lib/components/AppBar.svelte";
-	import MultiFileEditor from "./lib/components/MultiFileEditor.svelte";
+	import HandleResizer from "./lib/components/ui/HandleResizer.svelte";
+	import AppBar from "./lib/components/layout/AppBar.svelte";
+	import MultiFileEditor from "./lib/components/editor/MultiFileEditor.svelte";
 	import Explorer from "./lib/components/explorer/Explorer.svelte";
-	import ContextMenu from "./lib/components/ContextMenu.svelte";
-	import ConfirmModal from "./lib/components/ConfirmModal.svelte";
+	import ContextMenu from "./lib/components/ui/ContextMenu.svelte";
+	import ConfirmModal from "./lib/components/ui/ConfirmModal.svelte";
 
 	$effect(() => {
 		// loads the file tree
-		appState.loadFiles();
+		fs.loadFiles();
 	});
 </script>
 
 <!-- the singleton context menu -->
 <ConfirmModal />
-{#if appState.contextMenu}
+{#if ui.contextMenu}
 	<ContextMenu
-		x={appState.contextMenu.x}
-		y={appState.contextMenu.y}
-		options={appState.contextMenu.options}
-		onclose={() => appState.closeContextMenu()}
+		x={ui.contextMenu.x}
+		y={ui.contextMenu.y}
+		options={ui.contextMenu.options}
+		onclose={() => ui.closeContextMenu()}
 	/>
 {/if}
 

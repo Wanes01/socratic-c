@@ -10,8 +10,7 @@
     let isOpen = $state(false); // if a directory is open or not
     let isEditing = $state(false); // it the user is changing the file/dir name
 
-    // svelte-ignore state_referenced_locally
-    let newName = $state(node.name);
+    let newName = $state("");
     let inputElement: HTMLInputElement | null = $state(null); // input shown of node rename
 
     let isCreating = $state<"file" | "directory" | null>(null);
@@ -79,6 +78,7 @@
 
     // user double clicked a directory/file to rename it
     const onRename = async () => {
+        newName = node.name;
         isEditing = true;
         newName = node.name;
         await tick();
@@ -143,7 +143,7 @@
         if (e.key === "Escape") isCreating = null;
     };
 
-    const getIconColor = (extension) => {
+    const getIconColor = (extension: string) => {
         if ([".c", ".h"].includes(extension)) {
             return extension == ".c" ? "text-purple-300" : "text-green-300";
         }

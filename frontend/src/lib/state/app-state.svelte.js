@@ -86,15 +86,14 @@ export const appState = $state({
             // updates the file name locally, without refreshing
             const openedFile = this.openedFiles.find(f => f.path === oldPath);
             if (openedFile) {
-                // moves the CodeMirror's view to its new key
-                if (this.editorViews[oldPath]) {
-                    this.editorViews[newPath] = this.editorViews[oldPath];
-                    delete this.editorViews[oldPath];
-                }
                 openedFile.path = newPath;
                 openedFile.name = newName;
-                // updates the file extension
                 openedFile.extension = newName.includes('.') ? `.${newName.split('.').pop()}` : '';
+
+                // it the renamed file is the selected one then refreshes the editor
+                if (this.selectedFile?.path === oldPath) {
+                    this.selectedFile = openedFile;
+                }
             }
 
             // reloads the file tree
@@ -113,25 +112,11 @@ export const appState = $state({
             const isDir = node.type === 'directory';
 
             if (isDir) {
-                // removes all the files that are inside the directory to delete
                 this.openedFiles = this.openedFiles.filter(f =>
                     !f.path.startsWith(node.path + '/') && f.path !== node.path
                 );
-
-                // destroys all bound CodeMirror instances
-                Object.keys(this.editorViews).forEach(viewPath => {
-                    if (viewPath.startsWith(node.path + '/') || viewPath === node.path) {
-                        this.editorViews[viewPath].destroy();
-                        delete this.editorViews[viewPath];
-                    }
-                });
             } else {
                 this.openedFiles = this.openedFiles.filter(f => f.path !== node.path);
-
-                if (this.editorViews[node.path]) {
-                    this.editorViews[node.path].destroy();
-                    delete this.editorViews[node.path];
-                }
             }
 
             const isSelectedInsideDeleted = this.selectedFile?.path.startsWith(node.path + '/')

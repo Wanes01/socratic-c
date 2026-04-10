@@ -2,13 +2,22 @@
     import Button from "./Button.svelte";
 </script>
 
-<div class="flex flex-row px-3 py-2 justify-between items-center">
-    <p class="font-mono font-extrabold text-2xl text-white">
-        socrati<span class="text-purple-400">c_c</span>
-    </p>
-    <div class="flex flex-row gap-3 text-sm">
-        <Button text="Compila" icon="compile.svg" />
-        <Button text="Esegui" icon="run.svg" />
-        <Button text="Chiedi un suggerimento all'IA" icon="question.svg" />
+<div
+    class="flex flex-row px-4 py-2 justify-between items-center bg-neutral-900 border-b border-neutral-800 select-none"
+>
+    <div class="flex items-center gap-2">
+        <p class="font-mono font-black text-xl tracking-tighter text-white">
+            socrati<span class="text-purple-400">c_c</span>
+        </p>
+    </div>
+
+    <div class="flex flex-row gap-2">
+        <Button text="Compila" icon="compile.svg" variant="navBar" />
+
+        <Button text="Esegui" icon="run.svg" variant="navBar" />
+
+        <!-- separator -->
+        <div class="w-px h-6 bg-neutral-800 mx-1 self-center"></div>
+        <Button text="Chiedi all'IA" icon="bot.svg" variant="ai" />
     </div>
 </div>

@@ -6,11 +6,17 @@
     import { isValidFileName } from "../../util/utilities";
 
     let { node }: { node: FileNode } = $props();
+
     let isOpen = $state(false); // if a directory is open or not
     let isEditing = $state(false); // it the user is changing the file/dir name
+
     // svelte-ignore state_referenced_locally
     let newName = $state(node.name);
-    let inputElement: HTMLInputElement | null = $state(null);
+    let inputElement: HTMLInputElement | null = $state(null); // input shown of node rename
+
+    let isCreating = $state<"file" | "directory" | null>(null);
+    let newItemName = $state("");
+    let createInputElement: HTMLInputElement | null = $state(null); // input shown when creating a node
 
     const isDirectory = $derived(node.type === "directory");
 
@@ -36,18 +42,21 @@
                 // renames a file/dir
                 { label: "Rinomina", icon: "✏️", action: () => onRename() },
                 // deletes a file/dir
+                { label: "Elimina", icon: "🗑️", action: () => onDelete() },
+            );
+        }
+
+        if (isDirectory) {
+            options.push(
                 {
-                    label: "Elimina",
-                    icon: "🗑️",
-                    action: () => {
-                        appState.showModal(
-                            `Elimina ${isDirectory ? "cartella" : "file"}`,
-                            `Sei sicuro di voler eliminare "${node.name}"?`,
-                            () => appState.deleteNode(node),
-                            "Elimina",
-                            "Mantieni",
-                        );
-                    },
+                    label: "Nuovo File",
+                    icon: "📄",
+                    action: () => onCreate("file"),
+                },
+                {
+                    label: "Nuova Cartella",
+                    icon: "📁",
+                    action: () => onCreate("directory"),
                 },
             );
         }
@@ -77,7 +86,16 @@
         inputElement?.select();
     };
 
-    const onDelete = async () => {};
+    // user wants to delete a node
+    const onDelete = async () => {
+        appState.showModal(
+            `Elimina ${isDirectory ? "cartella" : "file"}`,
+            `Sei sicuro di voler eliminare "${node.name}"?`,
+            () => appState.deleteNode(node),
+            "Elimina",
+            "Mantieni",
+        );
+    };
 
     // renames the file
     const submitRename = async () => {
@@ -90,12 +108,39 @@
         isEditing = false;
     };
 
-    const handleKeyDown = (e: KeyboardEvent) => {
+    // user wants to create a new node
+    const onCreate = async (type: "file" | "directory") => {
+        isOpen = true; // open the directory to show the input
+        isCreating = type;
+        newItemName = "";
+        await tick();
+        createInputElement?.focus();
+    };
+
+    const submitCreate = async () => {
+        if (!isCreating) return;
+
+        const name = newItemName.trim();
+        if (name && isValidFileName(name)) {
+            // builds the new node's path
+            const newPath = `${node.path}/${name}`;
+            await appState.createNode(newPath, isCreating);
+        }
+
+        isCreating = null;
+    };
+
+    const handleRenameKeyDown = (e: KeyboardEvent) => {
         if (e.key === "Enter") submitRename();
         if (e.key === "Escape") {
             isEditing = false;
             newName = node.name;
         }
+    };
+
+    const handleCreateKeyDown = (e: KeyboardEvent) => {
+        if (e.key === "Enter") submitCreate();
+        if (e.key === "Escape") isCreating = null;
     };
 
     const getIconColor = (extension) => {
@@ -136,7 +181,7 @@
                     bind:this={inputElement}
                     bind:value={newName}
                     onblur={submitRename}
-                    onkeydown={handleKeyDown}
+                    onkeydown={handleRenameKeyDown}
                     class="bg-neutral-900 text-white border border-blue-500 px-1 rounded outline-none w-full text-sm"
                 />
             {:else}
@@ -156,6 +201,24 @@
             {#each Object.values(node.children) as child (child.path)}
                 <FileTreeNode node={child} />
             {/each}
+
+            {#if isCreating}
+                <div class="flex items-center gap-2 py-1 px-2 ml-2">
+                    <span class="w-4 text-xs"
+                        >{isCreating === "file" ? "📄" : "📁"}</span
+                    >
+                    <input
+                        bind:this={createInputElement}
+                        bind:value={newItemName}
+                        onblur={submitCreate}
+                        onkeydown={handleCreateKeyDown}
+                        class="bg-neutral-900 text-white border border-neutral-500 px-1 rounded outline-none w-full text-sm"
+                        placeholder={isCreating === "file"
+                            ? "nome file..."
+                            : "nome cartella..."}
+                    />
+                </div>
+            {/if}
         </div>
     {/if}
 </div>

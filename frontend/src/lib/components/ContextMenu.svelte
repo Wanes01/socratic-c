@@ -25,7 +25,7 @@
     {#each options as option}
         <button
             role="menuitem"
-            class="w-full text-left px-4 py-2 hover:bg-blue-600 hover:text-white transition-colors flex items-center gap-2 cursor-pointer"
+            class="w-full text-left px-4 py-2 hover:bg-neutral-600 hover:text-white transition-colors flex items-center gap-2 cursor-pointer"
             onclick={() => {
                 option.action();
                 onclose();

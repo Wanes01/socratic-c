@@ -1,4 +1,4 @@
-import { fetchFileTree, readFile, saveFileContent, renameFile, deleteFile } from '../services/files-api'
+import * as filesApi from '../services/files-api';
 
 export const appState = $state({
     fileTree: {},
@@ -33,7 +33,7 @@ export const appState = $state({
     // loads the file tree
     async loadFiles() {
         try {
-            this.fileTree = await fetchFileTree();
+            this.fileTree = await filesApi.fetchFileTree();
         } catch (e) {
             this.fileTree = {};
         }
@@ -45,7 +45,7 @@ export const appState = $state({
         const alreadyOpen = this.openedFiles.find(f => f.path === file.path);
         if (!alreadyOpen) {
             try {
-                const data = await readFile(file.path);
+                const data = await filesApi.readFile(file.path);
                 const fileData = {
                     path: file.path,
                     name: file.name,
@@ -66,7 +66,7 @@ export const appState = $state({
     async saveFile(file) {
         const content = this.getContent(file.path);
         if (content !== null) {
-            await saveFileContent(file.path, content);
+            await filesApi.saveFileContent(file.path, content);
         }
     },
 
@@ -81,7 +81,7 @@ export const appState = $state({
 
         try {
             // renames the file server-side
-            await renameFile(oldPath, newPath);
+            await filesApi.renameFile(oldPath, newPath);
 
             // updates the file name locally, without refreshing
             const openedFile = this.openedFiles.find(f => f.path === oldPath);
@@ -108,7 +108,7 @@ export const appState = $state({
     // deletes a file/directory (recursively)
     async deleteNode(node) {
         try {
-            await deleteFile(node.path);
+            await filesApi.deleteFile(node.path);
 
             const isDir = node.type === 'directory';
 
@@ -144,7 +144,20 @@ export const appState = $state({
             await this.loadFiles();
 
         } catch (err) {
-            alert("Errore durante l'eliminazione: " + err.message);
+            console.error("Errore durante l'eliminazione: " + err.message);
+        }
+    },
+
+    // creates a new file/directory
+    async createNode(path, type) {
+        try {
+            await filesApi.createNodeApi(path, type);
+
+            // relaods the file tree
+            await this.loadFiles();
+
+        } catch (err) {
+            console.error("Errore creazione nodo:", err);
         }
     }
 });

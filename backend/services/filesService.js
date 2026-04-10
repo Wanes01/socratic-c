@@ -180,3 +180,37 @@ exports.deleteNode = (relativePath) => {
         throw new Error(`Impossibile eliminare la risorsa: ${error.message}`);
     }
 };
+
+/**
+ * Creates a new node (file/directory)
+ * @param {string} relativePath : relative path of the new node
+ * @param {'file' | 'directory'} type : the type of the node to create
+ */
+exports.createNode = (relativePath, type) => {
+    const fullPath = path.join(EXERCISES_DIR, relativePath);
+
+    if (!fullPath.startsWith(EXERCISES_DIR)) {
+        throw new Error("Accesso non autorizzato al percorso");
+    }
+
+    if (fs.existsSync(fullPath)) {
+        throw new Error("Un elemento con questo nome esiste già");
+    }
+
+    try {
+        if (type === 'directory') {
+            fs.mkdirSync(fullPath, { recursive: true });
+        } else {
+            const parentDir = path.dirname(fullPath);
+            if (!fs.existsSync(parentDir)) {
+                fs.mkdirSync(parentDir, { recursive: true });
+            }
+            fs.writeFileSync(fullPath, "", 'utf-8');
+        }
+
+        return { success: true, message: `${type === 'file' ? 'File' : 'Directory'} creato correttamente` };
+    } catch (error) {
+        console.error(`Errore creazione ${type} in ${relativePath}:`, error.message);
+        throw new Error(`Errore durante la creazione: ${error.message}`);
+    }
+};

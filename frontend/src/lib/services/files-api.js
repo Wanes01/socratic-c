@@ -69,3 +69,20 @@ export async function deleteFile(path) {
 
     return await res.json();
 }
+
+export async function createNodeApi(path, type) {
+    const res = await fetch(`${FILES_API_BASE_URL}/create`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ path, type })
+    });
+
+    if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.error || 'Errore durante la creazione');
+    }
+
+    return await res.json();
+}

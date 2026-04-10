@@ -90,3 +90,25 @@ exports.deleteNode = (req, res) => {
         return res.status(500).json({ error: error.message });
     }
 };
+
+// creates a new node (file/directory)
+exports.createNode = (req, res) => {
+    const { path: relativePath, type } = req.body;
+
+    if (!relativePath || !type) {
+        return res.status(400).json({ error: "Percorso e tipo (file/directory) sono obbligatori" });
+    }
+
+    if (type !== 'file' && type !== 'directory') {
+        return res.status(400).json({ error: "Tipo non valido. Ci si aspetta 'file' o 'directory'" });
+    }
+
+    try {
+        const result = filesService.createNode(relativePath, type);
+        // node created successfully
+        return res.status(201).json(result);
+    } catch (error) {
+        const statusCode = error.message.includes("File/dir già esistente") ? 409 : 500;
+        return res.status(statusCode).json({ error: error.message });
+    }
+};

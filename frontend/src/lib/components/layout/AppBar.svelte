@@ -1,4 +1,5 @@
 <script lang="ts">
+    import { ts } from "../../state/TerminalState.svelte";
     import Button from "../ui/Button.svelte";
 </script>
 
@@ -12,9 +13,21 @@
     </div>
 
     <div class="flex flex-row gap-2">
-        <Button text="Compila" icon="compile.svg" variant="navBar" />
+        <Button
+            text="Compila"
+            icon="compile.svg"
+            variant="navBar"
+            disabled={ts.isCompiling}
+            onclick={() => console.log("compila")}
+        />
 
-        <Button text="Esegui" icon="run.svg" variant="navBar" />
+        <Button
+            text="Esegui"
+            icon="run.svg"
+            variant="navBar"
+            disabled={ts.isCompiling || ts.isExecuting || !ts.canExecute}
+            onclick={() => console.log("esegui")}
+        />
 
         <!-- separator -->
         <div class="w-px h-6 bg-neutral-800 mx-1 self-center"></div>

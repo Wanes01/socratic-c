@@ -3,13 +3,21 @@
         text: string;
         icon?: string;
         variant?: "navBar" | "ai";
+        rounded?: boolean;
         onclick?: () => void;
     }
 
-    let { text, icon, variant = "navBar", onclick }: Props = $props();
+    let {
+        text,
+        icon,
+        variant = "navBar",
+        rounded = true,
+        onclick,
+    }: Props = $props();
 
-    const baseClass =
-        "flex items-center gap-2 px-3 py-1.5 rounded-sm text-sm font-medium transition-all duration-200 active:scale-95 cursor-pointer";
+    const baseClass = $derived(
+        `${rounded ? "rounded-sm" : ""} flex items-center gap-2 px-3 py-1.5 text-sm font-medium transition-all duration-200 active:scale-95 cursor-pointer`,
+    );
 
     const variants = {
         navBar: "bg-neutral-700 hover:bg-neutral-600 text-neutral-200 border border-neutral-600 hover:border-neutral-500",

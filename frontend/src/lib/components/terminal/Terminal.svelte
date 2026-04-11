@@ -2,6 +2,8 @@
     import AnsiToHtml from "ansi-to-html";
     import { ts } from "../../state/TerminalState.svelte";
     import Button from "../ui/Button.svelte";
+    import { slide, scale } from "svelte/transition";
+    import { cubicOut } from "svelte/easing";
 
     const convert = new AnsiToHtml();
     let scrollContainer: HTMLDivElement | null = $state(null);
@@ -14,6 +16,12 @@
             scrollContainer.scrollTop = scrollContainer.scrollHeight;
         }
     });
+
+    $effect(() => {
+        if (ts.isCompiling) {
+            ts.output = "Compilazione in corso...";
+        }
+    });
 </script>
 
 <div class="flex flex-col w-full h-full bg-neutral-950 font-mono">
@@ -24,6 +32,16 @@
             class="text-xs font-bold uppercase tracking-wider text-neutral-500"
             >Output del programma</span
         >
+        {#if ts.hasErrors}
+            <div transition:scale={{ duration: 200, easing: cubicOut }}>
+                <Button
+                    text="Chiedi un suggerimento all'IA"
+                    icon="bot.svg"
+                    variant="ai"
+                    overrideClass="font-sans py-1"
+                />
+            </div>
+        {/if}
     </div>
 
     <div
@@ -31,11 +49,7 @@
         class="flex-1 overflow-y-auto p-3 text-sm leading-relaxed custom-scrollbar scroll-smooth"
     >
         <p class="text-gray-300 whitespace-pre-wrap break-all">
-            {#if ts.isCompiling}
-                Compilazione in corso...
-            {:else}
-                {@html htmlOutput}
-            {/if}
+            {@html htmlOutput}
         </p>
     </div>
 
@@ -53,14 +67,14 @@
                 class="w-full py-2 bg-transparent text-gray-200 text-sm outline-none placeholder:text-neutral-600"
             />
         </div>
-        {#if ts.isExecuting}
-            <Button
-                text="Invia"
-                rounded={false}
-                onclick={() => {
-                    // sends input data lmao
-                }}
-            />
+        {#if ts.canExecute || ts.isExecuting}
+            <div transition:slide={{ axis: "x", duration: 250 }}>
+                <Button
+                    text="Invia"
+                    rounded={false}
+                    overrideClass="h-full px-6"
+                />
+            </div>
         {/if}
     </div>
 </div>

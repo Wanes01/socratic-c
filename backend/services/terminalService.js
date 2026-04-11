@@ -53,9 +53,11 @@ exports.compileExercise = (exerciseName, options) => {
         const compileCmd = options.includeTests
             /* search and compile the ".c" files both in the student's root and in the test directory.
             Excludes the student's main so that the test's main can be used. */
-            ? `find . -name "*.c" ! -name "main.c" -print0 | xargs -0 -r gcc ../tests/*.c -o "../${EXEC_DIR}/${EXEC_NAME}" -I. -I../tests -lm -fdiagnostics-color=always ${flagsStr}`
+            ? `find . -name "*.c" ! -name "main.c" -print0 | xargs -0 gcc ../tests/*.c -o "../${EXEC_DIR}/${EXEC_NAME}" -I. -I../tests -lm -fdiagnostics-color=always ${flagsStr}`
             // compile only the ".c" files in the student's root, without considering any tests
             : `find . -name "*.c" -print0 | xargs -0 gcc -o "../${EXEC_DIR}/${EXEC_NAME}" -I. -lm -fdiagnostics-color=always ${flagsStr}`;
+
+        console.log('compileCmd:', compileCmd);
 
         // executes the command on root as the cwd.
         // sets a timeout to make sure that the compilation doesn't get stuck

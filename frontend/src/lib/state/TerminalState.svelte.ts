@@ -2,28 +2,30 @@ import { compileExercise } from "../services/terminal-api";
 
 class TerminalState {
     isCompiling = $state<boolean>(false); // true if the server is currently compiling the program
-    canExecute = $state<boolean>(false); // true if the executable of the current exercise exists
     isExecuting = $state<boolean>(false); // true if the program is under execution right now
+    lastCompileSuccess = $state<boolean>(false); // true if the last compilation was successfull
+    canExecute = $derived(this.lastCompileSuccess && !this.isCompiling && !this.isExecuting); // true if the executable of the current exercise exists
+
     params = $state<string>(""); // the command line arguments/input to the program
     output = $state<string>(""); // the output/error of the pragram
 
     compileOptions = $state({
-        ansi: false,
-        wall: false,
-        wpedantic: false,
+        ansi: true,
+        wall: true,
+        wpedantic: true,
         wextra: false
     });
 
+    // compiles the specified exercise using the current compileOptions
     compile = async (exerciseName: string): Promise<void> => {
         this.isCompiling = true;
-        this.canExecute = false;
-        this.isExecuting = false;
+        this.lastCompileSuccess = false;
         this.output = "";
 
         try {
             const result = await compileExercise(exerciseName, this.compileOptions);
             this.output = result.output;
-            this.canExecute = result.success;
+            this.lastCompileSuccess = result.success;
         } catch (e) {
             this.output = "Errore di rete durante la compilazione.";
         } finally {

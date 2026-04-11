@@ -1,0 +1,54 @@
+<script lang="ts">
+    let open = $state(false);
+
+    interface Props {
+        label: string;
+        children?: import("svelte").Snippet;
+    }
+
+    let { label, children }: Props = $props();
+
+    function handleOutsideClick(e: MouseEvent) {
+        const target = e.target as HTMLElement;
+        if (!target.closest(".dropdown-root")) {
+            open = false;
+        }
+    }
+</script>
+
+<svelte:window onclick={handleOutsideClick} />
+
+<div class="dropdown-root relative">
+    <button
+        onclick={() => (open = !open)}
+        class="dropdown-trigger flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-neutral-200 cursor-pointer"
+    >
+        <span>{label}</span>
+        <svg
+            class="h-3 w-3 opacity-60 transition-transform duration-200 {open
+                ? 'rotate-180'
+                : ''}"
+            viewBox="0 0 12 12"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+        >
+            <path
+                d="M2 4L6 8L10 4"
+                stroke="currentColor"
+                stroke-width="1.5"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+            />
+        </svg>
+    </button>
+
+    {#if open}
+        <div
+            class="absolute right-0 top-full mt-1 z-50 min-w-48
+                   bg-neutral-800 border border-neutral-700 rounded-sm shadow-lg
+                   flex flex-col py-1"
+        >
+            {@render children?.()}
+        </div>
+    {/if}
+</div>

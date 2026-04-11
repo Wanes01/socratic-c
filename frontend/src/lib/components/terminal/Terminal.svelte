@@ -27,8 +27,13 @@
         bind:this={scrollContainer}
         class="flex-1 overflow-y-auto p-3 text-sm leading-relaxed custom-scrollbar scroll-smooth"
     >
-        <pre
-            class="text-gray-300 whitespace-pre-wrap break-all">{ts.output}</pre>
+        <pre class="text-gray-300 whitespace-pre-wrap break-all">
+            {#if ts.isCompiling}
+                <span>Compilazione in corso...</span>
+            {:else}
+                <span>{ts.output}</span>
+            {/if}
+        </pre>
     </div>
 
     <div

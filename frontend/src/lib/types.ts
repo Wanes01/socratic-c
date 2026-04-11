@@ -32,3 +32,10 @@ export interface ModalState {
     confirmText: string;
     cancelText: string;
 }
+
+export interface CompileOptions {
+    ansi?: boolean;
+    wall?: boolean;
+    wpedantic?: boolean;
+    wextra?: boolean;
+}

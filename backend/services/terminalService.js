@@ -14,6 +14,9 @@ const EXEC_DIR = "bin"
  * @param {boolean} [options.wall=false] - enable common warnings (-Wall)
  * @param {boolean} [options.wpedantic=false] - enable pedantic warnings (-Wpedantic)
  * @param {boolean} [options.wextra=false] - enable extra warnings (-Wextra)
+ * @param {boolean} [options.werror=false] - warnings get treated as errors (-Werror)
+ * @param {boolean} [options.werror=false] - warnings get treated as errors (-Werror) includeTests
+ * @param {boolean} [options.includeTests=false] - includes the test folder in the gcc command
  * @returns {Promise<{success: boolean, output: string}>}
  */
 exports.compileExercise = (exerciseName, options) => {
@@ -42,11 +45,17 @@ exports.compileExercise = (exerciseName, options) => {
         if (options.wall) flags.push('-Wall');
         if (options.wpedantic) flags.push('-Wpedantic');
         if (options.wextra) flags.push('-Wextra');
+        if (options.werror) flags.push('-Werror');
 
         const flagsStr = flags.join(' ');
 
         // command costruction
-        const compileCmd = `find . -name "*.c" -print0 | xargs -0 gcc -o "../${EXEC_DIR}/${EXEC_NAME}" -I. -Wall -Wextra -lm -fdiagnostics-color=always ${flagsStr}`;
+        const compileCmd = options.includeTests
+            /* search and compile the ".c" files both in the student's root and in the test directory.
+            Excludes the student's main so that the test's main can be used. */
+            ? `find . -name "*.c" ! -name "main.c" -print0 | xargs -0 -r gcc ../tests/*.c -o "../${EXEC_DIR}/${EXEC_NAME}" -I. -I../tests -lm -fdiagnostics-color=always ${flagsStr}`
+            // compile only the ".c" files in the student's root, without considering any tests
+            : `find . -name "*.c" -print0 | xargs -0 gcc -o "../${EXEC_DIR}/${EXEC_NAME}" -I. -lm -fdiagnostics-color=always ${flagsStr}`;
 
         // executes the command on root as the cwd.
         // sets a timeout to make sure that the compilation doesn't get stuck

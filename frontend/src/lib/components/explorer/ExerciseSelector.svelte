@@ -1,5 +1,6 @@
 <script lang="ts">
     import { fs } from "../../state/FileState.svelte";
+    import { ts } from "../../state/TerminalState.svelte";
     import { ui } from "../../state/UIState.svelte";
     import type { ContextMenuOption } from "../../types";
     import { stringToColor } from "../../util/utilities";
@@ -29,6 +30,11 @@
     // user selects an exercise
     const onclick = (exerciseName: string): void => {
         fs.selectedExercise = exerciseName;
+
+        // if the exercise has a test folder, include it by default in the compilation process
+        if (fs.hasTests) {
+            ts.compileOptions.includeTests = true;
+        }
     };
 </script>
 

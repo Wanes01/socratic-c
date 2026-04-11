@@ -13,5 +13,6 @@ exports.compileExercise = async (req, res) => {
     }
 
     const result = await terminalService.compileExercise(exerciseName, options);
+
     return res.status(result.success ? 200 : 422).json(result);
 };

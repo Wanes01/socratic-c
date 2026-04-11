@@ -6,6 +6,10 @@
 
     const compileClick = async () => {
         if (fs.selectedExercise !== null) {
+            // saves all the open files before compiling
+            for (const file of fs.openedFiles) {
+                await fs.saveFile(file);
+            }
             await ts.compile(fs.selectedExercise);
         }
     };

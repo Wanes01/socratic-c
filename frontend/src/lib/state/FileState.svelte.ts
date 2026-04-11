@@ -7,6 +7,11 @@ class FileState {
     selectedExercise = $state<string | null>(null);
     openedFiles = $state<OpenedFile[]>([]);
     selectedFile = $state<OpenedFile | null>(null);
+    hasTests = $derived( // if the current exercise has any test
+        this.selectedExercise 
+        && (this.fileTree as any)[this.selectedExercise]?.tests 
+        && Object.keys((this.fileTree as any)[this.selectedExercise].tests).length > 0
+    );
     
     editorViews = $state<Record<string, EditorView>>({});
 

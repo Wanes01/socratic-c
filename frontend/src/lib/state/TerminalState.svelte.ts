@@ -13,7 +13,9 @@ class TerminalState {
         ansi: true,
         wall: true,
         wpedantic: true,
-        wextra: false
+        wextra: false,
+        werror: false,
+        includeTests: true // includes or not the tests source files in the compilation
     });
 
     // compiles the specified exercise using the current compileOptions

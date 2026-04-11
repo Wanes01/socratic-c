@@ -1,8 +1,11 @@
 <script lang="ts">
+    import AnsiToHtml from "ansi-to-html";
     import { ts } from "../../state/TerminalState.svelte";
     import Button from "../ui/Button.svelte";
 
+    const convert = new AnsiToHtml();
     let scrollContainer: HTMLDivElement | null = $state(null);
+    let htmlOutput = $derived(convert.toHtml(ts.output));
 
     // every time the output changes the terminal autoscrolls
     $effect(() => {
@@ -27,13 +30,13 @@
         bind:this={scrollContainer}
         class="flex-1 overflow-y-auto p-3 text-sm leading-relaxed custom-scrollbar scroll-smooth"
     >
-        <pre class="text-gray-300 whitespace-pre-wrap break-all">
+        <p class="text-gray-300 whitespace-pre-wrap break-all">
             {#if ts.isCompiling}
-                <span>Compilazione in corso...</span>
+                Compilazione in corso...
             {:else}
-                <span>{ts.output}</span>
+                {@html htmlOutput}
             {/if}
-        </pre>
+        </p>
     </div>
 
     <div

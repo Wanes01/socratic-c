@@ -38,4 +38,6 @@ export interface CompileOptions {
     wall?: boolean;
     wpedantic?: boolean;
     wextra?: boolean;
+    werror?: boolean;
+    includeTests?: boolean;
 }

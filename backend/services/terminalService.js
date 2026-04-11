@@ -1,6 +1,7 @@
-const { exec } = require('child_process');
+const { exec, spawn } = require('child_process');
 const fs = require('fs');
 const path = require('path');
+const { WebSocketServer } = require('ws');
 
 const EXERCISES_DIR = process.env.EXERCISES_DIR || path.join(__dirname, '../../exercises');
 const EXEC_NAME = "program"
@@ -78,3 +79,46 @@ exports.compileExercise = (exerciseName, options) => {
         });
     });
 };
+
+/**
+ * Initializes the WebSocket server attached to the given HTTP server.
+ * Handles program execution, stdout/stderr streaming, and stdin forwarding.
+ * @param {import('http').Server} server - the HTTP server to attach the WebSocket server to
+ */
+exports.initWebSocket = (server) => {
+    // attaches the WebSocker server to the same HTTP server as Express, to share the same port
+    const wss = new WebSocketServer({ server });
+
+    // every time the client opens a websocket connection...
+    wss.on('connection', (ws) => {
+        let currentProcess = null;
+
+        ws.on('message', (data) => {
+            const msg = JSON.parse(data);
+
+            if (msg.type === 'run') {
+                const binPath = path.join(EXERCISES_DIR, msg.exerciseName, 'bin', 'program');
+                const args = msg.params ? msg.params.trim().split(/\s+/) : [];
+
+                /* spawns the program with stdbuf to disable output buffering,
+                so stdout is sent immediately without waiting for \n
+                */
+                currentProcess = spawn('stdbuf', ['-o0', binPath, ...args]);
+
+                // every time the process writes on stdout/stderr, forwads it to the client
+                currentProcess.stdout.on('data', (d) => ws.send(JSON.stringify({ type: 'stdout', data: d.toString() })));
+                currentProcess.stderr.on('data', (d) => ws.send(JSON.stringify({ type: 'stderr', data: d.toString() })));
+                // notifies the client of the process termination (0 -> success, else -> error)
+                currentProcess.on('close', (code) => ws.send(JSON.stringify({ type: 'exit', code })));
+            }
+
+            // when the client sends input (e.g. for scanf), writes it to the process stdin
+            if (msg.type === 'stdin') {
+                currentProcess?.stdin.write(msg.data + '\n');
+            }
+        });
+
+        // if the client disconnects, kills the process
+        ws.on('close', () => currentProcess?.kill());
+    });
+}

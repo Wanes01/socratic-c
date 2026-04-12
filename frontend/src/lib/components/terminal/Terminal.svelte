@@ -1,19 +1,33 @@
 <script lang="ts">
     import AnsiToHtml from "ansi-to-html";
-    import { ts } from "../../state/TerminalState.svelte";
+    import stripAnsi from "strip-ansi";
+    import {
+        ts,
+        EXEC_MAX_OUTPUT_CHARS,
+        MESSAGES,
+    } from "../../state/TerminalState.svelte";
     import Button from "../ui/Button.svelte";
     import { slide, scale } from "svelte/transition";
     import { cubicOut } from "svelte/easing";
 
     const convert = new AnsiToHtml();
     let scrollContainer: HTMLDivElement | null = $state(null);
+    // the formatted terminal output
     let htmlOutput = $derived(convert.toHtml(ts.output));
+    // terminal output as plain text
+    let plainTextOutput = $derived(stripAnsi(ts.output));
 
     // every time the output changes the terminal autoscrolls
     $effect(() => {
-        ts.output;
         if (scrollContainer) {
             scrollContainer.scrollTop = scrollContainer.scrollHeight;
+        }
+
+        /* if the output exeedes the max amount of characters, kills
+        the process in order to not saturare memory*/
+        if (ts.isExecuting && plainTextOutput.length > EXEC_MAX_OUTPUT_CHARS) {
+            ts.stop();
+            ts.output += MESSAGES.MAX_OUTPUT_EXEEDED;
         }
     });
 

@@ -1,10 +1,17 @@
 import { compileExercise } from "../services/terminal-api";
 
-const COMPILATION_SUCCESS_MESSAGE = "Compilazione avvenuta con successo.";
-const COMPILATION_IN_PROGRESS_MESSAGE = "Compilazione in corso...";
-const NETWORK_ERROR_MESSAGE = "Errore di rete durante la compilazione.";
+// the max amount of characters that the terminal can show before killing the process
+export const EXEC_MAX_OUTPUT_CHARS = 100_000;
+
+export const MESSAGES = {
+    COMPILE_SUCCESS: "[Compilazione avvenuta con successo.]",
+    COMPILATION_IN_PROGRESS: "[Compilazione in corso...]",
+    NETWORK_ERROR: "[Errore di rete durante la compilazione.]",
+    MAX_OUTPUT_EXEEDED: `[L'output ha raggiunto più di ${EXEC_MAX_OUTPUT_CHARS} caratteri, motivo per cui il processo è stato terminato.]`
+}
 
 class TerminalState {
+
     isCompiling = $state<boolean>(false); // true if the server is currently compiling the program
     isExecuting = $state<boolean>(false); // true if the program is under execution right now
     lastAction = $state<"none" | "compile" | "execute">("none"); // last action performed
@@ -38,7 +45,7 @@ class TerminalState {
         this.lastCompileSuccess = false;
         this.hasWarnings = false;
         this.hasErrors = false;
-        this.output = COMPILATION_IN_PROGRESS_MESSAGE;
+        this.output = MESSAGES.COMPILATION_IN_PROGRESS;
 
         try {
             const result = await compileExercise(exerciseName, this.compileOptions);
@@ -47,14 +54,14 @@ class TerminalState {
             this.output = result.success
                 /* if it is a warning, show it; if it is an empty string then
                 the compilation was successful (shows the standard text).*/
-                ? (result.output || COMPILATION_SUCCESS_MESSAGE)
+                ? (result.output || MESSAGES.COMPILE_SUCCESS)
                 // if it's an error show it
                 : result.output;
             this.hasWarnings = result.success && !!result.output;
             this.hasErrors = !result.success;
         } catch (e) {
             this.lastAction = "compile";
-            this.output = NETWORK_ERROR_MESSAGE;
+            this.output = MESSAGES.NETWORK_ERROR;
             this.hasErrors = true;
         } finally {
             this.isCompiling = false;
@@ -107,7 +114,7 @@ class TerminalState {
         };
 
         this.ws.onerror = () => {
-            this.output = NETWORK_ERROR_MESSAGE;
+            this.output = MESSAGES.NETWORK_ERROR;
             this.isExecuting = false;
             this.ws = null;
         };

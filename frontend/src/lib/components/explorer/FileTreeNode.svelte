@@ -61,7 +61,9 @@
     };
 
     // user click on a directory/file
-    const onclick = () => {
+    const onclick = (e: MouseEvent) => {
+        e.stopPropagation();
+
         if (isEditing) {
             return; // do not open the file/dir if the user is renaming it
         }

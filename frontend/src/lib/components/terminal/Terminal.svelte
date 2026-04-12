@@ -17,11 +17,23 @@
         }
     });
 
-    $effect(() => {
-        if (ts.isCompiling) {
-            ts.output = "Compilazione in corso...";
+    $inspect(
+        ts.output,
+        ts.hasWarnings,
+        ts.hasErrors,
+        ts.lastAction,
+        ts.lastCompileSuccess,
+    );
+
+    const onclick = () => {
+        ts.sendInput();
+    };
+
+    const onkeydown = (e: KeyboardEvent) => {
+        if (e.key === "Enter" && ts.isExecuting) {
+            ts.sendInput();
         }
-    });
+    };
 </script>
 
 <div class="flex flex-col w-full h-full bg-neutral-950 font-mono">
@@ -32,13 +44,14 @@
             class="text-xs font-bold uppercase tracking-wider text-neutral-500"
             >Output del programma</span
         >
-        {#if ts.hasErrors}
+        {#if ts.hasErrors || ts.hasWarnings}
             <div transition:scale={{ duration: 200, easing: cubicOut }}>
                 <Button
                     text="Chiedi un suggerimento all'IA"
                     icon="bot.svg"
                     variant="ai"
                     overrideClass="font-sans py-1"
+                    onclick={() => {}}
                 />
             </div>
         {/if}
@@ -65,14 +78,16 @@
                     ? "Inserisci input per il programma..."
                     : "Argomenti linea di comando..."}
                 class="w-full py-2 bg-transparent text-gray-200 text-sm outline-none placeholder:text-neutral-600"
+                {onkeydown}
             />
         </div>
-        {#if ts.canExecute || ts.isExecuting}
+        {#if ts.isExecuting}
             <div transition:slide={{ axis: "x", duration: 250 }}>
                 <Button
                     text="Invia"
                     rounded={false}
                     overrideClass="h-full px-6"
+                    {onclick}
                 />
             </div>
         {/if}

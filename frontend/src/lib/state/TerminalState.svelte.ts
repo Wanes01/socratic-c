@@ -10,12 +10,9 @@ class TerminalState {
     lastAction = $state<"none" | "compile" | "execute">("none"); // last action performed
     lastCompileSuccess = $state<boolean>(false); // true if the last compilation was successful
     lastExecutionSuccess = $state<boolean>(false); // true if the last execution was successful
+    hasWarnings = $state<boolean>(false); // true if compilation produced warnings
+    hasErrors = $state<boolean>(false); // true if the compilation or execution produced errors
     canExecute = $derived(this.lastCompileSuccess && !this.isCompiling && !this.isExecuting);
-    
-    hasErrors = $derived(
-        (this.lastAction === "compile" && !this.lastCompileSuccess) ||
-        (this.lastAction === "execute" && !this.lastExecutionSuccess)
-    );
     
     params = $state<string>(""); // the command line arguments/input to the program
     output = $state<string>(""); // the output/error of the program
@@ -39,6 +36,8 @@ class TerminalState {
         this.isCompiling = true;
         this.lastAction = "none";
         this.lastCompileSuccess = false;
+        this.hasWarnings = false;
+        this.hasErrors = false;
         this.output = COMPILATION_IN_PROGRESS_MESSAGE;
 
         try {
@@ -46,11 +45,17 @@ class TerminalState {
             this.lastCompileSuccess = result.success;
             this.lastAction = "compile";
             this.output = result.success
-                ? COMPILATION_SUCCESS_MESSAGE
+                /* if it is a warning, show it; if it is an empty string then
+                the compilation was successful (shows the standard text).*/
+                ? (result.output || COMPILATION_SUCCESS_MESSAGE)
+                // if it's an error show it
                 : result.output;
+            this.hasWarnings = result.success && !!result.output;
+            this.hasErrors = !result.success;
         } catch (e) {
             this.lastAction = "compile";
             this.output = NETWORK_ERROR_MESSAGE;
+            this.hasErrors = true;
         } finally {
             this.isCompiling = false;
         }
@@ -60,6 +65,8 @@ class TerminalState {
         this.isExecuting = true;
         this.lastAction = "none";
         this.lastExecutionSuccess = false;
+        this.hasWarnings = false;
+        this.hasErrors = false;
         this.output = "";
 
         this.ws = new WebSocket(`ws://localhost:5000`);
@@ -77,6 +84,8 @@ class TerminalState {
             if (msg.type === 'exit') {
                 this.lastAction = "execute";
                 this.lastExecutionSuccess = msg.code === 0;
+                this.hasErrors = msg.code !== 0;
+                this.hasWarnings = false;
                 this.isExecuting = false;
                 this.ws = null;
             }

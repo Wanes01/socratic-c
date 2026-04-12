@@ -58,24 +58,15 @@ exports.compileExercise = (exerciseName, options) => {
             // compile only the ".c" files in the student's root, without considering any tests
             : `find . -name "*.c" -print0 | xargs -0 gcc -o "../${EXEC_DIR}/${EXEC_NAME}" -I. -lm -fdiagnostics-color=always ${flagsStr}`;
 
-        console.log('compileCmd:', compileCmd);
-
         // executes the command on root as the cwd.
         // sets a timeout to make sure that the compilation doesn't get stuck
         exec(compileCmd, { cwd: studentRoot, timeout: 10000 }, (error, stdout, stderr) => {
             const output = stdout + stderr;
 
-            if (error) {
-                resolve({
-                    success: false,
-                    output: output || "Errore di compilazione sconosciuto."
-                });
-            } else {
-                resolve({
-                    success: true,
-                    output: output || "Compilazione completata con successo."
-                });
-            }
+            resolve({
+                success: !error,
+                output: output
+            });
         });
     });
 };

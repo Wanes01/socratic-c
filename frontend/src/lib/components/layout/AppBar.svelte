@@ -5,13 +5,28 @@
     import CompileSettings from "../dropdowns/CompileSettings.svelte";
 
     const compileClick = async () => {
-        if (fs.selectedExercise !== null) {
-            // saves all the open files before compiling
-            for (const file of fs.openedFiles) {
-                await fs.saveFile(file);
-            }
-            await ts.compile(fs.selectedExercise);
+        if (fs.selectedExercise === null) {
+            return;
         }
+        // stops the execution of the current process
+        if (ts.isExecuting) {
+            ts.stop();
+        }
+        // saves all the open files before compiling
+        for (const file of fs.openedFiles) {
+            await fs.saveFile(file);
+        }
+        await ts.compile(fs.selectedExercise);
+    };
+
+    const executeClick = () => {
+        if (fs.selectedExercise !== null) {
+            ts.execute(fs.selectedExercise);
+        }
+    };
+
+    const stopClick = () => {
+        ts.stop();
     };
 </script>
 
@@ -36,13 +51,22 @@
             onclick={compileClick}
         />
 
-        <Button
-            text="Esegui"
-            icon="run.svg"
-            variant="navBar"
-            disabled={!ts.canExecute}
-            onclick={() => console.log("esegui")}
-        />
+        {#if !ts.isExecuting}
+            <Button
+                text="Esegui"
+                icon="run.svg"
+                variant="navBar"
+                disabled={!ts.canExecute}
+                onclick={executeClick}
+            />
+        {:else}
+            <Button
+                text="Ferma"
+                icon="stop.svg"
+                variant="navBar"
+                onclick={stopClick}
+            />
+        {/if}
 
         <!-- separator -->
         <div class="w-px h-6 bg-neutral-800 mx-1 self-center"></div>

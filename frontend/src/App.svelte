@@ -9,6 +9,7 @@
 	import ContextMenu from "./lib/components/ui/ContextMenu.svelte";
 	import ConfirmModal from "./lib/components/ui/ConfirmModal.svelte";
 	import Terminal from "./lib/components/terminal/Terminal.svelte";
+	import AIChat from "./lib/components/chat/AIChat.svelte";
 
 	$effect(() => {
 		// loads the file tree
@@ -82,7 +83,7 @@
 			maxSize={50}
 			class="border border-white/10"
 		>
-			<div class="p-4">Chat con ollama</div>
+			<AIChat />
 		</Pane>
 	</PaneGroup>
 </div>

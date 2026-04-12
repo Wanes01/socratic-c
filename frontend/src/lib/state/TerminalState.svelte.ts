@@ -4,10 +4,10 @@ import { compileExercise } from "../services/terminal-api";
 export const EXEC_MAX_OUTPUT_CHARS = 100_000;
 
 export const MESSAGES = {
-    COMPILE_SUCCESS: "[Compilazione avvenuta con successo.]",
-    COMPILATION_IN_PROGRESS: "[Compilazione in corso...]",
-    NETWORK_ERROR: "[Errore di rete durante la compilazione.]",
-    MAX_OUTPUT_EXEEDED: `[L'output ha raggiunto più di ${EXEC_MAX_OUTPUT_CHARS} caratteri, motivo per cui il processo è stato terminato.]`
+    COMPILE_SUCCESS: "\n[Compilazione avvenuta con successo.]",
+    COMPILATION_IN_PROGRESS: "\n[Compilazione in corso...]",
+    NETWORK_ERROR: "\n[Errore di rete durante la compilazione.]",
+    MAX_OUTPUT_EXEEDED: `\n[L'output ha raggiunto più di ${EXEC_MAX_OUTPUT_CHARS.toLocaleString('it-IT')} caratteri, motivo per cui il processo è stato terminato.]`
 }
 
 class TerminalState {

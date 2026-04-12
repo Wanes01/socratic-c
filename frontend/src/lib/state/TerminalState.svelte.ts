@@ -86,6 +86,11 @@ class TerminalState {
                 this.lastExecutionSuccess = msg.code === 0;
                 this.hasErrors = msg.code !== 0;
                 this.hasWarnings = false;
+
+                if (msg.exitMessage) {
+                    this.output += msg.exitMessage;
+                }
+
                 this.isExecuting = false;
                 this.ws = null;
             }

@@ -7,6 +7,22 @@ const EXERCISES_DIR = process.env.EXERCISES_DIR || path.join(__dirname, '../../e
 const EXEC_NAME = "program"
 const EXEC_DIR = "bin"
 
+// the max amount of memory (in kilobytes) that the exercise process can take
+const EXEC_MEMORY_LIMIT_KB = (process.env.EXEC_MEMORY_LIMIT_MB
+    ? parseInt(process.env.EXEC_MEMORY_LIMIT_MB)
+    : 128) * 1024;
+// the max amount of time (in milliseconds) the exercise process can run
+const EXEC_TIMEOUT_MS = (process.env.EXEC_TIMEOUT_SEC
+    ? parseInt(process.env.EXEC_TIMEOUT_SEC)
+    : 90) * 1000;
+
+const EXIT_CODE = {
+    success: 0,
+    outOfMemory: 137,
+    timeout: 124,
+    segFault: 139,
+}
+
 /**
  * compiles the specified exercise
  * @param {string} exerciseName - the name of the directory of the exercise
@@ -98,15 +114,42 @@ exports.initWebSocket = (server) => {
                 const args = msg.params ? msg.params.trim().split(/\s+/) : [];
 
                 /* spawns the program with stdbuf to disable output buffering,
-                so stdout is sent immediately without waiting for \n
-                */
-                currentProcess = spawn('stdbuf', ['-o0', binPath, ...args]);
+                so stdout is sent immediately without waiting for \n.
+                Also sets the max bytes that the process can take */
+                const cmd = `ulimit -v ${EXEC_MEMORY_LIMIT_KB} && stdbuf -o0 ${binPath} ${args.join(' ')}`;
+                currentProcess = spawn('bash', ['-c', cmd]);
+
+                // kills the process after the timeout
+                let timedOut = false;
+                const timeout = setTimeout(() => {
+                    timedOut = true;
+                    currentProcess?.kill('SIGKILL');
+                }, EXEC_TIMEOUT_MS);
 
                 // every time the process writes on stdout/stderr, forwads it to the client
                 currentProcess.stdout.on('data', (d) => ws.send(JSON.stringify({ type: 'stdout', data: d.toString() })));
                 currentProcess.stderr.on('data', (d) => ws.send(JSON.stringify({ type: 'stderr', data: d.toString() })));
-                // notifies the client of the process termination (0 -> success, else -> error)
-                currentProcess.on('close', (code) => ws.send(JSON.stringify({ type: 'exit', code })));
+
+                /* notifies the client of the process termination (0 -> success, else -> error).
+                Did not manage to pass the child process's exit code to the bash,
+                so the exit code refers to the /bin/bash process */
+                currentProcess.on('close', (code, signal) => {
+                    // cancels the timeout if the process terminates before it
+                    clearTimeout(timeout);
+                    let exitMessage = '';
+
+                    if (timedOut) {
+                        exitMessage = '\n[Processo terminato: tempo massimo di esecuzione superato]';
+                    } else if (signal === 'SIGSEGV') {
+                        exitMessage = '\n[Segmentation fault: accesso a memoria non valida]';
+                    } else if (signal === 'SIGKILL') {
+                        exitMessage = '\n[Processo terminato: memoria esaurita]';
+                    }
+
+                    ws.send(JSON.stringify({ type: 'exit', code, signal, exitMessage }));
+                });
+
+
             }
 
             // when the client sends input (e.g. for scanf), writes it to the process stdin

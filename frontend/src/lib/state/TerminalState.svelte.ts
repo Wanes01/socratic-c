@@ -29,6 +29,12 @@ class TerminalState {
         includeTests: true
     });
 
+    private ws: WebSocket | null = null;
+
+    /**
+     * Compiles the specified exercise with the current compileOptions configuration
+     * @param exerciseName the exercise to compile
+     */
     compile = async (exerciseName: string): Promise<void> => {
         this.isCompiling = true;
         this.lastAction = "none";
@@ -44,11 +50,66 @@ class TerminalState {
                 : result.output;
         } catch (e) {
             this.lastAction = "compile";
-
             this.output = NETWORK_ERROR_MESSAGE;
         } finally {
             this.isCompiling = false;
         }
+    }
+
+    execute = (exerciseName: string): void => {
+        this.isExecuting = true;
+        this.lastAction = "none";
+        this.lastExecutionSuccess = false;
+        this.output = "";
+
+        this.ws = new WebSocket(`ws://localhost:5000`);
+
+        this.ws.onmessage = (event) => {
+            const msg = JSON.parse(event.data);
+
+            // appends stdout and stderr to the output as they arrive
+            if (msg.type === 'stdout' || msg.type === 'stderr') {
+                this.output += msg.data;
+            }
+
+            /* when the process terminates, updates the state with the exit code
+            exit code 0 = success, anything else = error */
+            if (msg.type === 'exit') {
+                this.lastAction = "execute";
+                this.lastExecutionSuccess = msg.code === 0;
+                this.isExecuting = false;
+                this.ws = null;
+            }
+        };
+
+        /* once the connection is open, send the run command with the exercise name
+        and the command line arguments */
+        this.ws.onopen = () => {
+            this.ws!.send(JSON.stringify({
+                type: 'run',
+                exerciseName,
+                params: this.params
+            }));
+        };
+
+        this.ws.onerror = () => {
+            this.output = NETWORK_ERROR_MESSAGE;
+            this.isExecuting = false;
+            this.ws = null;
+        };
+    }
+
+    // sends the current params value as stdin input to the running process
+    sendInput = (): void => {
+        this.ws?.send(JSON.stringify({ type: 'stdin', data: this.params }));
+        this.params = "";
+    }
+
+    // stops the running process
+    stop = (): void => {
+        this.ws?.close();
+        this.ws = null;
+        this.isExecuting = false;
     }
 }
 

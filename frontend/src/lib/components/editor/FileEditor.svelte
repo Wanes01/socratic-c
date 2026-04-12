@@ -1,5 +1,6 @@
 <script lang="ts">
     import { fs } from "../../state/FileState.svelte";
+    import { untrack } from "svelte";
     import { indentUnit } from "@codemirror/language";
     import { EditorView, basicSetup } from "codemirror";
     import { keymap } from "@codemirror/view";
@@ -9,6 +10,11 @@
     import { oneDark } from "@codemirror/theme-one-dark";
 
     let { file } = $props(); // { path, name, extension, initialContent }
+
+    /* freezes the values on component creation with non reactive variables */
+    const initialContent = untrack(() => file.initialContent);
+    const filePath = untrack(() => file.path);
+    const fileExtension = untrack(() => file.extension);
 
     let editorContainer: HTMLElement;
     let view: EditorView;
@@ -25,7 +31,7 @@
     }
 
     function getLanguageExtension() {
-        return [".c", ".h", ".cpp"].includes(file.extension) ? cpp() : [];
+        return [".c", ".h", ".cpp"].includes(fileExtension) ? cpp() : [];
     }
 
     const darkBackground = EditorView.theme(
@@ -47,9 +53,10 @@
         { dark: true },
     );
 
+    // runs only on component mount
     $effect(() => {
         view = new EditorView({
-            doc: file.initialContent,
+            doc: initialContent,
             extensions: [
                 basicSetup,
                 oneDark,
@@ -70,10 +77,10 @@
             parent: editorContainer,
         });
 
-        fs.editorViews[file.path] = view;
+        fs.editorViews[filePath] = view;
 
         return () => {
-            delete fs.editorViews[file.path];
+            delete fs.editorViews[filePath];
             view.destroy();
         };
     });

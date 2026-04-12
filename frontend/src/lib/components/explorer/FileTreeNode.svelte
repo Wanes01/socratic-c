@@ -87,7 +87,7 @@
     const onDelete = async () => {
         ui.showModal(
             `Elimina ${isDirectory ? "cartella" : "file"}`,
-            `Sei sicuro di voler eliminare "${node.name}"?`,
+            `Sei sicuro di voler eliminare "${node.name}" ${isDirectory ? "e tutti i file contenuti" : ""}?`,
             () => fs.deleteNode(node),
             "Elimina",
             "Mantieni",

@@ -17,14 +17,6 @@
         }
     });
 
-    $inspect(
-        ts.output,
-        ts.hasWarnings,
-        ts.hasErrors,
-        ts.lastAction,
-        ts.lastCompileSuccess,
-    );
-
     const onclick = () => {
         ts.sendInput();
     };

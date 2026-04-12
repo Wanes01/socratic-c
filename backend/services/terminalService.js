@@ -50,13 +50,19 @@ exports.compileExercise = (exerciseName, options) => {
 
         const flagsStr = flags.join(' ');
 
+        /*
+        const compileCmd = options.includeTests
+            ? `find . -name "*.c" ! -name "main.c" -print0 | xargs -0 gcc ../tests/*.c -o "../${EXEC_DIR}/${EXEC_NAME}" -I. -I../tests -fdiagnostics-color=always ${flagsStr} -lm`
+            : `find . -name "*.c" -print0 | xargs -0 gcc -o "../${EXEC_DIR}/${EXEC_NAME}" -I. -fdiagnostics-color=always ${flagsStr} -lm`;
+        */
+
         // command costruction
         const compileCmd = options.includeTests
             /* search and compile the ".c" files both in the student's root and in the test directory.
             Excludes the student's main so that the test's main can be used. */
-            ? `find . -name "*.c" ! -name "main.c" -print0 | xargs -0 gcc ../tests/*.c -o "../${EXEC_DIR}/${EXEC_NAME}" -I. -I../tests -lm -fdiagnostics-color=always ${flagsStr}`
+            ? `gcc $(find . -name "*.c" ! -name "main.c") ../tests/*.c -o "../${EXEC_DIR}/${EXEC_NAME}" -I. -I../tests -fdiagnostics-color=always ${flagsStr} -lm`
             // compile only the ".c" files in the student's root, without considering any tests
-            : `find . -name "*.c" -print0 | xargs -0 gcc -o "../${EXEC_DIR}/${EXEC_NAME}" -I. -lm -fdiagnostics-color=always ${flagsStr}`;
+            : `gcc $(find . -name "*.c") -o "../${EXEC_DIR}/${EXEC_NAME}" -I. -fdiagnostics-color=always ${flagsStr} -lm`;
 
         // executes the command on root as the cwd.
         // sets a timeout to make sure that the compilation doesn't get stuck

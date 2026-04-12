@@ -76,11 +76,16 @@ class FileState {
             // updates the file name locally, without refreshing
             const openedFile = this.openedFiles.find(f => f.path === oldPath);
             if (openedFile) {
+                // captures the content of the current editor before the path change
+                const currentContent = this.getContent(oldPath);
+                if (currentContent !== null) {
+                    openedFile.initialContent = currentContent;
+                }
+
                 openedFile.path = newPath;
                 openedFile.name = newName;
                 openedFile.extension = newName.includes('.') ? `.${newName.split('.').pop()}` : '';
 
-                // it the renamed file is the selected one then refreshes the editor
                 if (this.selectedFile?.path === oldPath) {
                     this.selectedFile = openedFile;
                 }

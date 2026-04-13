@@ -2,7 +2,7 @@
     import { twMerge } from "tailwind-merge";
 
     interface Props {
-        text: string;
+        text?: string;
         icon?: string;
         variant?: "navBar" | "ai";
         rounded?: boolean;
@@ -12,8 +12,8 @@
     }
 
     let {
-        text,
         icon,
+        text = "",
         variant = "navBar",
         rounded = true,
         disabled = false,
@@ -43,5 +43,7 @@
     {#if icon}
         <img src={icon} alt="" class="h-4 w-4 opacity-80" />
     {/if}
-    <span>{text}</span>
+    {#if text}
+        <span>{text}</span>
+    {/if}
 </button>

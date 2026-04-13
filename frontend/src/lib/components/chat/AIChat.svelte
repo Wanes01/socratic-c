@@ -1,8 +1,10 @@
 <script lang="ts">
+    import { cs } from "../../state/ChatState.svelte";
     import { marked } from "marked";
     import { markedHighlight } from "marked-highlight";
     import hljs from "highlight.js";
     import "highlight.js/styles/atom-one-dark.css";
+    import Button from "../ui/Button.svelte";
 
     // sets the highlighting for code blocks
     marked.use(
@@ -17,11 +19,53 @@
         }),
     );
 
-    //const testMdHtml = marked(sampleMarkdown2); {@html testMdHtml}
+    // resizes the text area on user input
+    const autoResize = (e: Event): void => {
+        const target = e.target as HTMLTextAreaElement;
+        target.style.height = "auto";
+        target.style.height = target.scrollHeight + "px";
+    };
 </script>
 
 <div class="h-full flex flex-col overflow-hidden">
-    <div class="flex-1 overflow-y-auto p-4 ai-message"></div>
+    <div class="flex-1 overflow-y-auto p-4 ai-message">
+        {#each cs.messages as message, i (i)}
+            {#if message.role === "assistant"}
+                <div class="mb-3">
+                    <!-- assistant messages, translated from markdown to html -->
+                    {@html marked(message.content)}
+                </div>
+            {:else}
+                <div class="flex justify-end mb-3">
+                    <p
+                        class="bg-neutral-700 text-gray-300 text-sm px-3 py-2 rounded-sm max-w-[80%] border border-neutral-600 leading-relaxed"
+                    >
+                        {message.content}
+                    </p>
+                </div>
+            {/if}
+        {/each}
+    </div>
+
+    <!-- input -->
+    <div
+        class="flex flex-row gap-2 p-2 border-t border-white/10 bg-neutral-900"
+    >
+        <textarea
+            placeholder="Scrivi un messaggio..."
+            rows="1"
+            class="flex-1 resize-none bg-neutral-800 text-gray-300 text-sm placeholder-neutral-500 border border-neutral-700 rounded-sm px-3 py-2
+                   focus:outline-none focus:border-violet-600/60 transition-colors duration-200 max-h-150"
+            oninput={autoResize}
+            onkeydown={(e) => {
+                if (e.key === "Enter" && !e.shiftKey) {
+                    e.preventDefault();
+                    // TODO: invia messaggio
+                }
+            }}
+        ></textarea>
+        <Button text="" icon="bot.svg" variant="ai" />
+    </div>
 </div>
 
 <style>

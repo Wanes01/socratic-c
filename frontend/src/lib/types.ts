@@ -41,3 +41,8 @@ export interface CompileOptions {
     werror?: boolean;
     includeTests?: boolean;
 }
+
+export interface ChatMessage {
+    role: 'user' | 'assistant';
+    content: string;
+}

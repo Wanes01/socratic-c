@@ -47,7 +47,7 @@
 		<HandleResizer direction="vertical" />
 		<!-- Editor e terminale -->
 		<Pane
-			defaultSize={75}
+			defaultSize={70}
 			minSize={0}
 			maxSize={100}
 			class="border border-white/10"
@@ -78,8 +78,10 @@
 
 		<!-- Chat ollama -->
 		<Pane
-			defaultSize={15}
-			minSize={0}
+			defaultSize={20}
+			collapsible={true}
+			collapsedSize={0}
+			minSize={20}
 			maxSize={50}
 			class="border border-white/10"
 		>

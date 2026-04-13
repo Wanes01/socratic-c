@@ -1,8 +1,9 @@
 const ollamaService = require('../services/ollamaService');
+const globalAIConfig = require('../global-ai-config.json');
 const OLLAMA_MODEL = process.env.OLLAMA_MODEL;
 
 exports.chat = async (req, res) => {
-    const { model = OLLAMA_MODEL, messages } = req.body;
+    const { messages, exercise } = req.body;
 
     // these headers are mandatory for SSE
     res.setHeader('Content-Type', 'text/event-stream');
@@ -10,12 +11,11 @@ exports.chat = async (req, res) => {
     res.setHeader('Connection', 'keep-alive');
     res.flushHeaders(); // sends the headers immediately
 
-    try {
-        await ollamaService.streamChat(model, messages, res);
-    } catch (err) {
-        // if something goes wrong notifies the client
-        res.write(`data: ${JSON.stringify({ error: err.message })}\n\n`);
-    } finally {
-        res.end();
+    for await (const chunk of ollamaService.streamChat(OLLAMA_MODEL, messages)) {
+        res.write(`data: ${JSON.stringify({ token: chunk.token })}\n\n`);
+        if (chunk.done) {
+            res.write(`data: ${JSON.stringify({ done: true })}\n\n`);
+            return;
+        }
     }
 }

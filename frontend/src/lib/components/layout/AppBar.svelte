@@ -12,10 +12,8 @@
         if (ts.isExecuting) {
             ts.stop();
         }
-        // saves all the open files before compiling
-        for (const file of fs.openedFiles) {
-            await fs.saveFile(file);
-        }
+        // saves all the exercise files before compiling
+        await fs.saveCurrentExerciseFiles();
         await ts.compile(fs.selectedExercise);
     };
 

@@ -7,6 +7,11 @@ class FileState {
     selectedExercise = $state<string | null>(null);
     openedFiles = $state<OpenedFile[]>([]);
     selectedFile = $state<OpenedFile | null>(null);
+
+    exerciseOpenedFiles = $derived( // files that are open of the current exercise
+        this.openedFiles.filter(f => f.path.startsWith(this.selectedExercise || ""))
+    );
+    
     hasTests = $derived( // if the current exercise has any test
         this.selectedExercise 
         && (this.fileTree as any)[this.selectedExercise]?.tests 
@@ -59,6 +64,17 @@ class FileState {
             await filesApi.saveFileContent(file.path, content);
         }
     }
+
+    // saves all the files related to the current exercise
+    saveCurrentExerciseFiles = async (): Promise<void> => {
+        if (this.selectedExercise === null) {
+            return;
+        }
+
+        for (const file of this.exerciseOpenedFiles) {
+            await this.saveFile(file);
+        }
+    } 
 
     // renames a file/directory
     renameNode = async (node: FileNode, replName: string): Promise<void> => {

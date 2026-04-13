@@ -16,12 +16,14 @@ const EXEC_TIMEOUT_MS = (process.env.EXEC_TIMEOUT_SEC
     ? parseInt(process.env.EXEC_TIMEOUT_SEC)
     : 90) * 1000;
 
+/*
 const EXIT_CODE = {
     success: 0,
     outOfMemory: 137,
     timeout: 124,
     segFault: 139,
 }
+*/
 
 /**
  * compiles the specified exercise

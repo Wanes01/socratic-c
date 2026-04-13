@@ -15,6 +15,8 @@
 		// loads the file tree
 		fs.loadFiles();
 	});
+
+	$inspect(fs.fileTree);
 </script>
 
 <!-- the singleton context menu -->

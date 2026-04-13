@@ -7,6 +7,7 @@
         variant?: "navBar" | "ai";
         rounded?: boolean;
         disabled?: boolean;
+        iconOnly?: boolean;
         overrideClass?: string;
         onclick?: () => void;
     }
@@ -17,6 +18,7 @@
         variant = "navBar",
         rounded = true,
         disabled = false,
+        iconOnly = false,
         overrideClass = "",
         onclick,
     }: Props = $props();
@@ -41,9 +43,13 @@
 
 <button class={baseClass} {onclick} {disabled}>
     {#if icon}
-        <img src={icon} alt="" class="h-4 w-4 opacity-80" />
+        <img
+            src={icon}
+            alt={iconOnly && text ? text : ""}
+            class="h-4 w-4 opacity-80"
+        />
     {/if}
-    {#if text}
+    {#if !iconOnly && text}
         <span>{text}</span>
     {/if}
 </button>

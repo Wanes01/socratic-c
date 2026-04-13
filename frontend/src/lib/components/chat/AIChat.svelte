@@ -6,6 +6,8 @@
     import "highlight.js/styles/atom-one-dark.css";
     import Button from "../ui/Button.svelte";
 
+    let messageContent = $state("");
+
     // sets the highlighting for code blocks
     marked.use(
         markedHighlight({
@@ -24,6 +26,15 @@
         const target = e.target as HTMLTextAreaElement;
         target.style.height = "auto";
         target.style.height = target.scrollHeight + "px";
+    };
+
+    // sends a message to che LLM, if possible
+    const sendMessage = async (): Promise<void> => {
+        if (cs.isGenerating) {
+            return;
+        }
+        await cs.send(messageContent);
+        messageContent = "";
     };
 </script>
 
@@ -52,6 +63,7 @@
         class="flex flex-row gap-2 p-2 border-t border-white/10 bg-neutral-900"
     >
         <textarea
+            bind:value={messageContent}
             placeholder="Scrivi un messaggio..."
             rows="1"
             class="flex-1 resize-none bg-neutral-800 text-gray-300 text-sm placeholder-neutral-500 border border-neutral-700 rounded-sm px-3 py-2
@@ -60,11 +72,18 @@
             onkeydown={(e) => {
                 if (e.key === "Enter" && !e.shiftKey) {
                     e.preventDefault();
-                    // TODO: invia messaggio
+                    sendMessage();
                 }
             }}
         ></textarea>
-        <Button text="" icon="bot.svg" variant="ai" />
+        <Button
+            text="invia messaggio"
+            icon="bot.svg"
+            variant="ai"
+            iconOnly={true}
+            disabled={cs.isGenerating}
+            onclick={sendMessage}
+        />
     </div>
 </div>
 

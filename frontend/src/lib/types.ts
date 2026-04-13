@@ -42,7 +42,9 @@ export interface CompileOptions {
     includeTests?: boolean;
 }
 
+export type ChatRole = 'user' | 'assistant'; 
+
 export interface ChatMessage {
-    role: 'user' | 'assistant';
+    role: ChatRole;
     content: string;
 }

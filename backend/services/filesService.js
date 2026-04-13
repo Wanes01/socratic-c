@@ -70,6 +70,26 @@ exports.getExercisesTree = () => {
     const rawExercises = tree.children || {};
 
     const exercises = Object.values(rawExercises).reduce((acc, exercise) => {
+        const exercisePath = path.join(EXERCISES_DIR, exercise.name);
+
+        // creates the root directory if it doesn't exist
+        const rootPath = path.join(exercisePath, 'root');
+        if (!fs.existsSync(rootPath)) {
+            fs.mkdirSync(rootPath, { recursive: true });
+        }
+
+        // reads constraints from ai-config.json if present
+        let constraints = null;
+        const aiConfigPath = path.join(exercisePath, 'ai-config.json');
+        if (fs.existsSync(aiConfigPath)) {
+            try {
+                const aiConfig = JSON.parse(fs.readFileSync(aiConfigPath, 'utf-8'));
+                constraints = aiConfig.constraints || null;
+            } catch (e) {
+                console.error(`Errore lettura ai-config.json per ${exercise.name}:`, e.message);
+            }
+        }
+
         const sRoot = exercise.children?.['root'];
         const tRoot = exercise.children?.['tests'];
 
@@ -77,7 +97,8 @@ exports.getExercisesTree = () => {
             path: exercise.path,
             // makes access to data easier on frontend
             studentRoot: sRoot || {},
-            tests: tRoot || {}
+            tests: tRoot || {},
+            constraints
         };
 
         return acc;
@@ -243,4 +264,29 @@ exports.createExerciseZip = (exerciseName) => {
     archive.finalize();
 
     return archive;
+};
+
+/**
+ * Recursively reads all files from a file tree node
+ * @param {object} node : a node returned by getFileTree
+ * @returns {Array<{name: string, content: string}>} : list of files with their content
+ */
+exports.readFilesFromTree = (node) => {
+    const files = [];
+
+    if (!node || node.type === 'file') {
+        if (node) {
+            const content = exports.readExerciseFile(node.path);
+            if (content !== null) {
+                files.push({ name: node.name, content });
+            }
+        }
+        return files;
+    }
+
+    for (const child of Object.values(node.children || {})) {
+        files.push(...exports.readFilesFromTree(child));
+    }
+
+    return files;
 };

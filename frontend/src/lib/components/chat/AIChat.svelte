@@ -5,8 +5,23 @@
     import hljs from "highlight.js";
     import "highlight.js/styles/atom-one-dark.css";
     import Button from "../ui/Button.svelte";
+    import { fs } from "../../state/FileState.svelte";
 
     let messageContent = $state("");
+    let messagesContainer = $state<HTMLDivElement | null>(null);
+
+    // autoscrolls when messages are added to the chat
+    $effect(() => {
+        if (!cs.isGenerating) return;
+
+        const interval = setInterval(() => {
+            messagesContainer?.scrollTo({
+                top: messagesContainer.scrollHeight,
+            });
+        }, 50);
+
+        return () => clearInterval(interval);
+    });
 
     // sets the highlighting for code blocks
     marked.use(
@@ -33,13 +48,17 @@
         if (cs.isGenerating) {
             return;
         }
-        await cs.send(messageContent);
+        const tmpMsg = messageContent;
         messageContent = "";
+        await cs.send(tmpMsg);
     };
 </script>
 
 <div class="h-full flex flex-col overflow-hidden">
-    <div class="flex-1 overflow-y-auto p-4 ai-message">
+    <div
+        bind:this={messagesContainer}
+        class="flex-1 overflow-y-auto p-4 ai-message"
+    >
         {#each cs.messages as message, i (i)}
             {#if message.role === "assistant"}
                 <div class="mb-3">
@@ -67,7 +86,8 @@
             placeholder="Scrivi un messaggio..."
             rows="1"
             class="flex-1 resize-none bg-neutral-800 text-gray-300 text-sm placeholder-neutral-500 border border-neutral-700 rounded-sm px-3 py-2
-                   focus:outline-none focus:border-violet-600/60 transition-colors duration-200 max-h-150"
+                focus:outline-none focus:border-violet-600/60 transition-colors duration-200 max-h-150
+                disabled:opacity-40 disabled:cursor-not-allowed"
             oninput={autoResize}
             onkeydown={(e) => {
                 if (e.key === "Enter" && !e.shiftKey) {
@@ -75,13 +95,14 @@
                     sendMessage();
                 }
             }}
+            disabled={!fs.selectedExercise}
         ></textarea>
         <Button
             text="invia messaggio"
             icon="bot.svg"
             variant="ai"
             iconOnly={true}
-            disabled={cs.isGenerating}
+            disabled={cs.isGenerating || !fs.selectedExercise}
             onclick={sendMessage}
         />
     </div>

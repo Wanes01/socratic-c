@@ -41,6 +41,7 @@ class ChatState {
         this.addMessage("assistant", "");
 
         try {
+            console.log('ok');
             for await (const token of streamChat(this.LLMContext, fs.selectedExercise)) {
                 this.appendToLastMessage(token);
             }

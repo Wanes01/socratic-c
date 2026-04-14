@@ -1,15 +1,13 @@
 const path = require('path');
 const fs = require('fs');
-const ollamaService = require('../services/ollamaService');
+const aiService = require('../services/aiService');
 const filesService = require('../services/filesService');
 const globalAIConfig = require('../global-ai-config.json');
 
-const OLLAMA_MODEL = process.env.OLLAMA_MODEL;
 const EXERCISES_DIR = process.env.EXERCISES_DIR || path.join(__dirname, '../../exercises');
 
 exports.chat = async (req, res) => {
     try {
-        // the context window messages and exercise
         const { messages, exerciseName } = req.body;
 
         if (!messages || !exerciseName) {
@@ -18,7 +16,6 @@ exports.chat = async (req, res) => {
 
         const exercisePath = path.join(EXERCISES_DIR, exerciseName);
 
-        // checks if the exercise actually exists
         if (!fs.existsSync(exercisePath) || !fs.statSync(exercisePath).isDirectory()) {
             return res.status(404).json({ error: 'Esercizio non trovato' });
         }
@@ -33,12 +30,12 @@ exports.chat = async (req, res) => {
         // student files
         const studentFiles = filesService.readFilesFromTree(exerciseTree.children?.['root']);
 
-        // test files (optionals)
+        // test files (optional)
         const testFiles = exerciseTree.children?.['tests']
             ? filesService.readFilesFromTree(exerciseTree.children['tests'])
             : [];
 
-        // solution files (optionals)
+        // solution files (optional)
         const solutionsFullPath = path.join(exercisePath, 'solutions');
         const solutionFiles = fs.existsSync(solutionsFullPath)
             ? filesService.readFilesFromTree(filesService.getFileTree(solutionsFullPath))
@@ -74,29 +71,29 @@ exports.chat = async (req, res) => {
             }
         }
 
-        // builds the full messages array for Ollama
         const fullMessages = [
-            // the system prompt that tell the LLM it's purpose
             {
                 role: 'system',
                 content: globalAIConfig.systemPrompt
             },
-            // a breafing providing context on the current exercise
             {
                 role: 'user',
                 content: briefing
             },
-            /* a confirmation message from the assistant, designed so that the
-            assistant's first message is not a confirmation that they have reviewed their tasks */
+            // Fake assistant confirmation so that the first visible message
+            // is not the LLM acknowledging its own instructions
             {
                 role: 'assistant',
                 content: 'Ho preso visione dell\'esercizio e del codice dello studente. Sono pronto ad aiutarti.'
             },
-            // previews messages between the user and the assistant (if any)
             ...messages
         ];
 
-        console.log(fullMessages);
+        // console.log(fullMessages);
+
+        // Provider selection (Groq if groqApiKey is set, Ollama otherwise)
+        // is fully delegated to aiService.buildChatConfig
+        const chatConfig = aiService.buildChatConfig(fullMessages, globalAIConfig);
 
         // SSE headers
         res.setHeader('Content-Type', 'text/event-stream');
@@ -104,7 +101,7 @@ exports.chat = async (req, res) => {
         res.setHeader('Connection', 'keep-alive');
         res.flushHeaders();
 
-        for await (const chunk of ollamaService.streamChat(OLLAMA_MODEL, fullMessages, globalAIConfig.temperature)) {
+        for await (const chunk of aiService.streamChat(chatConfig)) {
             res.write(`data: ${JSON.stringify({ token: chunk.token })}\n\n`);
             if (chunk.done) {
                 res.write(`data: ${JSON.stringify({ done: true })}\n\n`);
@@ -113,8 +110,7 @@ exports.chat = async (req, res) => {
         }
 
     } catch (err) {
-        console.error('ollamaController.chat error:', err);
-        // if headers are already sent we can't send a JSON error anymore
+        console.error('aiController.chat error:', err);
         if (!res.headersSent) {
             res.status(500).json({ error: err.message });
         }

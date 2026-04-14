@@ -1,6 +1,6 @@
 import { ChatMessage } from "../types";
 
-const API_URL = "/api/ollama/chat";
+const API_URL = "/api/ai/chat";
 
 /**
  * sends the context to the LLM and generates the token

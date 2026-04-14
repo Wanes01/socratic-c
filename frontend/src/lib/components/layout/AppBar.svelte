@@ -1,8 +1,11 @@
 <script lang="ts">
     import { fs } from "../../state/FileState.svelte";
     import { ts } from "../../state/TerminalState.svelte";
+    import { cs } from "../../state/ChatState.svelte";
     import Button from "../ui/Button.svelte";
     import CompileSettings from "../dropdowns/CompileSettings.svelte";
+
+    $inspect(cs.messages);
 
     const compileClick = async () => {
         if (fs.selectedExercise === null) {
@@ -25,6 +28,15 @@
 
     const stopClick = () => {
         ts.stop();
+    };
+
+    const aiAdviceClick = async () => {
+        if (cs.isGenerating) {
+            return;
+        }
+        await cs.send(
+            "Puoi darmi un consiglio per andare avanti nell'esercizio?",
+        );
     };
 </script>
 
@@ -66,6 +78,12 @@
 
         <!-- separator -->
         <div class="w-px h-6 bg-neutral-800 mx-1 self-center"></div>
-        <Button text="Chiedi all'IA" icon="bot.svg" variant="ai" />
+        <Button
+            text="Chiedi all'IA"
+            icon="bot.svg"
+            variant="ai"
+            disabled={cs.isGenerating || !fs.selectedExercise}
+            onclick={aiAdviceClick}
+        />
     </div>
 </div>

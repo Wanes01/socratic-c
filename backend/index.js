@@ -11,12 +11,12 @@ initWebSocket(server);
 
 // the routers that handle the HTTP requests
 const filesRouter = require('./routes/filesRoute');
-const ollamaRouter = require('./routes/ollamaRoute');
+const aiRouter = require('./routes/aiRoute');
 const terminalRouter = require('./routes/terminalRoute');
 
 // sets the routes to be managed by the routers
 app.use('/api/files', filesRouter);
-app.use('/api/ollama', ollamaRouter);
+app.use('/api/ai', aiRouter);
 app.use('/api/terminal', terminalRouter);
 
 

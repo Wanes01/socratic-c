@@ -2,9 +2,12 @@
     import { fs } from "../../state/FileState.svelte";
     import { untrack } from "svelte";
     import { indentUnit } from "@codemirror/language";
+    import { autocompletion, completeAnyWord } from "@codemirror/autocomplete";
+    import { cCompletionSource } from "../../util/cCompletitions";
     import { EditorView, basicSetup } from "codemirror";
     import { keymap } from "@codemirror/view";
-    import { indentWithTab } from "@codemirror/commands";
+    import { indentMore, indentLess } from "@codemirror/commands";
+    import { acceptCompletion } from "@codemirror/autocomplete";
     import { cpp } from "@codemirror/lang-cpp";
     import { Compartment } from "@codemirror/state";
     import { oneDark } from "@codemirror/theme-one-dark";
@@ -15,6 +18,7 @@
     const initialContent = untrack(() => file.initialContent);
     const filePath = untrack(() => file.path);
     const fileExtension = untrack(() => file.extension);
+    const highlightExtensions = [".c", ".h", ".cpp"];
 
     let editorContainer: HTMLElement;
     let view: EditorView;
@@ -31,9 +35,10 @@
     }
 
     function getLanguageExtension() {
-        return [".c", ".h", ".cpp"].includes(fileExtension) ? cpp() : [];
+        return highlightExtensions.includes(fileExtension) ? cpp() : [];
     }
 
+    // overrides the CodeMirror theme with these styles
     const darkBackground = EditorView.theme(
         {
             "&": { backgroundColor: "#262626 !important" },
@@ -53,6 +58,43 @@
         { dark: true },
     );
 
+    // shortcuts that can be used on the editor
+    const keyBinding = keymap.of([
+        {
+            key: "Tab",
+            // if the autocomplete windows is open, accepts both with tab and enter
+            run: acceptCompletion,
+            shift: indentLess, // shift-tab deintent even if the autocomplete window is open
+        },
+        {
+            key: "Tab",
+            run: indentMore, // if the autocomplete tab is closed, indent
+        },
+        {
+            key: "Mod-s", // binds 'CTRL + S' to a file save
+            run: () => {
+                fs.saveFile(file).then(showSavedFeedback);
+                return true;
+            },
+        },
+    ]);
+
+    const autocompleteExtension = autocompletion({
+        override: [
+            async (context) => {
+                const isCFile = highlightExtensions.includes(fileExtension);
+
+                // if the file extension supports autocompletition, autocomplete
+                if (isCFile) {
+                    return await cCompletionSource(context);
+                }
+
+                // autocompletes only the user defined words
+                return completeAnyWord(context);
+            },
+        ],
+    });
+
     // runs only on component mount
     $effect(() => {
         view = new EditorView({
@@ -62,17 +104,9 @@
                 oneDark,
                 darkBackground,
                 indentUnit.of("    "), // default indentation to 4 spaces
-                keymap.of([
-                    indentWithTab, // maps the 'Tab' key to indentation in the editor
-                    {
-                        key: "Mod-s", // maps 'ctrl + s' to a function that saves the file
-                        run: () => {
-                            fs.saveFile(file).then(showSavedFeedback);
-                            return true;
-                        },
-                    },
-                ]),
+                keyBinding,
                 languageConf.of(getLanguageExtension()),
+                autocompleteExtension,
             ],
             parent: editorContainer,
         });

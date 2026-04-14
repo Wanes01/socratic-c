@@ -47,16 +47,16 @@
 
         {#if isOpen}
             <div
-                class="flex flex-col gap-3 px-4"
+                class="flex flex-col gap-2 mx-2 px-2 py-1 border-l border-neutral-600 bg-purple-100/5"
                 transition:slide={{ duration: 200 }}
             >
                 {#each Object.keys(keyToTitle) as exInfo}
                     {#if currentExercise[exInfo]}
-                        <div>
+                        <div class="flex flex-col">
                             <p
-                                class="text-[0.9rem] font-bold uppercase tracking-widest text-neutral-500 mb-1"
+                                class="text-[0.8rem] font-bold uppercase tracking-widest text-neutral-400 underline underline-offset-3"
                             >
-                                • {keyToTitle[exInfo]}
+                                {keyToTitle[exInfo]}
                             </p>
                             <p class="text-xs text-neutral-300 leading-relaxed">
                                 {currentExercise[exInfo]}

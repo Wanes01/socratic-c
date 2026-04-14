@@ -4,7 +4,7 @@ import { fs } from "./FileState.svelte";
 
 /* maximum number of messages retained in the conversation context
 to optimize the tokens sent to the LLM model. */
-export const MAX_CONTEXT_MESSAGES = 10;
+export const MAX_CONTEXT_MESSAGES = 15;
 
 class ChatState {
     messages = $state<ChatMessage[]>([]); // all the messages between the student and the assistant
@@ -41,7 +41,6 @@ class ChatState {
         this.addMessage("assistant", "");
 
         try {
-            console.log('ok');
             for await (const token of streamChat(this.LLMContext, fs.selectedExercise)) {
                 this.appendToLastMessage(token);
             }
@@ -52,6 +51,11 @@ class ChatState {
             this.isGenerating = false;
         }
     };
+
+    // cleans chat history
+    cleanChat = (): void => {
+        this.messages = [];
+    }
 }
 
 export const cs = new ChatState();

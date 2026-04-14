@@ -5,8 +5,6 @@
     import Button from "../ui/Button.svelte";
     import CompileSettings from "../dropdowns/CompileSettings.svelte";
 
-    $inspect(cs.messages);
-
     const compileClick = async () => {
         if (fs.selectedExercise === null) {
             return;
@@ -31,11 +29,13 @@
     };
 
     const aiAdviceClick = async () => {
-        if (cs.isGenerating) {
+        if (cs.isGenerating || !fs.selectedExercise) {
             return;
         }
+        // saves all the current exercises files, so that the ai can take them into consideration
+        await fs.saveCurrentExerciseFiles();
         await cs.send(
-            "Puoi darmi un consiglio per andare avanti nell'esercizio?",
+            "L'esercizio è stato completato con successo? Se non è così, dammi un suggerimento su come proseguire.",
         );
     };
 </script>

@@ -1,4 +1,5 @@
 <script lang="ts">
+    import { cs } from "../../state/ChatState.svelte";
     import AnsiToHtml from "ansi-to-html";
     import stripAnsi from "strip-ansi";
     import {
@@ -31,14 +32,35 @@
         }
     });
 
-    const onclick = () => {
+    const sendInputClick = () => {
         ts.sendInput();
     };
 
-    const onkeydown = (e: KeyboardEvent) => {
+    const sendInputKeyDown = (e: KeyboardEvent) => {
         if (e.key === "Enter" && ts.isExecuting) {
             ts.sendInput();
         }
+    };
+
+    const aiHelpClick = async () => {
+        if (cs.isGenerating) {
+            return;
+        }
+
+        // the flags used to compile, as a string
+        const flags = Object.entries(ts.compileOptions)
+            .filter(([_, value]) => value)
+            .map(([key]) => {
+                if (key.startsWith("w")) {
+                    return `-W${key.slice(1)}`;
+                }
+                return key !== "includeTests" ? `-${key}` : "";
+            })
+            .join(" ");
+
+        await cs.send(
+            `Si è verificato un errore di compilazione o a runtime. La compilazione è stata eseguita con questi flag: "${flags}". L'output sul terminale è "${plainTextOutput}". Puoi aiutarmi a risolvere il problema?`,
+        );
     };
 </script>
 
@@ -57,7 +79,7 @@
                     icon="bot.svg"
                     variant="ai"
                     overrideClass="font-sans py-1"
-                    onclick={() => {}}
+                    onclick={aiHelpClick}
                 />
             </div>
         {/if}
@@ -84,7 +106,7 @@
                     ? "Inserisci input per il programma..."
                     : "Argomenti linea di comando..."}
                 class="w-full py-2 bg-transparent text-gray-200 text-sm outline-none placeholder:text-neutral-600"
-                {onkeydown}
+                onkeydown={sendInputKeyDown}
             />
         </div>
         {#if ts.isExecuting}
@@ -93,7 +115,7 @@
                     text="Invia"
                     rounded={false}
                     overrideClass="h-full px-6"
-                    {onclick}
+                    onclick={sendInputClick}
                 />
             </div>
         {/if}

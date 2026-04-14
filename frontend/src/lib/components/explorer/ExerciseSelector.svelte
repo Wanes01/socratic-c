@@ -2,6 +2,7 @@
     import { fs } from "../../state/FileState.svelte";
     import { ts } from "../../state/TerminalState.svelte";
     import { ui } from "../../state/UIState.svelte";
+    import { cs } from "../../state/ChatState.svelte";
     import type { ContextMenuOption } from "../../types";
     import { stringToColor } from "../../util/utilities";
     import ExplorerSection from "./ExplorerSection.svelte";
@@ -29,6 +30,11 @@
 
     // user selects an exercise
     const onclick = (exerciseName: string): void => {
+        // another exersicise is already selected. Cleans chat history.
+        if (fs.selectedExercise) {
+            cs.cleanChat();
+        }
+
         fs.selectedExercise = exerciseName;
 
         // if the exercise has a test folder, include it by default in the compilation process

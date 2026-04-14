@@ -1,11 +1,11 @@
 <script lang="ts">
     import { cs } from "../../state/ChatState.svelte";
+    import { fs } from "../../state/FileState.svelte";
     import { marked } from "marked";
     import { markedHighlight } from "marked-highlight";
     import hljs from "highlight.js";
     import "highlight.js/styles/atom-one-dark.css";
     import Button from "../ui/Button.svelte";
-    import { fs } from "../../state/FileState.svelte";
 
     let messageContent = $state("");
     let messagesContainer = $state<HTMLDivElement | null>(null);
@@ -48,6 +48,7 @@
         if (cs.isGenerating) {
             return;
         }
+        await fs.saveCurrentExerciseFiles();
         const tmpMsg = messageContent;
         messageContent = "";
         await cs.send(tmpMsg);

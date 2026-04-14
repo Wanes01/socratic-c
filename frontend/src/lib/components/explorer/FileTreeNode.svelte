@@ -5,6 +5,7 @@
     import type { FileNode, ContextMenuOption } from "../../types";
     import FileTreeNode from "./FileTreeNode.svelte";
     import { isValidFileName } from "../../util/utilities";
+    import { slide } from "svelte/transition";
 
     let { node }: { node: FileNode } = $props();
 
@@ -196,7 +197,10 @@
     </button>
 
     {#if isDirectory && isOpen && node.children}
-        <div class="border-l border-neutral-600 ml-2">
+        <div
+            class="border-l border-neutral-600 ml-2"
+            transition:slide={{ duration: 100 }}
+        >
             {#each Object.values(node.children) as child (child.path)}
                 <FileTreeNode node={child} />
             {/each}

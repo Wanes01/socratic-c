@@ -78,17 +78,22 @@ exports.getExercisesTree = () => {
             fs.mkdirSync(rootPath, { recursive: true });
         }
 
-        // reads constraints from ai-config.json if present
-        let constraints = null;
         const aiConfigPath = path.join(exercisePath, 'ai-config.json');
+        let aiConfig = {};
+
         if (fs.existsSync(aiConfigPath)) {
             try {
-                const aiConfig = JSON.parse(fs.readFileSync(aiConfigPath, 'utf-8'));
-                constraints = aiConfig.constraints || null;
+                aiConfig = JSON.parse(fs.readFileSync(aiConfigPath, 'utf-8'));
             } catch (e) {
                 console.error(`Errore lettura ai-config.json per ${exercise.name}:`, e.message);
             }
         }
+
+        /*
+        if (!aiConfig.description) {
+            throw new Error(`ai-config.json di "${exercise.name}" non ha il campo "description" obbligatorio`);
+        }
+        */
 
         const sRoot = exercise.children?.['root'];
         const tRoot = exercise.children?.['tests'];
@@ -98,7 +103,9 @@ exports.getExercisesTree = () => {
             // makes access to data easier on frontend
             studentRoot: sRoot || {},
             tests: tRoot || {},
-            constraints
+            description: aiConfig.description,
+            learningGoals: aiConfig.learningGoals || null,
+            constraints: aiConfig.constraints || null
         };
 
         return acc;

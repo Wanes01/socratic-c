@@ -1,0 +1,8 @@
+{
+  "json.schemas": [
+    {
+      "fileMatch": ["**/ai-config.json"],
+      "url": "./.schemas/exercise.schema.json"
+    }
+  ]
+}

@@ -1,0 +1,21 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Configurazione Esercizio Socratic Tutor",
+  "type": "object",
+  "properties": {
+    "description": {
+      "type": "string",
+      "description": "The assignment will be shown to the student and given to the AI."
+    },
+    "learningGoals": {
+      "type": "string",
+      "description": "(optional) Learning objectives (e.g. 'use of pointers') to guide the AI's focus."
+    },
+    "constraints": {
+      "type": "string",
+      "description": "(optional) Descriptive technical constraints (e.g. 'do not use for loops') that the AI must check after compilation."
+    }
+  },
+  "required": ["description"],
+  "additionalProperties": false
+}

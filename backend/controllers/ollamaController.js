@@ -96,6 +96,8 @@ exports.chat = async (req, res) => {
             ...messages
         ];
 
+        console.log(fullMessages);
+
         // SSE headers
         res.setHeader('Content-Type', 'text/event-stream');
         res.setHeader('Cache-Control', 'no-cache');

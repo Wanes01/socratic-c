@@ -75,6 +75,13 @@
                 </div>
             {/if}
         {/each}
+        {#if cs.isGenerating}
+            <p class="italic text-purple-400/70">
+                Sto generando la risposta{cs.messages.length === 2
+                    ? ", il primo messaggio potrebbe impiegare più tempo del solito"
+                    : ""}...
+            </p>
+        {/if}
     </div>
 
     <!-- input -->

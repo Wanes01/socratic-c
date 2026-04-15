@@ -1,24 +1,24 @@
-const fs = require('fs');
-const path = require('path');
-const archiver = require('archiver');
+import type { AiConfig, ExercisesMap, FileContent, FileTreeNode, NodeChildrenMap, OperationResult } from '../types/filesTypes';
+import fs from 'fs';
+import path from 'path';
+import archiver = require('archiver');
 
-exports.EXERCISES_DIR = process.env.EXERCISES_DIR || path.join(__dirname, '../../exercises');
-EXERCISES_DIR = exports.EXERCISES_DIR
+export const EXERCISES_DIR = process.env.EXERCISES_DIR || path.join(__dirname, '../../exercises');
 
 const viewableDirs = ['root', 'tests'];
 
 /**
  * Recursive function to map a directory tree structure to JSON with filtering
- * @param {string} dirPath : the absolute path
- * @param {function} condition : predicate that receives the info object (defaults to true, accepting all elements)
- * @returns {object|null} : the node info or null if it doesn't satisfy the condition
+ * @param dirPath the absolute path
+ * @param condition predicate that receives the info object (defaults to true, accepting all elements)
+ * @returns the node info or null if it doesn't satisfy the condition
  */
-exports.getFileTree = (dirPath, condition = (item) => true) => {
+export const getFileTree = (dirPath: string, condition: (node: FileTreeNode) => boolean = (_) => true): FileTreeNode | null => {
     const stats = fs.statSync(dirPath);
     const relativePath = path.relative(EXERCISES_DIR, dirPath);
 
     // an obejct describing the directory/file
-    const info = {
+    const info: FileTreeNode = {
         name: path.basename(dirPath),
         path: relativePath || ".",
         type: stats.isDirectory() ? "directory" : "file"
@@ -35,7 +35,7 @@ exports.getFileTree = (dirPath, condition = (item) => true) => {
     // recursevly elaborate directories
     if (stats.isDirectory()) {
         info.children = fs.readdirSync(dirPath)
-            .reduce((acc, childName) => {
+            .reduce((acc: NodeChildrenMap, childName: string) => {
                 const childResult = exports.getFileTree(path.join(dirPath, childName), condition);
 
                 // filters out all the nodes that did not comply the condition
@@ -55,21 +55,21 @@ exports.getFileTree = (dirPath, condition = (item) => true) => {
  * Creates the exercises directory if it does not exist.
  * @returns the exercises file tree.
  */
-exports.getExercisesTree = () => {
+export const getExercisesTree = (): ExercisesMap => {
     if (!fs.existsSync(EXERCISES_DIR)) {
         fs.mkdirSync(EXERCISES_DIR);
     }
 
     const tree = exports.getFileTree(
         EXERCISES_DIR,
-        (item) =>
+        (item: FileTreeNode) =>
             !item.path.includes("/") // accepts first level nodes
             || viewableDirs.some(dir => item.path.includes(`/${dir}`)) // accept root, tests and all their content
     );
 
-    const rawExercises = tree.children || {};
+    const rawExercises = (tree?.children ?? {}) as NodeChildrenMap;
 
-    const exercises = Object.values(rawExercises).reduce((acc, exercise) => {
+    const exercises = Object.values(rawExercises).reduce((acc: ExercisesMap, exercise: FileTreeNode) => {
         const exercisePath = path.join(EXERCISES_DIR, exercise.name);
 
         // creates the root directory if it doesn't exist
@@ -79,21 +79,15 @@ exports.getExercisesTree = () => {
         }
 
         const aiConfigPath = path.join(exercisePath, 'ai-config.json');
-        let aiConfig = {};
+        let aiConfig: AiConfig = {};
 
         if (fs.existsSync(aiConfigPath)) {
             try {
                 aiConfig = JSON.parse(fs.readFileSync(aiConfigPath, 'utf-8'));
-            } catch (e) {
+            } catch (e: any) {
                 console.error(`Errore lettura ai-config.json per ${exercise.name}:`, e.message);
             }
         }
-
-        /*
-        if (!aiConfig.description) {
-            throw new Error(`ai-config.json di "${exercise.name}" non ha il campo "description" obbligatorio`);
-        }
-        */
 
         const sRoot = exercise.children?.['root'];
         const tRoot = exercise.children?.['tests'];
@@ -116,15 +110,15 @@ exports.getExercisesTree = () => {
 
 /**
  * Reads the content of the file in the exercises directory given the relative path
- * @param {string} relPath : the relative path of the file from the exercises directory
+ * @param relPath the relative path of the file from the exercises directory
  * @returns the content of the file as a string
  */
-exports.readExerciseFile = (relPath) => {
+export const readExerciseFile = (relPath: string): string | null => {
     const fullPath = path.join(EXERCISES_DIR, relPath);
 
     try {
         return fs.readFileSync(fullPath, 'utf-8');
-    } catch (error) {
+    } catch (error: any) {
         console.error(`An error occurred while reading ${fullPath}:`, error.message);
         return null;
     }
@@ -132,11 +126,11 @@ exports.readExerciseFile = (relPath) => {
 
 /**
  * Saves (overwrites) the content of a file.
- * @param {string} relPath : the relative path of the file from EXERCISES_DIR
- * @param {string} content : the new content to save
- * @returns {boolean} : true if success, false otherwise
+ * @param relPath the relative path of the file from EXERCISES_DIR
+ * @param content the new content to save
+ * @returns true if success, false otherwise
  */
-exports.saveExerciseFile = (relPath, content) => {
+export const saveExerciseFile = (relPath: string, content: string): boolean => {
     const fullPath = path.join(EXERCISES_DIR, relPath);
 
     if (!fullPath.startsWith(EXERCISES_DIR)) {
@@ -148,7 +142,7 @@ exports.saveExerciseFile = (relPath, content) => {
         /* writes the file. If it doesn't exist then it gets created */
         fs.writeFileSync(fullPath, content, 'utf-8');
         return true;
-    } catch (error) {
+    } catch (error: any) {
         console.error(`Errore durante il salvataggio di ${fullPath}:`, error.message);
         return false;
     }
@@ -156,10 +150,10 @@ exports.saveExerciseFile = (relPath, content) => {
 
 /**
  * Renames a file or directory.
- * @param {string} oldRelPath : current relative path
- * @param {string} newRelPath : new relative path
+ * @param oldRelPath current relative path
+ * @param newRelPath new relative path
  */
-exports.renameNode = (oldRelPath, newRelPath) => {
+export const renameNode = (oldRelPath: string, newRelPath: string): boolean => {
     const oldFullPath = path.join(EXERCISES_DIR, oldRelPath);
     const newFullPath = path.join(EXERCISES_DIR, newRelPath);
 
@@ -180,7 +174,7 @@ exports.renameNode = (oldRelPath, newRelPath) => {
 
         fs.renameSync(oldFullPath, newFullPath);
         return true;
-    } catch (error) {
+    } catch (error: any) {
         console.error(`Errore durante la rinomina da ${oldRelPath} a ${newRelPath}:`, error.message);
         return false;
     }
@@ -188,9 +182,10 @@ exports.renameNode = (oldRelPath, newRelPath) => {
 
 /**
  * Deletes a file ora a directory (and all its content)
- * @param {string} relativePath : the relative path from the exercises folder
+ * @param relativePath the relative path from the exercises folder
+ * @returns the result of the operation
  */
-exports.deleteNode = (relativePath) => {
+export const deleteNode = (relativePath: string): OperationResult => {
     const fullPath = path.join(EXERCISES_DIR, relativePath);
 
     if (!fullPath.startsWith(EXERCISES_DIR)) {
@@ -205,7 +200,7 @@ exports.deleteNode = (relativePath) => {
         fs.rmSync(fullPath, { recursive: true, force: true });
 
         return { success: true, message: "Eliminazione completata" };
-    } catch (error) {
+    } catch (error: any) {
         console.error(`Errore durante l'eliminazione di ${relativePath}:`, error.message);
         throw new Error(`Impossibile eliminare la risorsa: ${error.message}`);
     }
@@ -213,10 +208,11 @@ exports.deleteNode = (relativePath) => {
 
 /**
  * Creates a new node (file/directory)
- * @param {string} relativePath : relative path of the new node
- * @param {'file' | 'directory'} type : the type of the node to create
+ * @param relativePath : relative path of the new node
+ * @param type : the type of the node to create
+ * @returns the result of the operation
  */
-exports.createNode = (relativePath, type) => {
+export const createNode = (relativePath: string, type: 'file' | 'directory'): OperationResult => {
     const fullPath = path.join(EXERCISES_DIR, relativePath);
 
     if (!fullPath.startsWith(EXERCISES_DIR)) {
@@ -239,7 +235,7 @@ exports.createNode = (relativePath, type) => {
         }
 
         return { success: true, message: `${type === 'file' ? 'File' : 'Directory'} creato correttamente` };
-    } catch (error) {
+    } catch (error: any) {
         console.error(`Errore creazione ${type} in ${relativePath}:`, error.message);
         throw new Error(`Errore durante la creazione: ${error.message}`);
     }
@@ -247,10 +243,10 @@ exports.createNode = (relativePath, type) => {
 
 /**
  * Creates the ZIP of an exercise directory
- * @param {string} exerciseName the name of the exercise
- * @returns {Archiver} the archiver instance
+ * @param {string} exerciseName the name of the exercise to zip
+ * @returns {Archiver} the archiver instance with the zipped file
  */
-exports.createExerciseZip = (exerciseName) => {
+export const createExerciseZip = (exerciseName: string): archiver.Archiver => {
     const exercisePath = path.join(exports.EXERCISES_DIR, exerciseName);
 
     if (!fs.existsSync(exercisePath) || !fs.statSync(exercisePath).isDirectory()) {
@@ -275,10 +271,10 @@ exports.createExerciseZip = (exerciseName) => {
 
 /**
  * Recursively reads all files from a file tree node
- * @param {object} node : a node returned by getFileTree
- * @returns {Array<{name: string, content: string}>} : list of files with their content
+ * @param node a node returned by getFileTree
+ * @returns a list of files with their content
  */
-exports.readFilesFromTree = (node) => {
+export const readFilesFromTree = (node: FileTreeNode | null): FileContent[] => {
     const files = [];
 
     if (!node || node.type === 'file') {

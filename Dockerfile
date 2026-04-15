@@ -16,8 +16,9 @@ WORKDIR /app/backend
 COPY backend/package*.json ./
 RUN npm install
 COPY backend/ ./
+RUN npm run build
 
 # copy the built frontend
 COPY --from=frontend-builder /app/frontend/dist ./public
 EXPOSE 5000
-CMD ["node", "index.js"]
+CMD ["node", "dist/index.js"]

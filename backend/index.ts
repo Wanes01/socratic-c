@@ -1,18 +1,17 @@
-const express = require('express');
-const path = require('path');
-const { initWebSocket } = require('./services/terminalService');
-const app = express();
+import express, { Application } from 'express';
+import path from 'path';
+import { initWebSocket } from './services/terminalService';
+// the routers that handle the HTTP requests
+import filesRouter from './routes/filesRoute';
+import aiRouter from './routes/aiRoute';
+import terminalRouter from './routes/terminalRoute';
 
+const app: Application = express();
 app.use(express.json());
-
 const server = app.listen(5000);
+
 // initializes the web socket server to read stdout, stderr and write on stdin of the current process
 initWebSocket(server);
-
-// the routers that handle the HTTP requests
-const filesRouter = require('./routes/filesRoute');
-const aiRouter = require('./routes/aiRoute');
-const terminalRouter = require('./routes/terminalRoute');
 
 // sets the routes to be managed by the routers
 app.use('/api/files', filesRouter);

@@ -1,8 +1,9 @@
-const filesService = require('../services/filesService')
-const path = require('path');
+import type { Request, Response } from 'express';
+import * as filesService from '../services/filesService';
+import path from 'path';
 
 // function called when the exercises files tree is requested 
-exports.getTree = (_, res) => {
+export const getTree = (_: Request, res: Response): void => {
     try {
         const tree = filesService.getExercisesTree();
         res.json(tree);
@@ -12,9 +13,9 @@ exports.getTree = (_, res) => {
 }
 
 // retrives the content of the file specified in the path query parameter
-exports.getFileContent = (req, res) => {
+export const getFileContent = (req: Request, res: Response) => {
     // reads the relative file path from the query string
-    const relPath = req.query.path;
+    const relPath = req.query.path as string;
 
     if (!relPath) {
         return res.status(400).json({ error: "File inesistente" });
@@ -45,7 +46,7 @@ exports.getFileContent = (req, res) => {
 }
 
 // saves the content of the file specified in request body
-exports.setFileContent = (req, res) => {
+export const setFileContent = (req: Request, res: Response) => {
     const { relPath, content } = req.body;
     const success = filesService.saveExerciseFile(relPath, content);
 
@@ -57,7 +58,7 @@ exports.setFileContent = (req, res) => {
 }
 
 // handles the request for renaming a file/folder
-exports.renameNode = (req, res) => {
+export const renameNode = (req: Request, res: Response) => {
     const { oldPath, newPath } = req.body;
 
     if (!oldPath || !newPath) {
@@ -72,27 +73,27 @@ exports.renameNode = (req, res) => {
         } else {
             return res.status(500).json({ error: "Errore durante la rinomina del file" });
         }
-    } catch (error) {
+    } catch (error: any) {
         console.error("Errore controller renameNode:", error.message);
         return res.status(400).json({ error: error.message });
     }
 };
 
 // handles the request for deleting a file/dir
-exports.deleteNode = (req, res) => {
-    const relativePath = req.query.path;
+export const deleteNode = (req: Request, res: Response) => {
+    const relativePath = req.query.path as string;
 
     try {
         const result = filesService.deleteNode(relativePath);
         return res.status(200).json(result);
-    } catch (error) {
+    } catch (error: any) {
         console.error("Errore eliminazione:", error.message);
         return res.status(500).json({ error: error.message });
     }
 };
 
 // creates a new node (file/directory)
-exports.createNode = (req, res) => {
+export const createNode = (req: Request, res: Response) => {
     const { path: relativePath, type } = req.body;
 
     if (!relativePath || !type) {
@@ -107,15 +108,15 @@ exports.createNode = (req, res) => {
         const result = filesService.createNode(relativePath, type);
         // node created successfully
         return res.status(201).json(result);
-    } catch (error) {
+    } catch (error: any) {
         const statusCode = error.message.includes("File/dir già esistente") ? 409 : 500;
         return res.status(statusCode).json({ error: error.message });
     }
 };
 
 // downloads an exercise as a zip file
-exports.downloadExercise = (req, res) => {
-    const exerciseName = req.query.name;
+export const downloadExercise = (req: Request, res: Response) => {
+    const exerciseName = req.query.name as string;
 
     if (!exerciseName) {
         return res.status(400).json({ error: "Esercizio non trovato" });
@@ -135,7 +136,7 @@ exports.downloadExercise = (req, res) => {
 
         archive.pipe(res);
 
-    } catch (error) {
+    } catch (error: any) {
         console.error("Errore downloadExercise:", error.message);
         res.status(404).json({ error: error.message });
     }

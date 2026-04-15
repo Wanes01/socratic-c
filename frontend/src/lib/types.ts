@@ -34,12 +34,12 @@ export interface ModalState {
 }
 
 export interface CompileOptions {
-    ansi?: boolean;
-    wall?: boolean;
-    wpedantic?: boolean;
-    wextra?: boolean;
-    werror?: boolean;
-    includeTests?: boolean;
+    ansi: boolean;
+    wall: boolean;
+    wpedantic: boolean;
+    wextra: boolean;
+    werror: boolean;
+    includeTests: boolean;
 }
 
 export type ChatRole = 'user' | 'assistant'; 

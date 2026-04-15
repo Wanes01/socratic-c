@@ -1,6 +1,7 @@
-const express = require('express');
+import express from 'express';
+import * as filesController from '../controllers/filesController';
+
 const router = express.Router();
-const filesController = require('../controllers/filesController')
 
 // gets the exercises files tree
 router.get('/tree', filesController.getTree);
@@ -24,4 +25,4 @@ router.post('/create', filesController.createNode);
 router.get('/download', filesController.downloadExercise);
 
 // exports the router to be seen by the main app
-module.exports = router;
+export default router;

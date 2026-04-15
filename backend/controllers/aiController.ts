@@ -1,23 +1,38 @@
-const path = require('path');
-const fs = require('fs');
-const aiService = require('../services/aiService');
-const filesService = require('../services/filesService');
-const globalAIConfig = require('../global-ai-config.json');
 
-const EXERCISES_DIR = process.env.EXERCISES_DIR || path.join(__dirname, '../../exercises');
+import type { Request, Response } from 'express';
+import path from 'path';
+import fs from 'fs';
+import * as aiService from '../services/aiService';
+import { getFileTree, readFilesFromTree, EXERCISES_DIR } from '../services/filesService';
+import globalAIConfig from '../global-ai-config.json';
 
-exports.chat = async (req, res) => {
+/**
+ * Handles a streaming AI chat request for a specific exercise.
+ * This controller:
+ * - Validates the exercise existence and its specific AI configuration.
+ * - Aggregates all relevant files (student source, tests, and solutions) into a Markdown briefing.
+ * - Injects a system prompt and the briefing into the conversation history.
+ * - Delegates provider selection (Groq/Ollama) to the aiService.
+ * - Streams the LLM response back to the client using Server-Sent Events (SSE).
+ * @param req express request object (body expects: { messages: ChatMessage[], exerciseName: string })
+ * @param res express response object configured for SSE streaming.
+ * @returns sends an SSE stream of tokens or a JSON error if headers haven't been sent.
+ * @throws 400 if parameters are missing, 404 if exercise is not found.
+ */
+export const chat = async (req: Request, res: Response): Promise<void> => {
     try {
         const { messages, exerciseName } = req.body;
 
         if (!messages || !exerciseName) {
-            return res.status(400).json({ error: 'messages ed exerciseName sono obbligatori' });
+            res.status(400).json({ error: 'messages ed exerciseName sono obbligatori' });
+            return;
         }
 
         const exercisePath = path.join(EXERCISES_DIR, exerciseName);
 
         if (!fs.existsSync(exercisePath) || !fs.statSync(exercisePath).isDirectory()) {
-            return res.status(404).json({ error: 'Esercizio non trovato' });
+            res.status(404).json({ error: 'Esercizio non trovato' });
+            return;
         }
 
         // exercise specific ai configuration
@@ -25,20 +40,20 @@ exports.chat = async (req, res) => {
             fs.readFileSync(path.join(exercisePath, 'ai-config.json'), 'utf-8')
         );
 
-        const exerciseTree = filesService.getFileTree(exercisePath);
+        const exerciseTree = getFileTree(exercisePath);
 
         // student files
-        const studentFiles = filesService.readFilesFromTree(exerciseTree.children?.['root']);
+        const studentFiles = readFilesFromTree(exerciseTree?.children?.['root'] ?? null);
 
         // test files (optional)
-        const testFiles = exerciseTree.children?.['tests']
-            ? filesService.readFilesFromTree(exerciseTree.children['tests'])
+        const testFiles = exerciseTree?.children?.['tests']
+            ? readFilesFromTree(exerciseTree.children['tests'])
             : [];
 
         // solution files (optional)
         const solutionsFullPath = path.join(exercisePath, 'solutions');
         const solutionFiles = fs.existsSync(solutionsFullPath)
-            ? filesService.readFilesFromTree(filesService.getFileTree(solutionsFullPath))
+            ? readFilesFromTree(getFileTree(solutionsFullPath))
             : [];
 
         // builds the briefing message
@@ -107,7 +122,7 @@ exports.chat = async (req, res) => {
             }
         }
 
-    } catch (err) {
+    } catch (err: any) {
         console.error('aiController.chat error:', err);
         if (!res.headersSent) {
             res.status(500).json({ error: err.message });

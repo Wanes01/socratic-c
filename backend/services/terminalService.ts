@@ -1,9 +1,11 @@
-const { exec, spawn } = require('child_process');
-const fs = require('fs');
-const path = require('path');
-const { WebSocketServer } = require('ws');
+import type { Server } from 'http';
+import type { CompileOptions, CompilationResult } from '../types/terminalTypes';
+import { exec, spawn, ChildProcessWithoutNullStreams } from 'child_process';
+import { WebSocketServer } from 'ws';
+import { EXERCISES_DIR } from './filesService';
+import fs from 'fs';
+import path from 'path';
 
-const EXERCISES_DIR = process.env.EXERCISES_DIR || path.join(__dirname, '../../exercises');
 const EXEC_NAME = "program"
 const EXEC_DIR = "bin"
 
@@ -16,34 +18,17 @@ const EXEC_TIMEOUT_MS = (process.env.EXEC_TIMEOUT_SEC
     ? parseInt(process.env.EXEC_TIMEOUT_SEC)
     : 90) * 1000;
 
-/*
-const EXIT_CODE = {
-    success: 0,
-    outOfMemory: 137,
-    timeout: 124,
-    segFault: 139,
-}
-*/
-
 /**
- * compiles the specified exercise
- * @param {string} exerciseName - the name of the directory of the exercise
- * @param {Object} [options] - compilation options
- * @param {boolean} [options.ansi=false] - compile with -ansi flag (C89)
- * @param {boolean} [options.wall=false] - enable common warnings (-Wall)
- * @param {boolean} [options.wpedantic=false] - enable pedantic warnings (-Wpedantic)
- * @param {boolean} [options.wextra=false] - enable extra warnings (-Wextra)
- * @param {boolean} [options.werror=false] - warnings get treated as errors (-Werror)
- * @param {boolean} [options.werror=false] - warnings get treated as errors (-Werror) includeTests
- * @param {boolean} [options.includeTests=false] - includes the test folder in the gcc command
- * @returns {Promise<{success: boolean, output: string}>}
+ * 
+ * @param exerciseName the name of the directory of the exercise
+ * @param options compilation options selected be the user
+ * @returns a promise that results in the output terminal after the compilation
  */
-exports.compileExercise = (exerciseName, options) => {
+export const compileExercise = (exerciseName: string, options: CompileOptions): Promise<CompilationResult> => {
     return new Promise((resolve) => {
         const exercisePath = path.join(EXERCISES_DIR, exerciseName);
         const studentRoot = path.join(exercisePath, 'root');
         const binDir = path.join(exercisePath, EXEC_DIR);
-        //const outputFile = path.join(binDir, EXEC_NAME);
 
         // verifies that the exerciseName directory exists
         if (!fs.existsSync(studentRoot)) {
@@ -67,12 +52,6 @@ exports.compileExercise = (exerciseName, options) => {
         if (options.werror) flags.push('-Werror');
 
         const flagsStr = flags.join(' ');
-
-        /*
-        const compileCmd = options.includeTests
-            ? `find . -name "*.c" ! -name "main.c" -print0 | xargs -0 gcc ../tests/*.c -o "../${EXEC_DIR}/${EXEC_NAME}" -I. -I../tests -fdiagnostics-color=always ${flagsStr} -lm`
-            : `find . -name "*.c" -print0 | xargs -0 gcc -o "../${EXEC_DIR}/${EXEC_NAME}" -I. -fdiagnostics-color=always ${flagsStr} -lm`;
-        */
 
         // command costruction
         const compileCmd = options.includeTests
@@ -98,17 +77,17 @@ exports.compileExercise = (exerciseName, options) => {
 /**
  * Initializes the WebSocket server attached to the given HTTP server.
  * Handles program execution, stdout/stderr streaming, and stdin forwarding.
- * @param {import('http').Server} server - the HTTP server to attach the WebSocket server to
+ * @param server  the HTTP server where the WebSocket will be attached
  */
-exports.initWebSocket = (server) => {
+export const initWebSocket = (server: Server) => {
     // attaches the WebSocker server to the same HTTP server as Express, to share the same port
     const wss = new WebSocketServer({ server });
 
     // every time the client opens a websocket connection...
     wss.on('connection', (ws) => {
-        let currentProcess = null;
+        let currentProcess: ChildProcessWithoutNullStreams | null = null;
 
-        ws.on('message', (data) => {
+        ws.on('message', (data: string) => {
             const msg = JSON.parse(data);
 
             if (msg.type === 'run') {

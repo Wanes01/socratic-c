@@ -4,8 +4,7 @@
     import { ui } from "../../state/UIState.svelte";
     import { cs } from "../../state/ChatState.svelte";
     import type { ContextMenuOption } from "../../types";
-    import { stringToColor } from "../../util/utilities";
-    import ExplorerSection from "./ExplorerSection.svelte";
+    import ExplorerDropdown from "./ExplorerDropdown.svelte";
 
     // the list of available exercises
     let exercises = $derived(Object.keys(fs.fileTree));
@@ -44,14 +43,14 @@
     };
 </script>
 
-<ExplorerSection title="esercizi">
+<ExplorerDropdown title="esercizi" openOnMount={true}>
     <ul class="flex flex-col w-full">
         {#each exercises as exName}
             {@const isSelected = fs.selectedExercise === exName}
-            {@const color = stringToColor(exName)}
             <li
-                class="w-full"
-                style={isSelected ? `border-left: 2px solid ${color};` : null}
+                class="w-full {isSelected
+                    ? 'border-l-2 border-purple-500'
+                    : ''}"
             >
                 <button
                     type="button"
@@ -62,14 +61,9 @@
                     onclick={() => onclick(exName)}
                     oncontextmenu={(e) => oncontextmenu(e, exName)}
                 >
-                    <div
-                        class="w-2 h-2 rounded-full shrink-0"
-                        style="background-color: {color};"
-                    ></div>
-
                     <span class="text-sm font-medium">{exName}</span>
                 </button>
             </li>
         {/each}
     </ul>
-</ExplorerSection>
+</ExplorerDropdown>

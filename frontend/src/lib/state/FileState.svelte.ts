@@ -65,16 +65,26 @@ class FileState {
         }
     }
 
+    // saves all specified files
+    saveFiles = async (files: OpenedFile[]): Promise<void> => {
+        for (const file of files) {
+            await this.saveFile(file);
+        }
+    }
+
     // saves all the files related to the current exercise
     saveCurrentExerciseFiles = async (): Promise<void> => {
         if (this.selectedExercise === null) {
             return;
         }
 
-        for (const file of this.exerciseOpenedFiles) {
-            await this.saveFile(file);
-        }
-    } 
+        await this.saveFiles(this.exerciseOpenedFiles);
+    }
+
+    // saves all the opened files
+    saveAllFiles = async (): Promise<void> => {
+        await this.saveFiles(this.openedFiles);
+    }
 
     // renames a file/directory
     renameNode = async (node: FileNode, replName: string): Promise<void> => {

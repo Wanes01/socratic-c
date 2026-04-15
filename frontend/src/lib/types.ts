@@ -48,3 +48,8 @@ export interface ChatMessage {
     role: ChatRole;
     content: string;
 }
+
+export interface ToastState {
+    message: string;
+    type: "info" | "success" | "error";
+}

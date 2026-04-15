@@ -2,6 +2,7 @@
     import { fs } from "../../state/FileState.svelte";
     import { ts } from "../../state/TerminalState.svelte";
     import { cs } from "../../state/ChatState.svelte";
+    import { ui } from "../../state/UIState.svelte";
     import Button from "../ui/Button.svelte";
     import CompileSettings from "../dropdowns/CompileSettings.svelte";
 
@@ -28,6 +29,11 @@
         ts.stop();
     };
 
+    const saveClick = async () => {
+        await fs.saveAllFiles();
+        ui.showToast("File salvati", "info", 1000);
+    };
+
     const aiAdviceClick = async () => {
         if (cs.isGenerating || !fs.selectedExercise) {
             return;
@@ -47,6 +53,13 @@
         <p class="font-mono font-black text-xl tracking-tighter text-white">
             socrati<span class="text-purple-400">c_c</span>
         </p>
+        <Button
+            text="Salva tutti i file"
+            icon="save.svg"
+            variant="navBar"
+            disabled={fs.openedFiles.length === 0}
+            onclick={saveClick}
+        />
     </div>
 
     <div class="flex flex-row gap-2">

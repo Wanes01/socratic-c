@@ -1,8 +1,10 @@
-import type { ContextMenuState, ModalState, ContextMenuOption } from "../types"
+import type { ContextMenuState, ModalState, ContextMenuOption, ToastState } from "../types"
 
 class UIState {
     contextMenu = $state<ContextMenuState | null>(null);
     modal = $state<ModalState | null>(null);
+    toast = $state<ToastState | null>(null);
+    private toastTimer: any = null;
 
     // closes the context menu
     closeContextMenu(): void {
@@ -28,6 +30,20 @@ class UIState {
     // closes the confirmation modal
     closeModal(): void {
         this.modal = null;
+    }
+
+    // shows a toast for the specified amount of time
+    showToast(message: string, type: "info" | "success" | "error" = "info", duration: number = 3000): void {
+        if (this.toastTimer) {
+            clearTimeout(this.toastTimer);
+        }
+        
+        this.toast = { message, type };
+
+        this.toastTimer = setTimeout(() => {
+            this.toast = null;
+            this.toastTimer = null;
+        }, duration);
     }
 }
 

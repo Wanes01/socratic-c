@@ -8,6 +8,7 @@
 	import Explorer from "./lib/components/explorer/Explorer.svelte";
 	import ContextMenu from "./lib/components/ui/ContextMenu.svelte";
 	import ConfirmModal from "./lib/components/ui/ConfirmModal.svelte";
+	import Toast from "./lib/components/ui/Toast.svelte";
 	import Terminal from "./lib/components/terminal/Terminal.svelte";
 	import AIChat from "./lib/components/chat/AIChat.svelte";
 
@@ -26,6 +27,10 @@
 		options={ui.contextMenu.options}
 		onclose={() => ui.closeContextMenu()}
 	/>
+{/if}
+
+{#if ui.toast}
+	<Toast />
 {/if}
 
 <div

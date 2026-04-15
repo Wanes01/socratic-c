@@ -1,6 +1,96 @@
 @import '@fontsource/inter';
+@import "@fontsource/jetbrains-mono";
 @import "tailwindcss";
 
 @theme {
   --font-inter: 'Inter', sans-serif;
+  --font-jetbrains: "JetBrains Mono", monospace;
+}
+
+/* marked converts markdown into HTML tags.
+The following is the styling for all the containers using
+the 'markdown' class, intended for displaying markdown. */
+
+@layer components {
+  .markdown {
+    @apply font-sans text-sm leading-[1.6] text-gray-300;
+    font-family: var(--font-inter);
+  }
+
+  .markdown h1 {
+    @apply text-[1.1rem] font-bold text-neutral-200 mt-4 mb-2 border-b border-white/10 pb-1;
+  }
+
+  .markdown h2 {
+    @apply text-base font-semibold text-neutral-200 mt-3.5 mb-[0.4rem];
+  }
+
+  .markdown h3 {
+    @apply text-sm font-semibold text-neutral-300 mt-3 mb-[0.35rem];
+  }
+
+  .markdown p {
+    @apply my-[0.4rem];
+  }
+
+  .markdown code {
+    @apply text-[0.8rem] bg-neutral-900 text-purple-400 px-1.25 py-px rounded-[3px] border border-white/8;
+    font-family: var(--font-jetbrains);
+  }
+
+  .markdown pre {
+    @apply bg-neutral-900 border border-white/8 rounded overflow-x-auto my-[0.6rem];
+  }
+
+  .markdown pre code {
+    @apply bg-transparent! border-none p-0 text-neutral-300 text-[0.8rem];
+  }
+
+  .markdown ul {
+    @apply pl-5 my-[0.4rem] list-disc;
+  }
+
+  .markdown ol {
+    @apply pl-5 my-[0.4rem] list-decimal;
+  }
+
+  .markdown li {
+    @apply my-[0.2rem];
+  }
+
+  .markdown blockquote {
+    @apply border-l-2 border-violet-700 bg-violet-700/8 my-[0.6rem] py-2 px-3 rounded-r-sm text-violet-300 italic;
+  }
+
+  .markdown strong {
+    @apply text-neutral-200 font-semibold;
+  }
+
+  .markdown em {
+    @apply text-neutral-400;
+  }
+
+  .markdown hr {
+    @apply border-t border-white/8 my-3;
+  }
+
+  .markdown table {
+    @apply w-full border-collapse my-[0.6rem] text-[0.8rem];
+  }
+
+  .markdown thead tr {
+    @apply bg-neutral-900 border-b border-white/12;
+  }
+
+  .markdown th {
+    @apply text-left px-3 py-[0.4rem] font-semibold;
+  }
+
+  .markdown td {
+    @apply px-3 py-[0.4rem] border-b border-white/5 text-gray-300;
+  }
+
+  .markdown tbody tr:hover {
+    @apply bg-white/3;
+  }
 }

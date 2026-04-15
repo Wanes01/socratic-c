@@ -11,6 +11,23 @@
 	import Toast from "./lib/components/ui/Toast.svelte";
 	import Terminal from "./lib/components/terminal/Terminal.svelte";
 	import AIChat from "./lib/components/chat/AIChat.svelte";
+	import { marked } from "marked";
+	import { markedHighlight } from "marked-highlight";
+	import hljs from "highlight.js";
+	import "highlight.js/styles/atom-one-dark.css";
+
+	// sets markdown code highlighting
+	marked.use(
+		markedHighlight({
+			langPrefix: "hljs language-",
+			highlight(code, lang) {
+				if (lang && hljs.getLanguage(lang)) {
+					return hljs.highlight(code, { language: lang }).value;
+				}
+				return hljs.highlightAuto(code).value;
+			},
+		}),
+	);
 
 	$effect(() => {
 		// loads the file tree

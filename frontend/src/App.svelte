@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { ui } from "./lib/state/UIState.svelte";
 	import { fs } from "./lib/state/FileState.svelte";
+	import { cs } from "./lib/state/ChatState.svelte";
 	import { PaneGroup, Pane } from "paneforge";
 	import HandleResizer from "./lib/components/ui/HandleResizer.svelte";
 	import AppBar from "./lib/components/layout/AppBar.svelte";
@@ -16,6 +17,8 @@
 	import hljs from "highlight.js";
 	import "highlight.js/styles/atom-one-dark.css";
 
+	const MODELS_REFETCH_SECONDS = 20;
+
 	// sets markdown code highlighting
 	marked.use(
 		markedHighlight({
@@ -30,8 +33,33 @@
 	);
 
 	$effect(() => {
-		// loads the file tree
-		fs.loadFiles();
+		// refreshed the models
+		const refreshModels = async () => {
+			try {
+				await cs.refreshAvailableModels();
+			} catch (err) {
+				console.error("Errore refresh modelli:", err);
+			}
+		};
+
+		// fetches the file tree and the language model on component mount
+		const onMount = async () => {
+			try {
+				await Promise.all([refreshModels(), fs.loadFiles()]);
+			} catch (err) {
+				console.error("Errore inizializzazione app:", err);
+			}
+		};
+
+		onMount();
+		const interval = setInterval(
+			refreshModels,
+			MODELS_REFETCH_SECONDS * 1000,
+		);
+
+		return () => {
+			clearInterval(interval);
+		};
 	});
 </script>
 

@@ -146,3 +146,34 @@ export const chat = async (req: Request, res: Response): Promise<void> => {
         res.end();
     }
 };
+
+/**
+ * Handles the request for listing available language models.
+ * @param req express request object
+ * @param res express response object
+ * @returns 200 if the operation is successfull, 503 if models could not be listed
+ */
+export const listUsableModels = async (_: Request, res: Response) => {
+    try {
+        const availableModels = await aiService.getAvailableModels();
+
+        if (availableModels.length === 0) {
+            res.status(503).json({
+                success: false,
+                message: "Nessun provider LLM raggiungibile"
+            })
+            return;
+        }
+
+        return res.status(200).json({
+            success: true,
+            models: availableModels
+        });
+    } catch (error: any) {
+        res.status(503).json({
+            success: false,
+            message: "Non è stato possibile ottenere una lista dei modelli disponibili"
+        })
+        return;
+    }
+}

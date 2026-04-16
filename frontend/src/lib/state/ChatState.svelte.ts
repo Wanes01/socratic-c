@@ -1,12 +1,17 @@
-import type { ChatMessage, ChatRole } from "../types"
-import { streamChat } from "../services/chat-api";
+import type { ChatMessage, ChatRole, LLMOption } from "../types"
+import { streamChat, fetchModels } from "../services/chat-api";
 import { fs } from "./FileState.svelte";
+
+const LOCAL_PROVIDER = 'ollama';
 
 /* maximum number of messages retained in the conversation context
 to optimize the tokens sent to the LLM model. */
 export const MAX_CONTEXT_MESSAGES = 15;
 
 class ChatState {
+    models = $state<LLMOption[]>([]);
+    selectedProvider = $state<string>("");
+    isServiceAvailable = $derived(this.models.some(opt => opt.available));
     messages = $state<ChatMessage[]>([]); // all the messages between the student and the assistant
     LLMContext = $derived(this.messages.slice(-MAX_CONTEXT_MESSAGES)); // the messages that will be used in the context LLM context window
     isGenerating = $state<boolean>(false); // true if the LLM is currently generating the answer
@@ -55,6 +60,30 @@ class ChatState {
     // cleans chat history
     cleanChat = (): void => {
         this.messages = [];
+    }
+
+    // fetches the available language models
+    refreshAvailableModels = async (): Promise<void> => {
+        const result = await fetchModels() as { success: boolean, models: LLMOption[] };
+        if (result.success) {
+            this.models = result.models;
+        }
+
+        // something went wrong and no model is available
+        if (this.models.length === 0) {
+            return;
+        }
+
+        // selects a cloud model by default, if present
+        this.selectedProvider =
+            this.models.find(opt => opt.provider !== LOCAL_PROVIDER && opt.available)?.provider || "";
+
+        if (this.selectedProvider) {
+            return;
+        }
+
+        // tries to use the local, if available
+        this.selectedProvider = this.models.find(opt => opt.provider === LOCAL_PROVIDER && opt.available)?.provider || ""
     }
 }
 

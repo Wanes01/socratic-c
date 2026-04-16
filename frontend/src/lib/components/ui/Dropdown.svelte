@@ -1,5 +1,6 @@
 <script lang="ts">
     let open = $state(false);
+    let container = $state<HTMLElement>();
 
     interface Props {
         label: string;
@@ -9,8 +10,7 @@
     let { label, children }: Props = $props();
 
     function handleOutsideClick(e: MouseEvent) {
-        const target = e.target as HTMLElement;
-        if (!target.closest(".dropdown-root")) {
+        if (container && !container.contains(e.target as Node)) {
             open = false;
         }
     }
@@ -18,7 +18,7 @@
 
 <svelte:window onclick={handleOutsideClick} />
 
-<div class="dropdown-root relative">
+<div bind:this={container} class="relative">
     <button
         onclick={() => (open = !open)}
         class="dropdown-trigger flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-neutral-200 cursor-pointer"

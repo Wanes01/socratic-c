@@ -1,8 +1,10 @@
-import type { StreamChatConfig, ChatStreamChunk, ChatMessage, GlobalAIConfig } from '../types/aiTypes';
+import type { StreamChatConfig, ChatStreamChunk, ChatMessage, LLMOption } from '../types/aiTypes';
 import fs from 'fs/promises';
 import path from 'path';
+import isReachable from 'is-reachable';
 
-const OLLAMA_URL = process.env.OLLAMA_URL;
+const OLLAMA_URL = process.env.OLLAMA_URL || "";
+const GROQ_API = "https://api.groq.com/openai/v1/chat/completions";
 const SYSTEM_PROMPT_PATH = path.join(__dirname, '../config/system-prompt.md');
 const LLM_TEMPERATURE = 0.3; // the model should be highly determistic, so a low temperature is appropriate
 const GROQ_MODEL = process.env.GROQ_MODEL || 'openai/gpt-oss-120b';
@@ -113,3 +115,23 @@ export const getSystemPrompt = async () => {
     }
     return cachedSystemPrompt;
 };
+
+/**
+ * Makes a list of all usable models and their providers.
+ * @returns a list of moderls that can be used.
+ */
+export const getAvailableModels = async () => {
+    const models: LLMOption[] = [
+        {
+            provider: 'ollama',
+            model: process.env.OLLAMA_MODEL || "",
+            available: await isReachable(OLLAMA_URL)
+        },
+        {
+            provider: 'groq',
+            model: GROQ_MODEL,
+            available: await isReachable(GROQ_API)
+        }
+    ];
+    return models;
+}

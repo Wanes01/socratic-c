@@ -1,6 +1,7 @@
-import { ChatMessage } from "../types";
+import { ChatMessage, LLMOption } from "../types";
+import { apiFetch } from "../util/utilities";
 
-const API_URL = "/api/ai/chat";
+const AI_API_BASE = "/api/ai";
 
 /**
  * sends the context to the LLM and generates the token
@@ -13,7 +14,7 @@ export const streamChat = async function* (
     messages: ChatMessage[],
     exerciseName: string
 ): AsyncGenerator<string> {
-    const response = await fetch(API_URL, {
+    const response = await fetch(`${AI_API_BASE}/chat`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ messages, exerciseName })
@@ -44,3 +45,9 @@ export const streamChat = async function* (
         }
     }
 };
+
+/**
+ * Fetches the available api models
+ * @returns a list of usable api models
+ */
+export const fetchModels = async () => apiFetch(AI_API_BASE, '/models');

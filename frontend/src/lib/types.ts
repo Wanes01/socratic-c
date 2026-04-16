@@ -42,7 +42,7 @@ export interface CompileOptions {
     includeTests: boolean;
 }
 
-export type ChatRole = 'user' | 'assistant'; 
+export type ChatRole = 'user' | 'assistant';
 
 export interface ChatMessage {
     role: ChatRole;
@@ -52,4 +52,13 @@ export interface ChatMessage {
 export interface ToastState {
     message: string;
     type: "info" | "success" | "error";
+}
+
+/**v
+ * A model that can be used to chat.
+ */
+export interface LLMOption {
+    provider: string;
+    model: string;
+    available: boolean;
 }

@@ -1,10 +1,11 @@
 
 import type { Request, Response } from 'express';
+import type { ExerciseAIConfig } from '../types/aiTypes';
 import path from 'path';
 import fs from 'fs/promises';
+import yaml from 'js-yaml';
 import * as aiService from '../services/aiService';
-import { getFileTree, readFilesFromTree, EXERCISES_DIR } from '../services/filesService';
-import globalAIConfig from '../global-ai-config.json';
+import { getFileTree, readFilesFromTree, EXERCISES_DIR, EXERCISE_AI_CONFIG_FILE_NAME } from '../services/filesService';
 import { FileContent } from '../types/filesTypes';
 
 /**
@@ -35,9 +36,9 @@ export const chat = async (req: Request, res: Response): Promise<void> => {
             return;
         }
 
-        const [exerciseTree, aiConfigRaw] = await Promise.all([
+        const [exerciseTree, exerciseConfigRaw] = await Promise.all([
             getFileTree(exercisePath),
-            fs.readFile(path.join(exercisePath, 'ai-config.json'), 'utf-8').catch(() => null)
+            fs.readFile(path.join(exercisePath, EXERCISE_AI_CONFIG_FILE_NAME), 'utf-8').catch(() => null)
         ]);
 
         if (!exerciseTree) {
@@ -46,7 +47,12 @@ export const chat = async (req: Request, res: Response): Promise<void> => {
         }
 
         // exercise specific ai configuration
-        const exerciseAIConfig = aiConfigRaw ? JSON.parse(aiConfigRaw) : {};
+        const exerciseAIConfig = (exerciseConfigRaw ? yaml.load(exerciseConfigRaw) : {}) as ExerciseAIConfig;
+
+        // the description field is mandatory
+        if (!exerciseAIConfig.description) {
+            throw new Error("Every exercise must provide a description.");
+        }
 
         // student files
         const studentFiles = await readFilesFromTree(exerciseTree?.children?.['root'] ?? null);
@@ -99,7 +105,7 @@ export const chat = async (req: Request, res: Response): Promise<void> => {
         const fullMessages = [
             {
                 role: 'system',
-                content: globalAIConfig.systemPrompt
+                content: await aiService.getSystemPrompt()
             },
             {
                 role: 'user',
@@ -114,9 +120,8 @@ export const chat = async (req: Request, res: Response): Promise<void> => {
             ...messages
         ];
 
-        // Provider selection (Groq if groqApiKey is set, Ollama otherwise)
-        // is fully delegated to aiService.buildChatConfig
-        const chatConfig = aiService.buildChatConfig(fullMessages, globalAIConfig);
+        // provider selection
+        const chatConfig = aiService.buildChatConfig(fullMessages);
 
         // SSE headers
         res.setHeader('Content-Type', 'text/event-stream');

@@ -6,6 +6,12 @@ export interface ChatMessage {
     content: string;
 }
 
+export interface ExerciseAIConfig {
+    description: string;
+    learningGoals?: string;
+    constraints?: string;
+}
+
 /**
  * Structure of the global AI configuration file.
  */

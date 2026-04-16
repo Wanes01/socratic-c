@@ -6,6 +6,7 @@
 
     let messageContent = $state("");
     let messagesContainer = $state<HTMLDivElement | null>(null);
+    let textareaElement = $state<HTMLTextAreaElement | null>(null);
 
     // autoscrolls when messages are added to the chat
     $effect(() => {
@@ -35,6 +36,10 @@
         await fs.saveCurrentExerciseFiles();
         const tmpMsg = messageContent;
         messageContent = "";
+        if (textareaElement) {
+            textareaElement.style.height = "auto";
+        }
+
         await cs.send(tmpMsg);
     };
 </script>
@@ -74,6 +79,7 @@
         class="flex flex-row gap-2 p-2 border-t border-white/10 bg-neutral-900"
     >
         <textarea
+            bind:this={textareaElement}
             bind:value={messageContent}
             placeholder="Scrivi un messaggio..."
             rows="1"

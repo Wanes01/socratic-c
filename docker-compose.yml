@@ -20,6 +20,8 @@ services:
       - llm-network
     depends_on:
       - ollama-service
+    env_file:
+      - .env
 
   ollama-service:
     image: ollama/ollama:latest

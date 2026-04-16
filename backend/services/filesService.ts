@@ -1,9 +1,12 @@
 import type { AiConfig, ExercisesMap, FileContent, FileTreeNode, NodeChildrenMap, OperationResult } from '../types/filesTypes';
+import yaml from 'js-yaml';
 import fs from 'fs/promises';
 import path from 'path';
 import archiver from 'archiver';
+import { ExerciseAIConfig } from '../types/aiTypes';
 
 export const EXERCISES_DIR = process.env.EXERCISES_DIR || path.join(__dirname, '../../exercises');
+export const EXERCISE_AI_CONFIG_FILE_NAME = 'exercise-config.yaml';
 
 const viewableDirs = ['root', 'tests'];
 
@@ -43,7 +46,7 @@ export const getFileTree = async (dirPath: string, condition: (node: FileTreeNod
                 info.children![childResult.name] = childResult;
             }
         });
-        
+
         await Promise.all(childrenPromises);
     }
 
@@ -74,15 +77,14 @@ export const getExercisesTree = async (): Promise<ExercisesMap> => {
         const rootPath = path.join(exercisePath, 'root');
         await fs.mkdir(rootPath, { recursive: true });
 
-        const aiConfigPath = path.join(exercisePath, 'ai-config.json');
-        let aiConfig: AiConfig = {};
+        let exerciseAIConfig: ExerciseAIConfig = {} as ExerciseAIConfig;
 
         try {
-            const fileContent = await fs.readFile(aiConfigPath, 'utf-8');
-            aiConfig = JSON.parse(fileContent);
+            const exerciseConfigRaw = await fs.readFile(path.join(exercisePath, EXERCISE_AI_CONFIG_FILE_NAME), 'utf-8');
+            exerciseAIConfig = (exerciseConfigRaw ? yaml.load(exerciseConfigRaw) : {}) as ExerciseAIConfig;
         } catch (e: any) {
             if (e.code !== 'ENOENT') { // file not found / corrupted
-                console.error(`Errore lettura/parsing ai-config.json per ${exercise.name}:`, e.message);
+                console.error(`Errore lettura/parsing ${EXERCISE_AI_CONFIG_FILE_NAME} per ${exercise.name}:`, e.message);
             }
         }
 
@@ -95,9 +97,9 @@ export const getExercisesTree = async (): Promise<ExercisesMap> => {
                 path: exercise.path,
                 studentRoot: sRoot || {},
                 tests: tRoot || {},
-                description: aiConfig.description,
-                learningGoals: aiConfig.learningGoals || null,
-                constraints: aiConfig.constraints || null
+                description: exerciseAIConfig.description,
+                learningGoals: exerciseAIConfig.learningGoals || null,
+                constraints: exerciseAIConfig.constraints || null
             }
         ] as const;
     });
@@ -237,9 +239,9 @@ export const createNode = async (relativePath: string, type: 'file' | 'directory
 
         return { success: true, message: `${type === 'file' ? 'File' : 'Directory'} creato correttamente` };
     } catch (error: any) {
-        return { 
-            success: false, 
-            message: `Errore durante la creazione: ${error.message}` 
+        return {
+            success: false,
+            message: `Errore durante la creazione: ${error.message}`
         };
     }
 };
@@ -308,7 +310,7 @@ export const readFilesFromTree = async (node: FileTreeNode | null): Promise<File
     // it's a directory, reads files in parallel
     if (node.children) {
         const childrenArray = Object.values(node.children);
-        
+
         // applies the same operation on all children
         const results = await Promise.all(
             childrenArray.map(child => readFilesFromTree(child))

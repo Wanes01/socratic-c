@@ -1,6 +1,14 @@
 import type { StreamChatConfig, ChatStreamChunk, ChatMessage, GlobalAIConfig } from '../types/aiTypes';
+import fs from 'fs/promises';
+import path from 'path';
 
 const OLLAMA_URL = process.env.OLLAMA_URL;
+const SYSTEM_PROMPT_PATH = path.join(__dirname, '../config/system-prompt.md');
+const LLM_TEMPERATURE = 0.3; // the model should be highly determistic, so a low temperature is appropriate
+const GROQ_MODEL = process.env.GROQ_MODEL || 'openai/gpt-oss-120b';
+const GROQ_API_KEY: string | undefined = process.env.GROQ_API_KEY?.trim();
+
+let cachedSystemPrompt: string = "";
 
 /**
  * Generates a stream of chat tokens from the specified AI provider
@@ -60,25 +68,23 @@ export const streamChat = async function* (config: StreamChatConfig): AsyncGener
 };
 
 /**
- * Builds the config object for streamChat based on the global AI config.
- * Uses Groq if a valid groqApiKey is present, otherwise falls back to Ollama.
+ * Builds the config object for streamChat based on the global AI configuration.
+ * Uses Groq if a valid api key is present, otherwise falls back to Ollama.
  *
  * @param messages the full messages array to send to the LLM.
- * @param globalAIConfig the parsed global-ai-config.json object.
  * @returns {StreamChatConfig} the config object ready to be passed to streamChat.
  */
-export const buildChatConfig = (messages: ChatMessage[], globalAIConfig: GlobalAIConfig): StreamChatConfig => {
-    const groqApiKey = globalAIConfig.groqApiKey?.trim();
+export const buildChatConfig = (messages: ChatMessage[]): StreamChatConfig => {
 
-    if (groqApiKey) {
+    if (GROQ_API_KEY) {
         return {
             provider: 'groq',
             url: 'https://api.groq.com/openai/v1/chat/completions',
-            apiKey: groqApiKey,
+            apiKey: GROQ_API_KEY,
             body: {
-                model: 'openai/gpt-oss-120b', //'llama-3.3-70b-versatile',
+                model: GROQ_MODEL,
                 messages,
-                temperature: globalAIConfig.temperature,
+                temperature: LLM_TEMPERATURE,
                 stream: true
             }
         };
@@ -90,8 +96,20 @@ export const buildChatConfig = (messages: ChatMessage[], globalAIConfig: GlobalA
         body: {
             model: process.env.OLLAMA_MODEL,
             messages,
-            options: { temperature: globalAIConfig.temperature },
+            options: { temperature: LLM_TEMPERATURE },
             stream: true
         }
     };
+};
+
+/**
+ * Reads the system prompt from the system-prompt.md file.
+ * @returns the content of the system prompt file
+ */
+export const getSystemPrompt = async () => {
+    // sets it, so it does not have to be red again
+    if (!cachedSystemPrompt) {
+        cachedSystemPrompt = await fs.readFile(SYSTEM_PROMPT_PATH, 'utf-8');
+    }
+    return cachedSystemPrompt;
 };

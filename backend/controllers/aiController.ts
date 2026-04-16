@@ -114,8 +114,6 @@ export const chat = async (req: Request, res: Response): Promise<void> => {
             ...messages
         ];
 
-        console.log(fullMessages);
-
         // Provider selection (Groq if groqApiKey is set, Ollama otherwise)
         // is fully delegated to aiService.buildChatConfig
         const chatConfig = aiService.buildChatConfig(fullMessages, globalAIConfig);

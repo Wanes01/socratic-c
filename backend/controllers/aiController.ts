@@ -1,10 +1,11 @@
 
 import type { Request, Response } from 'express';
 import path from 'path';
-import fs from 'fs';
+import fs from 'fs/promises';
 import * as aiService from '../services/aiService';
 import { getFileTree, readFilesFromTree, EXERCISES_DIR } from '../services/filesService';
 import globalAIConfig from '../global-ai-config.json';
+import { FileContent } from '../types/filesTypes';
 
 /**
  * Handles a streaming AI chat request for a specific exercise.
@@ -29,32 +30,41 @@ export const chat = async (req: Request, res: Response): Promise<void> => {
         }
 
         const exercisePath = path.join(EXERCISES_DIR, exerciseName);
+        if (!exercisePath.startsWith(EXERCISES_DIR)) {
+            res.status(403).json({ error: 'Accesso non autorizzato' });
+            return;
+        }
 
-        if (!fs.existsSync(exercisePath) || !fs.statSync(exercisePath).isDirectory()) {
+        const [exerciseTree, aiConfigRaw] = await Promise.all([
+            getFileTree(exercisePath),
+            fs.readFile(path.join(exercisePath, 'ai-config.json'), 'utf-8').catch(() => null)
+        ]);
+
+        if (!exerciseTree) {
             res.status(404).json({ error: 'Esercizio non trovato' });
             return;
         }
 
         // exercise specific ai configuration
-        const exerciseAIConfig = JSON.parse(
-            fs.readFileSync(path.join(exercisePath, 'ai-config.json'), 'utf-8')
-        );
-
-        const exerciseTree = getFileTree(exercisePath);
+        const exerciseAIConfig = aiConfigRaw ? JSON.parse(aiConfigRaw) : {};
 
         // student files
-        const studentFiles = readFilesFromTree(exerciseTree?.children?.['root'] ?? null);
+        const studentFiles = await readFilesFromTree(exerciseTree?.children?.['root'] ?? null);
 
         // test files (optional)
         const testFiles = exerciseTree?.children?.['tests']
-            ? readFilesFromTree(exerciseTree.children['tests'])
+            ? await readFilesFromTree(exerciseTree.children['tests'])
             : [];
 
         // solution files (optional)
-        const solutionsFullPath = path.join(exercisePath, 'solutions');
-        const solutionFiles = fs.existsSync(solutionsFullPath)
-            ? readFilesFromTree(getFileTree(solutionsFullPath))
-            : [];
+        const solutionsPath = path.join(exercisePath, 'solutions');
+        let solutionFiles: FileContent[] = [];
+        try {
+            await fs.access(solutionsPath);
+            const solutionsTree = await getFileTree(solutionsPath);
+            solutionFiles = await readFilesFromTree(solutionsTree);
+        } catch {
+        }
 
         // builds the briefing message
         let briefing = `## Exercise description\n${exerciseAIConfig.description}\n\n`;
@@ -104,6 +114,8 @@ export const chat = async (req: Request, res: Response): Promise<void> => {
             ...messages
         ];
 
+        console.log(fullMessages);
+
         // Provider selection (Groq if groqApiKey is set, Ollama otherwise)
         // is fully delegated to aiService.buildChatConfig
         const chatConfig = aiService.buildChatConfig(fullMessages, globalAIConfig);
@@ -118,7 +130,7 @@ export const chat = async (req: Request, res: Response): Promise<void> => {
             res.write(`data: ${JSON.stringify({ token: chunk.token })}\n\n`);
             if (chunk.done) {
                 res.write(`data: ${JSON.stringify({ done: true })}\n\n`);
-                return;
+                break;
             }
         }
 
@@ -127,5 +139,7 @@ export const chat = async (req: Request, res: Response): Promise<void> => {
         if (!res.headersSent) {
             res.status(500).json({ error: err.message });
         }
+    } finally {
+        res.end();
     }
 };

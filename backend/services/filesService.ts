@@ -1,7 +1,7 @@
 import type { AiConfig, ExercisesMap, FileContent, FileTreeNode, NodeChildrenMap, OperationResult } from '../types/filesTypes';
-import fs from 'fs';
+import fs from 'fs/promises';
 import path from 'path';
-import archiver = require('archiver');
+import archiver from 'archiver';
 
 export const EXERCISES_DIR = process.env.EXERCISES_DIR || path.join(__dirname, '../../exercises');
 
@@ -13,8 +13,8 @@ const viewableDirs = ['root', 'tests'];
  * @param condition predicate that receives the info object (defaults to true, accepting all elements)
  * @returns the node info or null if it doesn't satisfy the condition
  */
-export const getFileTree = (dirPath: string, condition: (node: FileTreeNode) => boolean = (_) => true): FileTreeNode | null => {
-    const stats = fs.statSync(dirPath);
+export const getFileTree = async (dirPath: string, condition: (node: FileTreeNode) => boolean = (_) => true): Promise<FileTreeNode | null> => {
+    const stats = await fs.stat(dirPath);
     const relativePath = path.relative(EXERCISES_DIR, dirPath);
 
     // an obejct describing the directory/file
@@ -34,17 +34,17 @@ export const getFileTree = (dirPath: string, condition: (node: FileTreeNode) => 
 
     // recursevly elaborate directories
     if (stats.isDirectory()) {
-        info.children = fs.readdirSync(dirPath)
-            .reduce((acc: NodeChildrenMap, childName: string) => {
-                const childResult = exports.getFileTree(path.join(dirPath, childName), condition);
+        const childrenNames = await fs.readdir(dirPath);
+        info.children = {};
 
-                // filters out all the nodes that did not comply the condition
-                if (childResult !== null) {
-                    acc[childResult.name] = childResult;
-                }
-
-                return acc;
-            }, {});
+        const childrenPromises = childrenNames.map(async (childName) => {
+            const childResult = await getFileTree(path.join(dirPath, childName), condition);
+            if (childResult !== null) {
+                info.children![childResult.name] = childResult;
+            }
+        });
+        
+        await Promise.all(childrenPromises);
     }
 
     return info;
@@ -55,12 +55,10 @@ export const getFileTree = (dirPath: string, condition: (node: FileTreeNode) => 
  * Creates the exercises directory if it does not exist.
  * @returns the exercises file tree.
  */
-export const getExercisesTree = (): ExercisesMap => {
-    if (!fs.existsSync(EXERCISES_DIR)) {
-        fs.mkdirSync(EXERCISES_DIR);
-    }
+export const getExercisesTree = async (): Promise<ExercisesMap> => {
+    await fs.mkdir(EXERCISES_DIR, { recursive: true });
 
-    const tree = exports.getFileTree(
+    const tree = await getFileTree(
         EXERCISES_DIR,
         (item: FileTreeNode) =>
             !item.path.includes("/") // accepts first level nodes
@@ -69,43 +67,43 @@ export const getExercisesTree = (): ExercisesMap => {
 
     const rawExercises = (tree?.children ?? {}) as NodeChildrenMap;
 
-    const exercises = Object.values(rawExercises).reduce((acc: ExercisesMap, exercise: FileTreeNode) => {
+    const exercisesPromises = Object.values(rawExercises).map(async (exercise: FileTreeNode) => {
         const exercisePath = path.join(EXERCISES_DIR, exercise.name);
 
         // creates the root directory if it doesn't exist
         const rootPath = path.join(exercisePath, 'root');
-        if (!fs.existsSync(rootPath)) {
-            fs.mkdirSync(rootPath, { recursive: true });
-        }
+        await fs.mkdir(rootPath, { recursive: true });
 
         const aiConfigPath = path.join(exercisePath, 'ai-config.json');
         let aiConfig: AiConfig = {};
 
-        if (fs.existsSync(aiConfigPath)) {
-            try {
-                aiConfig = JSON.parse(fs.readFileSync(aiConfigPath, 'utf-8'));
-            } catch (e: any) {
-                console.error(`Errore lettura ai-config.json per ${exercise.name}:`, e.message);
+        try {
+            const fileContent = await fs.readFile(aiConfigPath, 'utf-8');
+            aiConfig = JSON.parse(fileContent);
+        } catch (e: any) {
+            if (e.code !== 'ENOENT') { // file not found / corrupted
+                console.error(`Errore lettura/parsing ai-config.json per ${exercise.name}:`, e.message);
             }
         }
 
         const sRoot = exercise.children?.['root'];
         const tRoot = exercise.children?.['tests'];
 
-        acc[exercise.name] = {
-            path: exercise.path,
-            // makes access to data easier on frontend
-            studentRoot: sRoot || {},
-            tests: tRoot || {},
-            description: aiConfig.description,
-            learningGoals: aiConfig.learningGoals || null,
-            constraints: aiConfig.constraints || null
-        };
+        return [
+            exercise.name,
+            {
+                path: exercise.path,
+                studentRoot: sRoot || {},
+                tests: tRoot || {},
+                description: aiConfig.description,
+                learningGoals: aiConfig.learningGoals || null,
+                constraints: aiConfig.constraints || null
+            }
+        ] as const;
+    });
 
-        return acc;
-    }, {});
-
-    return exercises;
+    const resolvedExercises = await Promise.all(exercisesPromises);
+    return Object.fromEntries(resolvedExercises);
 }
 
 /**
@@ -113,13 +111,19 @@ export const getExercisesTree = (): ExercisesMap => {
  * @param relPath the relative path of the file from the exercises directory
  * @returns the content of the file as a string
  */
-export const readExerciseFile = (relPath: string): string | null => {
-    const fullPath = path.join(EXERCISES_DIR, relPath);
-
+export const readExerciseFile = async (relPath: string): Promise<string | null> => {
     try {
-        return fs.readFileSync(fullPath, 'utf-8');
+        const fullPath = path.join(EXERCISES_DIR, relPath);
+
+        // path traversal guard (user may request ../../../)
+        if (!fullPath.startsWith(EXERCISES_DIR)) {
+            console.error(`Tentativo di accesso non autorizzato: ${relPath}`);
+            return null;
+        }
+
+        return await fs.readFile(fullPath, 'utf-8');
     } catch (error: any) {
-        console.error(`An error occurred while reading ${fullPath}:`, error.message);
+        console.error(`An error occurred while reading a file:`, error.message);
         return null;
     }
 }
@@ -130,21 +134,19 @@ export const readExerciseFile = (relPath: string): string | null => {
  * @param content the new content to save
  * @returns true if success, false otherwise
  */
-export const saveExerciseFile = (relPath: string, content: string): boolean => {
-    const fullPath = path.join(EXERCISES_DIR, relPath);
-
-    if (!fullPath.startsWith(EXERCISES_DIR)) {
-        console.error(`Tentativo di accesso non autorizzato al percorso: ${fullPath}`);
-        return false;
-    }
-
+export const saveExerciseFile = async (relPath: string, content: string): Promise<OperationResult> => {
     try {
+        const fullPath = path.join(EXERCISES_DIR, relPath);
+        if (!fullPath.startsWith(EXERCISES_DIR)) {
+            console.error(`Tentativo di accesso non autorizzato al percorso: ${fullPath}`);
+            return { success: false, message: "Accesso non autorizzato" };
+        }
         /* writes the file. If it doesn't exist then it gets created */
-        fs.writeFileSync(fullPath, content, 'utf-8');
-        return true;
+        await fs.writeFile(fullPath, content, 'utf-8');
+        return { success: true, message: "File salvato" };
     } catch (error: any) {
-        console.error(`Errore durante il salvataggio di ${fullPath}:`, error.message);
-        return false;
+        console.error(`Errore durante il salvataggio del file`, error.message);
+        return { success: false, message: "Errore durante il salvataggio del file" };
     }
 }
 
@@ -153,30 +155,31 @@ export const saveExerciseFile = (relPath: string, content: string): boolean => {
  * @param oldRelPath current relative path
  * @param newRelPath new relative path
  */
-export const renameNode = (oldRelPath: string, newRelPath: string): boolean => {
-    const oldFullPath = path.join(EXERCISES_DIR, oldRelPath);
-    const newFullPath = path.join(EXERCISES_DIR, newRelPath);
-
-    if (!oldFullPath.startsWith(EXERCISES_DIR) || !newFullPath.startsWith(EXERCISES_DIR)) {
-        throw new Error("Unauthorized path access");
-    }
-
-    if (fs.existsSync(newFullPath)) {
-        throw new Error("Un file o una directory con questo nome esiste già");
-    }
-
+export const renameNode = async (oldRelPath: string, newRelPath: string): Promise<OperationResult> => {
     try {
-        // if the destination folder does not exist, create it
-        const newDir = path.dirname(newFullPath);
-        if (!fs.existsSync(newDir)) {
-            fs.mkdirSync(newDir, { recursive: true });
+        const oldFullPath = path.join(EXERCISES_DIR, oldRelPath);
+        const newFullPath = path.join(EXERCISES_DIR, newRelPath);
+
+        if (!oldFullPath.startsWith(EXERCISES_DIR) || !newFullPath.startsWith(EXERCISES_DIR)) {
+            throw new Error("Unauthorized path access");
         }
 
-        fs.renameSync(oldFullPath, newFullPath);
-        return true;
+        try {
+            // does not throw an error: a file with this name already exists
+            await fs.access(newFullPath);
+            return { success: false, message: "Esiste già un file con questo nome" };
+        } catch {
+        }
+
+        // if the destination folder does not exist, create it
+        const newDir = path.dirname(newFullPath);
+        await fs.mkdir(newDir, { recursive: true });
+
+        fs.rename(oldFullPath, newFullPath);
+        return { success: true, message: "File rinominato correttamente" };
     } catch (error: any) {
         console.error(`Errore durante la rinomina da ${oldRelPath} a ${newRelPath}:`, error.message);
-        return false;
+        return { success: false, message: "Non è stato possibile rinominare il file" };
     }
 }
 
@@ -185,24 +188,21 @@ export const renameNode = (oldRelPath: string, newRelPath: string): boolean => {
  * @param relativePath the relative path from the exercises folder
  * @returns the result of the operation
  */
-export const deleteNode = (relativePath: string): OperationResult => {
-    const fullPath = path.join(EXERCISES_DIR, relativePath);
-
-    if (!fullPath.startsWith(EXERCISES_DIR)) {
-        throw new Error("Accesso non autorizzato al percorso");
-    }
-
-    if (!fs.existsSync(fullPath)) {
-        throw new Error("Il file o la directory non esiste");
-    }
-
+export const deleteNode = async (relativePath: string): Promise<OperationResult> => {
     try {
-        fs.rmSync(fullPath, { recursive: true, force: true });
+        const fullPath = path.join(EXERCISES_DIR, relativePath);
+
+        if (!fullPath.startsWith(EXERCISES_DIR)) {
+            return { success: false, message: "Accesso non autorizzato al percorso" };
+        }
+
+        await fs.rm(fullPath, { recursive: true, force: true });
 
         return { success: true, message: "Eliminazione completata" };
     } catch (error: any) {
         console.error(`Errore durante l'eliminazione di ${relativePath}:`, error.message);
-        throw new Error(`Impossibile eliminare la risorsa: ${error.message}`);
+        // throw new Error(`Impossibile eliminare la risorsa: ${error.message}`);
+        return { success: false, message: "Impossibile eliminare la risorsa" };
     }
 };
 
@@ -212,32 +212,35 @@ export const deleteNode = (relativePath: string): OperationResult => {
  * @param type : the type of the node to create
  * @returns the result of the operation
  */
-export const createNode = (relativePath: string, type: 'file' | 'directory'): OperationResult => {
-    const fullPath = path.join(EXERCISES_DIR, relativePath);
-
-    if (!fullPath.startsWith(EXERCISES_DIR)) {
-        throw new Error("Accesso non autorizzato al percorso");
-    }
-
-    if (fs.existsSync(fullPath)) {
-        throw new Error("Un elemento con questo nome esiste già");
-    }
-
+export const createNode = async (relativePath: string, type: 'file' | 'directory'): Promise<OperationResult> => {
     try {
+        const fullPath = path.join(EXERCISES_DIR, relativePath);
+
+        if (!fullPath.startsWith(EXERCISES_DIR)) {
+            return { success: false, message: "Accesso non autorizzato al percorso" };
+        }
+
+        try {
+            await fs.access(fullPath);
+            return { success: false, message: "Un elemento con questo nome esiste già" };
+        } catch {
+        }
+
         if (type === 'directory') {
-            fs.mkdirSync(fullPath, { recursive: true });
+            fs.mkdir(fullPath, { recursive: true });
         } else {
             const parentDir = path.dirname(fullPath);
-            if (!fs.existsSync(parentDir)) {
-                fs.mkdirSync(parentDir, { recursive: true });
-            }
-            fs.writeFileSync(fullPath, "", 'utf-8');
+            await fs.mkdir(parentDir, { recursive: true });
+            // wx makes so that the files doesn't get overwritten between the access controll and this command
+            await fs.writeFile(fullPath, "", { encoding: 'utf-8', flag: 'wx' });
         }
 
         return { success: true, message: `${type === 'file' ? 'File' : 'Directory'} creato correttamente` };
     } catch (error: any) {
-        console.error(`Errore creazione ${type} in ${relativePath}:`, error.message);
-        throw new Error(`Errore durante la creazione: ${error.message}`);
+        return { 
+            success: false, 
+            message: `Errore durante la creazione: ${error.message}` 
+        };
     }
 };
 
@@ -246,10 +249,19 @@ export const createNode = (relativePath: string, type: 'file' | 'directory'): Op
  * @param {string} exerciseName the name of the exercise to zip
  * @returns {Archiver} the archiver instance with the zipped file
  */
-export const createExerciseZip = (exerciseName: string): archiver.Archiver => {
-    const exercisePath = path.join(exports.EXERCISES_DIR, exerciseName);
+export const createExerciseZip = async (exerciseName: string): Promise<archiver.Archiver> => {
+    const exercisePath = path.resolve(EXERCISES_DIR, exerciseName);
 
-    if (!fs.existsSync(exercisePath) || !fs.statSync(exercisePath).isDirectory()) {
+    if (!exercisePath.startsWith(EXERCISES_DIR)) {
+        throw new Error("Accesso non autorizzato");
+    }
+
+    try {
+        const stats = await fs.stat(exercisePath);
+        if (!stats.isDirectory()) {
+            throw new Error("Il percorso specificato non è una directory");
+        }
+    } catch (error: any) {
         throw new Error("Esercizio non trovato");
     }
 
@@ -257,12 +269,18 @@ export const createExerciseZip = (exerciseName: string): archiver.Archiver => {
         zlib: { level: 9 } // the compression level
     });
 
-    viewableDirs.forEach(dir => {
+    for (const dir of viewableDirs) {
         const fullSubPath = path.join(exercisePath, dir);
-        if (fs.existsSync(fullSubPath) && fs.statSync(fullSubPath).isDirectory()) {
-            archive.directory(fullSubPath, dir);
+        try {
+            const subStats = await fs.stat(fullSubPath);
+            if (subStats.isDirectory()) {
+                // preserves the dir name
+                archive.directory(fullSubPath, dir);
+            }
+        } catch {
+            continue;
         }
-    });
+    }
 
     archive.finalize();
 
@@ -274,22 +292,29 @@ export const createExerciseZip = (exerciseName: string): archiver.Archiver => {
  * @param node a node returned by getFileTree
  * @returns a list of files with their content
  */
-export const readFilesFromTree = (node: FileTreeNode | null): FileContent[] => {
-    const files = [];
+export const readFilesFromTree = async (node: FileTreeNode | null): Promise<FileContent[]> => {
+    if (!node) {
+        return [];
+    }
 
-    if (!node || node.type === 'file') {
-        if (node) {
-            const content = exports.readExerciseFile(node.path);
-            if (content !== null) {
-                files.push({ name: node.name, content });
-            }
+    if (node.type === 'file') {
+        const content = await readExerciseFile(node.path);
+        if (content !== null) {
+            return [{ name: node.name, content }];
         }
-        return files;
+        return [];
     }
 
-    for (const child of Object.values(node.children || {})) {
-        files.push(...exports.readFilesFromTree(child));
+    // it's a directory, reads files in parallel
+    if (node.children) {
+        const childrenArray = Object.values(node.children);
+        
+        // applies the same operation on all children
+        const results = await Promise.all(
+            childrenArray.map(child => readFilesFromTree(child))
+        );
+        return results.flat();
     }
 
-    return files;
+    return [];
 };

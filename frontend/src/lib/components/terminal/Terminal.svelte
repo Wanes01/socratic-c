@@ -59,7 +59,7 @@
             .join(" ");
 
         await cs.send(
-            `Si è verificato un errore di compilazione o a runtime. La compilazione è stata eseguita con questi flag: "${flags}". L'output sul terminale è "${plainTextOutput}". Puoi aiutarmi a risolvere il problema?`,
+            `Ho riscontrato un problema con il mio codice C. La compilazione è stata eseguita con questi flag: "${flags}". L'output sul terminale è "${plainTextOutput}". Analizza l'output del terminale qui sopra. Identifica se si tratta di un errore di compilazione, un warning o un errore a runtime. Spiega in modo semplice cosa sta cercando di dirmi il compilatore o il sistema e dammi un suggerimento su come proseguire.`,
         );
     };
 </script>

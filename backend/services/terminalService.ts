@@ -3,8 +3,12 @@ import type { CompileOptions, CompilationResult } from '../types/terminalTypes';
 import { exec, spawn, ChildProcessWithoutNullStreams } from 'child_process';
 import { WebSocketServer } from 'ws';
 import { EXERCISES_DIR } from './filesService';
-import fs from 'fs';
+import fs from 'fs/promises';
 import path from 'path';
+import util from 'util';
+
+// makes exec a promise
+const execAsync = util.promisify(exec);
 
 const EXEC_NAME = "program"
 const EXEC_DIR = "bin"
@@ -24,54 +28,51 @@ const EXEC_TIMEOUT_MS = (process.env.EXEC_TIMEOUT_SEC
  * @param options compilation options selected be the user
  * @returns a promise that results in the output terminal after the compilation
  */
-export const compileExercise = (exerciseName: string, options: CompileOptions): Promise<CompilationResult> => {
-    return new Promise((resolve) => {
-        const exercisePath = path.join(EXERCISES_DIR, exerciseName);
-        const studentRoot = path.join(exercisePath, 'root');
-        const binDir = path.join(exercisePath, EXEC_DIR);
+export const compileExercise = async (exerciseName: string, options: CompileOptions): Promise<CompilationResult> => {
+    const exercisePath = path.join(EXERCISES_DIR, exerciseName);
+    if (!exercisePath.startsWith(EXERCISES_DIR)) {
+        return { success: false, output: "Errore: Accesso non autorizzato." };
+    }
 
-        // verifies that the exerciseName directory exists
-        if (!fs.existsSync(studentRoot)) {
-            return resolve({
-                success: false,
-                output: `Errore: Cartella 'root' non trovata in ${exerciseName}`
-            });
-        }
+    const studentRoot = path.join(exercisePath, 'root');
+    const binDir = path.join(exercisePath, EXEC_DIR);
 
-        // creates the bin folder if it does not exists
-        if (!fs.existsSync(binDir)) {
-            fs.mkdirSync(binDir, { recursive: true });
-        }
+    // verifies that the exerciseName directory exists
+    try {
+        // 2. Controllo asincrono
+        await fs.access(studentRoot);
+    } catch {
+        return { success: false, output: `Errore: Cartella 'root' non trovata in ${exerciseName}` };
+    }
 
-        // builds the flags to use
-        const flags = [];
-        if (options.ansi) flags.push('-ansi');
-        if (options.wall) flags.push('-Wall');
-        if (options.wpedantic) flags.push('-Wpedantic');
-        if (options.wextra) flags.push('-Wextra');
-        if (options.werror) flags.push('-Werror');
+    // creates the bin folder if it does not exists
+    await fs.mkdir(binDir, { recursive: true });
 
-        const flagsStr = flags.join(' ');
+    // builds the flags to use
+    const flags = [];
+    if (options.ansi) flags.push('-ansi');
+    if (options.wall) flags.push('-Wall');
+    if (options.wpedantic) flags.push('-Wpedantic');
+    if (options.wextra) flags.push('-Wextra');
+    if (options.werror) flags.push('-Werror');
+    const flagsStr = flags.join(' ');
 
-        // command costruction
-        const compileCmd = options.includeTests
-            /* search and compile the ".c" files both in the student's root and in the test directory.
-            Excludes the student's main so that the test's main can be used. */
-            ? `gcc $(find . -name "*.c" ! -name "main.c") ../tests/*.c -o "../${EXEC_DIR}/${EXEC_NAME}" -I. -I../tests -fdiagnostics-color=always ${flagsStr} -lm`
-            // compile only the ".c" files in the student's root, without considering any tests
-            : `gcc $(find . -name "*.c") -o "../${EXEC_DIR}/${EXEC_NAME}" -I. -fdiagnostics-color=always ${flagsStr} -lm`;
-
-        // executes the command on root as the cwd.
-        // sets a timeout to make sure that the compilation doesn't get stuck
-        exec(compileCmd, { cwd: studentRoot, timeout: 10000 }, (error, stdout, stderr) => {
-            const output = stdout + stderr;
-
-            resolve({
-                success: !error,
-                output: output
-            });
-        });
-    });
+    // command costruction
+    const compileCmd = options.includeTests
+        /* search and compile the ".c" files both in the student's root and in the test directory.
+        Excludes the student's main so that the test's main can be used. */
+        ? `gcc $(find . -name "*.c" ! -name "main.c") ../tests/*.c -o "../${EXEC_DIR}/${EXEC_NAME}" -I. -I../tests -fdiagnostics-color=always ${flagsStr} -lm`
+        // compile only the ".c" files in the student's root, without considering any tests
+        : `gcc $(find . -name "*.c") -o "../${EXEC_DIR}/${EXEC_NAME}" -I. -fdiagnostics-color=always ${flagsStr} -lm`;
+    
+    try {
+        const { stdout, stderr } = await execAsync(compileCmd, { cwd: studentRoot, timeout: 10000 });
+        return { success: true, output: stdout + stderr };
+    } catch (error: any) {
+        // execAsync thows an error if the exit code is not 0
+        const output = (error.stdout || '') + (error.stderr || '');
+        return { success: false, output: output || error.message };
+    }
 };
 
 /**

@@ -9,6 +9,10 @@ export interface CompileOptions {
 }
 
 export interface CompilationResult {
+    /**
+     * true if the compilation generates anything (output/errors/warnings)
+     * false if a network error occurres
+     */
     success: boolean;
     output: string;
 }

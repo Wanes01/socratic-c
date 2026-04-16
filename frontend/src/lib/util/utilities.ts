@@ -16,3 +16,23 @@ export const isValidFileName = (name: string): boolean => {
 
     return true;
 }
+
+// generic api helper
+export const apiFetch = async <T>(
+    apiBase: string,
+    endpoint: string,
+    options?: RequestInit,
+    errorMessage?: string
+): Promise<T> => {
+    const res = await fetch(`${apiBase}${endpoint}`, {
+        headers: { 'Content-Type': 'application/json' },
+        ...options
+    });
+
+    if (!res.ok) {
+        const errorData = await res.json().catch(() => ({}));
+        throw new Error(errorData.error || errorMessage || 'Errore nella richiesta');
+    }
+
+    return res.json();
+}

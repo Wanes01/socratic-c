@@ -64,14 +64,18 @@ export const compileExercise = async (exerciseName: string, options: CompileOpti
         ? `gcc $(find . -name "*.c" ! -name "main.c") ../tests/*.c -o "../${EXEC_DIR}/${EXEC_NAME}" -I. -I../tests -fdiagnostics-color=always ${flagsStr} -lm`
         // compile only the ".c" files in the student's root, without considering any tests
         : `gcc $(find . -name "*.c") -o "../${EXEC_DIR}/${EXEC_NAME}" -I. -fdiagnostics-color=always ${flagsStr} -lm`;
-    
+
     try {
         const { stdout, stderr } = await execAsync(compileCmd, { cwd: studentRoot, timeout: 10000 });
         return { success: true, output: stdout + stderr };
     } catch (error: any) {
-        // execAsync thows an error if the exit code is not 0
+        // execAsync thows an error if the exit code is not 0 (an error ora a warning occurred)
         const output = (error.stdout || '') + (error.stderr || '');
-        return { success: false, output: output || error.message };
+        if (output) {
+            return { success: true, output: output };
+        }
+        // the error is not from a compiler response
+        return { success: false, output: `Errore di sistema o timeout: ${error.message}` };
     }
 };
 

@@ -39,11 +39,11 @@ the 'markdown' class, intended for displaying markdown. */
   }
 
   .markdown pre {
-    @apply bg-neutral-900 border border-white/8 rounded overflow-x-auto my-[0.6rem];
+    @apply bg-neutral-900 border p-2.5! border-white/8 rounded overflow-x-auto my-[0.6rem];
   }
 
   .markdown pre code {
-    @apply bg-transparent! border-none p-0 text-neutral-300 text-[0.8rem];
+    @apply bg-transparent! border-none p-0! text-neutral-300 text-[0.8rem];
   }
 
   .markdown ul {

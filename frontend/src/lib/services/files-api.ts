@@ -1,95 +1,75 @@
+
+import type { FileNode } from '../types';
+import { apiFetch } from '../util/utilities';
+
 const FILES_API_BASE_URL = '/api/files';
 
-export async function fetchFileTree() {
-    const res = await fetch(`${FILES_API_BASE_URL}/tree`);
-    if (!res.ok) {
-        throw new Error('Could not retrieve files tree');
-    }
-    return await res.json();
-}
+/**
+ * Fetches the complete file tree structure of the exercises directory
+ * @returns a promise that resolves to the root node of the file tree
+ */
+export const fetchFileTree = (): Promise<FileNode> => apiFetch(FILES_API_BASE_URL, '/tree');
 
-export async function readFile(relPath: string) {
-    const encodedPath = encodeURIComponent(relPath);
-    const res = await fetch(`${FILES_API_BASE_URL}/read?path=${encodedPath}`);
-    if (!res.ok) {
-        throw new Error('Could not read file');
-    }
-    return await res.json();
-}
+/**
+ * Reads the content of a specific file.
+ * @param relPath the relative path of the file to read from the exercise folder
+ * @returns a promise that resolves to the file content
+ */
+export const readFile = (relPath: string): Promise<{ content: string; }> =>
+    apiFetch(FILES_API_BASE_URL, `/read?path=${encodeURIComponent(relPath)}`);
 
-export async function saveFileContent(relPath: string, content: string) {
-    const res = await fetch(`${FILES_API_BASE_URL}/save`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-            content,
-            relPath
-        })
-    });
-    if (!res.ok) {
-        throw new Error('Could not save the file');
-    }
-    return await res.json();
-}
-
-export async function renameFile(oldPath: string, newPath: string) {
-    const res = await fetch(`${FILES_API_BASE_URL}/rename`, {
-        method: "PATCH",
-        headers: {
-            "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-            oldPath,
-            newPath
-        })
+/**
+ * Updates the content of an existing file
+ * @param relPath the relative path from the exercise folder of the file to save
+ * @param content the new content to write into the file
+ * @returns a promise indicating the result of the operation
+ */
+export const saveFileContent = (relPath: string, content: string): Promise<{ success: boolean; }> =>
+    apiFetch(FILES_API_BASE_URL, '/save', {
+        method: 'POST',
+        body: JSON.stringify({ relPath, content })
     });
 
-    if (!res.ok) {
-        const errorData = await res.json();
-        throw new Error(errorData.error || 'Errore nella rinomina');
-    }
-
-    return await res.json();
-}
-
-export async function deleteFile(path: string) {
-    const encodedPath = encodeURIComponent(path);
-
-    const res = await fetch(`${FILES_API_BASE_URL}/delete?path=${encodedPath}`, {
-        method: "DELETE",
-        headers: {
-            "Content-Type": "application/json",
-        }
+/**
+ * Renames a file or directory
+ * @param oldPath the current relative path of the node from the exercise dir
+ * @param newPath the new relative path for the node from the exercise dir
+ * @returns a promise indicating the result of the operation
+ */
+export const renameFile = (oldPath: string, newPath: string): Promise<{ success: boolean; }> =>
+    apiFetch(FILES_API_BASE_URL, '/rename', {
+        method: 'PATCH',
+        body: JSON.stringify({ oldPath, newPath })
     });
 
-    if (!res.ok) {
-        const errorData = await res.json();
-        throw new Error(errorData.error || "Errore durante l'eliminazione");
-    }
-
-    return await res.json();
-}
-
-export async function createNodeApi(path: string, type: string) {
-    const res = await fetch(`${FILES_API_BASE_URL}/create`, {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ path, type })
+/**
+ * Deletes a file or directory
+ * @param filePath the relative path of the node from the exercise dir
+ * @returns a promise indicating the result of the operation
+ */
+export const deleteFile = (filePath: string): Promise<{ success: boolean; }> =>
+    apiFetch(FILES_API_BASE_URL, `/delete?path=${encodeURIComponent(filePath)}`, {
+        method: 'DELETE'
     });
 
-    if (!res.ok) {
-        const errorData = await res.json();
-        throw new Error(errorData.error || 'Errore durante la creazione');
-    }
+/**
+ * Creates a file or directory
+ * @param filePath the relative path of the node from the exercise dir
+ * @returns a promise indicating the result of the operation
+ */
+export const createNodeApi = (filePath: string, type: string): Promise<{ success: boolean; }> =>
+    apiFetch(FILES_API_BASE_URL, '/create', {
+        method: 'POST',
+        body: JSON.stringify({ path: filePath, type })
+    });
 
-    return await res.json();
-}
-
+/**
+ * Triggers a browser download of a specific exercise as a ZIP archive.
+ * This method creates a temporary anchor element to initiate the download.
+ * @param exerciseName the name of the exercise folder to compress and download
+ */
 export function downloadExerciseZip(exerciseName: string): void {
-    const encodedName = encodeURIComponent(exerciseName);
-    const url = `${FILES_API_BASE_URL}/download?name=${encodedName}`;
+    const url = `${FILES_API_BASE_URL}/download?name=${encodeURIComponent(exerciseName)}`;
 
     // creates a temporary element to start the download
     const link = document.createElement('a');

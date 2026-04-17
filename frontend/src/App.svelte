@@ -96,7 +96,7 @@
 			<Explorer />
 		</Pane>
 		<HandleResizer direction="vertical" />
-		<!-- Editor e terminale -->
+		<!-- File editor and terminal -->
 		<Pane
 			defaultSize={70}
 			minSize={0}
@@ -104,14 +104,23 @@
 			class="border border-white/10"
 		>
 			<PaneGroup direction="vertical">
-				<!-- Opened file selector and editor -->
 				<Pane
 					defaultSize={83}
 					minSize={20}
 					maxSize={100}
 					class="border border-white/10"
 				>
-					<MultiFileEditor />
+					{#if fs.selectedExercise}
+						<MultiFileEditor />
+					{:else}
+						<div
+							class="flex flex-col w-full h-full items-center justify-center"
+						>
+							<p class="text-xl italic text-neutral-500/40">
+								Seleziona un esercizio...
+							</p>
+						</div>
+					{/if}
 				</Pane>
 				<HandleResizer direction="horizontal" />
 				<!-- Terminale -->
@@ -127,12 +136,12 @@
 		</Pane>
 		<HandleResizer direction="vertical" />
 
-		<!-- Chat ollama -->
+		<!-- LLM chat -->
 		<Pane
 			defaultSize={20}
 			collapsible={true}
 			collapsedSize={0}
-			minSize={20}
+			minSize={17}
 			maxSize={50}
 			class="border border-white/10"
 		>

@@ -19,31 +19,42 @@
 </script>
 
 <ul
-    class="flex flex-row w-full bg-neutral-800 text-white select-none overflow-x-auto border-b border-b-[#333333]"
+    class="flex flex-row w-full bg-neutral-900 select-none overflow-x-auto border-b border-neutral-800"
 >
     {#each fs.openedFiles as file (file.path)}
         {@const isSelected = file.path === fs.selectedFile?.path}
         <li
-            class="flex items-center border-r border-neutral-900 transition-colors cursor-pointer {isSelected
-                ? 'bg-neutral-700'
-                : 'hover:bg-neutral-750'}"
+            class="relative flex items-center cursor-pointer group
+                   {isSelected
+                ? 'bg-neutral-800'
+                : 'bg-neutral-900 hover:bg-neutral-800/60'}
+                   border-r border-neutral-800 transition-colors"
         >
+            {#if isSelected}
+                <div
+                    class="absolute top-0 left-0 right-0 h-0.5 bg-violet-400"
+                ></div>
+            {/if}
             <button
                 type="button"
                 onclick={() => onTabClick(file)}
-                class="cursor-pointer py-2 pl-4 pr-2 flex items-center gap-2 transition-colors {isSelected
-                    ? 'text-white'
-                    : 'text-neutral-400'}"
+                class="py-2 pl-3 pr-1 flex items-center gap-2 transition-colors
+                       {isSelected
+                    ? 'text-neutral-100'
+                    : 'text-neutral-500 group-hover:text-neutral-300'}"
             >
-                <span class="text-sm truncate max-w-37.5">{file.name}</span>
+                <span class="truncate max-w-36">{file.name}</span>
             </button>
             <button
                 type="button"
                 aria-label="Chiudi {file.name}"
                 onclick={() => onCrossClick(file)}
-                class="mr-2 p-1 rounded hover:bg-neutral-600 transition-opacity group cursor-pointer"
+                class="mr-2 p-0.5 rounded transition-all cursor-pointer
+                       opacity-0 group-hover:opacity-100
+                       {isSelected ? 'opacity-100' : ''}
+                       hover:bg-neutral-700 text-neutral-500 hover:text-neutral-300"
             >
-                <img src="close.svg" alt="" class="h-3 w-3 brightness-200" />
+                <img src="close.svg" alt="" class="h-3 w-3 brightness-150" />
             </button>
         </li>
     {/each}

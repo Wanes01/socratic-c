@@ -6,6 +6,8 @@
     import { cs } from "../../state/chat-state.svelte";
     import ExplorerDropdown from "./ExplorerDropdown.svelte";
 
+    $inspect(fs.fileTree);
+
     // the list of available exercises
     let exercises = $derived(Object.keys(fs.fileTree));
 
@@ -44,24 +46,42 @@
 </script>
 
 <ExplorerDropdown title="esercizi" openOnMount={true}>
-    <ul class="flex flex-col w-full">
+    <ul class="flex flex-col w-full py-1">
         {#each exercises as exName}
             {@const isSelected = fs.selectedExercise === exName}
-            <li
-                class="w-full {isSelected
-                    ? 'border-l-2 border-violet-400'
-                    : ''}"
-            >
+            <li class="relative">
+                {#if isSelected}
+                    <div
+                        class="absolute left-0 top-0 bottom-0 w-0.5 bg-violet-400 rounded-r-full"
+                    ></div>
+                {/if}
                 <button
                     type="button"
-                    class="flex items-center w-full gap-3 px-4 py-1 cursor-pointer transition-colors text-left
+                    class="flex items-center w-full px-3 py-1 cursor-pointer transition-colors text-left gap-2
                            {isSelected
-                        ? 'bg-neutral-700 text-white'
-                        : 'text-neutral-400 hover:bg-neutral-800 hover:text-neutral-200'}"
+                        ? 'text-neutral-100 bg-neutral-700/50'
+                        : 'text-neutral-500 hover:bg-neutral-800 hover:text-neutral-300'}"
                     onclick={() => onclick(exName)}
                     oncontextmenu={(e) => oncontextmenu(e, exName)}
                 >
-                    <span class="text-sm font-medium">{exName}</span>
+                    <svg
+                        class="w-3 h-3 shrink-0 transition-colors
+                               {isSelected
+                            ? 'text-violet-400'
+                            : 'text-neutral-600'}"
+                        viewBox="0 0 12 12"
+                        fill="none"
+                        xmlns="http://www.w3.org/2000/svg"
+                    >
+                        <path
+                            d="M2 6h8M6 2l4 4-4 4"
+                            stroke="currentColor"
+                            stroke-width="1.5"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                        />
+                    </svg>
+                    <span class="truncate">{exName}</span>
                 </button>
             </li>
         {/each}

@@ -7,7 +7,9 @@ services:
     ports:
       - "5000:5000"
     volumes:
-      - ./:/app
+      - ./backend:/app/backend
+      - ./frontend:/app/frontend
+      - ./exercises:/app/exercises
       - /app/backend/node_modules
       - /app/frontend/node_modules
     environment:

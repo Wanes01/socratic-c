@@ -148,7 +148,7 @@
         if ([".c", ".h"].includes(extension)) {
             return extension == ".c" ? "text-purple-300" : "text-green-300";
         }
-        return "text-orange-300";
+        return "text-neutral-300";
     };
 </script>
 

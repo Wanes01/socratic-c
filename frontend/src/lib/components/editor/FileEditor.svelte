@@ -120,7 +120,7 @@
     });
 </script>
 
-<div class="relative h-full w-full">
+<div class="relative h-full w-full font-jetbrains">
     <div bind:this={editorContainer} class="editor-wrapper h-full w-full"></div>
     {#if saved}
         <div

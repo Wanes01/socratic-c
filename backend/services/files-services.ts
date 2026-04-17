@@ -1,4 +1,4 @@
-import type { AiConfig, ExercisesMap, FileContent, FileTreeNode, NodeChildrenMap, OperationResult } from '../types/files-types';
+import type { ExercisesMap, FileContent, FileTreeNode, NodeChildrenMap, OperationResult } from '../types/files-types';
 import yaml from 'js-yaml';
 import fs from 'fs/promises';
 import path from 'path';
@@ -229,7 +229,7 @@ export const createNode = async (relativePath: string, type: 'file' | 'directory
         }
 
         if (type === 'directory') {
-            fs.mkdir(fullPath, { recursive: true });
+            await fs.mkdir(fullPath, { recursive: true });
         } else {
             const parentDir = path.dirname(fullPath);
             await fs.mkdir(parentDir, { recursive: true });

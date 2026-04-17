@@ -46,7 +46,7 @@ export const compileExercise = async (exerciseName: string, options: CompileOpti
     }
 
     // creates the bin folder if it does not exists
-    await fs.mkdir(binDir, { recursive: true });
+    await fs.mkdir(binDir, { recursive: true, mode: 0o777 });
 
     // builds the flags to use
     const flags = [];

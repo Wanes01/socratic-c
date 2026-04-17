@@ -59,7 +59,8 @@ export const getFileTree = async (dirPath: string, condition: (node: FileTreeNod
  * @returns the exercises file tree.
  */
 export const getExercisesTree = async (): Promise<ExercisesMap> => {
-    await fs.mkdir(EXERCISES_DIR, { recursive: true });
+    await fs.mkdir(EXERCISES_DIR, { recursive: true, mode: 0o777 });
+    await ensureExerciseStructure();
 
     const tree = await getFileTree(
         EXERCISES_DIR,
@@ -72,10 +73,6 @@ export const getExercisesTree = async (): Promise<ExercisesMap> => {
 
     const exercisesPromises = Object.values(rawExercises).map(async (exercise: FileTreeNode) => {
         const exercisePath = path.join(EXERCISES_DIR, exercise.name);
-
-        // creates the root directory if it doesn't exist
-        const rootPath = path.join(exercisePath, 'root');
-        await fs.mkdir(rootPath, { recursive: true });
 
         let exerciseAIConfig: ExerciseAIConfig = {} as ExerciseAIConfig;
 
@@ -107,6 +104,27 @@ export const getExercisesTree = async (): Promise<ExercisesMap> => {
     const resolvedExercises = await Promise.all(exercisesPromises);
     return Object.fromEntries(resolvedExercises);
 }
+
+/**
+ * Ensures that every folder inside EXERCISES_DIR contains the root directory.
+ */
+const ensureExerciseStructure = async () => {
+    try {
+        const entries = await fs.readdir(EXERCISES_DIR, { withFileTypes: true });
+
+        const repairPromises = entries
+            .filter(entry => entry.isDirectory())
+            .map(async (entry) => {
+                const rootPath = path.join(EXERCISES_DIR, entry.name, 'root');
+                await fs.mkdir(rootPath, { recursive: true, mode: 0o777 });
+                await fs.chmod(rootPath, 0o777);
+            });
+
+        await Promise.all(repairPromises);
+    } catch (error) {
+        console.error("Errore durante la riparazione della struttura esercizi:", error);
+    }
+};
 
 /**
  * Reads the content of the file in the exercises directory given the relative path
@@ -175,7 +193,7 @@ export const renameNode = async (oldRelPath: string, newRelPath: string): Promis
 
         // if the destination folder does not exist, create it
         const newDir = path.dirname(newFullPath);
-        await fs.mkdir(newDir, { recursive: true });
+        await fs.mkdir(newDir, { recursive: true, mode: 0o777 });
 
         fs.rename(oldFullPath, newFullPath);
         return { success: true, message: "File rinominato correttamente" };
@@ -210,8 +228,8 @@ export const deleteNode = async (relativePath: string): Promise<OperationResult>
 
 /**
  * Creates a new node (file/directory)
- * @param relativePath : relative path of the new node
- * @param type : the type of the node to create
+ * @param relativePath relative path of the new node from the exercise directory
+ * @param type the type of the node to create
  * @returns the result of the operation
  */
 export const createNode = async (relativePath: string, type: 'file' | 'directory'): Promise<OperationResult> => {
@@ -229,12 +247,13 @@ export const createNode = async (relativePath: string, type: 'file' | 'directory
         }
 
         if (type === 'directory') {
-            await fs.mkdir(fullPath, { recursive: true });
+            await fs.mkdir(fullPath, { recursive: true, mode: 0o777 });
         } else {
             const parentDir = path.dirname(fullPath);
-            await fs.mkdir(parentDir, { recursive: true });
+            await fs.mkdir(parentDir, { recursive: true, mode: 0o777 });
             // wx makes so that the files doesn't get overwritten between the access controll and this command
             await fs.writeFile(fullPath, "", { encoding: 'utf-8', flag: 'wx' });
+            await fs.chmod(fullPath, 0o666);
         }
 
         return { success: true, message: `${type === 'file' ? 'File' : 'Directory'} creato correttamente` };

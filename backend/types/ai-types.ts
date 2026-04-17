@@ -60,5 +60,8 @@ export type ProviderConfig = {
     model: string;
     keyNeeded: boolean;
     apiKey?: string;
+    // validates if the selected model can be used
+    validateModel?: () => Promise<boolean>;
+    // builds the body for the http request to the provider
     buildBody: (messages: ChatMessage[]) => object;
 };

@@ -103,10 +103,18 @@ export const getSystemPrompt = async () => {
  */
 export const getAvailableModels = async (): Promise<LLMOption[]> => {
     return Promise.all(
-        Object.entries(PROVIDER_CONFIGS).map(async ([provider, config]) => ({
-            provider: provider as Provider,
-            model: config.model,
-            available: await isReachable(config.url) && (!config.keyNeeded || !!config.apiKey)
-        }))
+        Object.entries(PROVIDER_CONFIGS).map(async ([provider, config]) => {
+            let isAvailable = await isReachable(config.url) && (!config.keyNeeded || !!config.apiKey);
+
+            if (isAvailable && config.validateModel) {
+                isAvailable = await config.validateModel();
+            }
+
+            return {
+                provider: provider as Provider,
+                model: config.model,
+                available: isAvailable
+            };
+        })
     );
 };

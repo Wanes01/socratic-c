@@ -2,10 +2,10 @@
     import { fs } from "../../state/files-state.svelte";
     import { ts } from "../../state/terminal-state.svelte";
     import { cs } from "../../state/chat-state.svelte";
-    import { ui } from "../../state/ui-state.svelte";
     import Button from "../ui/Button.svelte";
     import CompileSettings from "../dropdowns/CompileSettings.svelte";
     import ProviderSelector from "../dropdowns/ProviderSelector.svelte";
+    import QuickActions from "../dropdowns/QuickActions.svelte";
 
     const compileClick = async () => {
         if (fs.selectedExercise === null) {
@@ -30,11 +30,6 @@
         ts.stop();
     };
 
-    const saveClick = async () => {
-        await fs.saveAllFiles();
-        ui.showToast("File salvati", "info", 1000);
-    };
-
     const aiAdviceClick = async () => {
         if (cs.isGenerating || !fs.selectedExercise) {
             return;
@@ -51,21 +46,22 @@
     class="flex flex-row px-4 py-2 justify-between items-center bg-neutral-900 border-b border-neutral-800 select-none"
 >
     <div class="flex flex-row gap-10">
-        <p class="font-mono font-black text-xl tracking-tighter text-white">
-            socrati<span class="text-purple-400">c_c</span>
-        </p>
-        <Button
-            text="Salva tutti i file"
-            icon="save.svg"
-            variant="navBar"
-            disabled={fs.openedFiles.length === 0}
-            onclick={saveClick}
-        />
+        <div class="flex flex-col font-jetbrains leading-none">
+            <span class="text-[15px] text-violet-400">#include</span>
+            <span class="text-[19px] font-bold text-neutral-200">
+                <span class="text-neutral-500">&lt;</span>socratic_c<span
+                    class="text-neutral-500">&gt;</span
+                >
+            </span>
+        </div>
+        <QuickActions />
     </div>
 
     <div class="flex flex-row gap-2">
-        <ProviderSelector />
-        <CompileSettings />
+        <div class="flex flex-row">
+            <ProviderSelector />
+            <CompileSettings />
+        </div>
         <Button
             text="Compila"
             icon="compile.svg"

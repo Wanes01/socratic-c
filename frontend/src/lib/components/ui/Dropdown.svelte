@@ -4,10 +4,17 @@
 
     interface Props {
         label: string;
+        align?: "left" | "center" | "right";
         children?: import("svelte").Snippet;
     }
 
-    let { label, children }: Props = $props();
+    let { label, children, align = "center" }: Props = $props();
+
+    const alignClass = {
+        left: "left-0",
+        center: "left-1/2 -translate-x-1/2",
+        right: "right-0",
+    };
 
     function handleOutsideClick(e: MouseEvent) {
         if (container && !container.contains(e.target as Node)) {
@@ -41,12 +48,11 @@
             />
         </svg>
     </button>
-
     {#if open}
         <div
-            class="absolute right-0 top-full mt-1 z-50 min-w-48
+            class="absolute top-full mt-1 z-50 min-w-48
                    bg-neutral-800 border border-neutral-700 rounded-sm shadow-lg
-                   flex flex-col py-1"
+                   {alignClass[align]}"
         >
             {@render children?.()}
         </div>

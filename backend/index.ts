@@ -17,14 +17,3 @@ initWebSocket(server);
 app.use('/api/files', filesRouter);
 app.use('/api/ai', aiRouter);
 app.use('/api/terminal', terminalRouter);
-
-
-
-// Serve i file statici prodotti da Svelte
-app.use(express.static(path.join(__dirname, 'public')));
-
-
-// Per ogni altra rotta, rimanda all'index.html di Svelte
-app.get('*', (req, res) => {
-    res.sendFile(path.join(__dirname, 'frontend/dist/index.html'));
-});

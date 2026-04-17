@@ -1,29 +1,30 @@
 services:
-  web-app:
-    command: npm run dev
-    build: .
-    container_name: socratic-tutor-app
-    working_dir: /app/backend
-    ports:
-      - "5000:5000"
-    volumes:
-      - ./backend:/app/backend
-      - ./frontend:/app/frontend
-      - ./exercises:/app/exercises
-      - /app/backend/node_modules
-      - /app/frontend/node_modules
+  backend:
+    build:
+      context: ./backend
+    container_name: socratic-backend
     environment:
       - EXERCISES_DIR=/app/exercises
       - OLLAMA_URL=http://ollama-service:11434
       - OLLAMA_MODEL=qwen2.5-coder:3b
-      - EXEC_MEMORY_LIMIT_MB=128 # expressed in megabytes
-      - EXEC_TIMEOUT_SEC=90 # expressed in seconds
-    networks:
-      - llm-network
-    depends_on:
-      - ollama-service
+      - EXEC_MEMORY_LIMIT_MB=128
+      - EXEC_TIMEOUT_SEC=90
     env_file:
       - .env
+    networks:
+      - ollama-net
+      - frontend-net
+    depends_on:
+      - ollama-service
+
+  frontend:
+    build:
+      context: ./frontend
+    container_name: socratic-frontend
+    networks:
+      - frontend-net
+    depends_on:
+      - backend
 
   ollama-service:
     image: ollama/ollama:latest
@@ -31,10 +32,12 @@ services:
     volumes:
       - ollama_data:/root/.ollama
     networks:
-      - llm-network
+      - ollama-net
 
 networks:
-  llm-network:
+  frontend-net:
+    driver: bridge
+  ollama-net:
     driver: bridge
 
 volumes:

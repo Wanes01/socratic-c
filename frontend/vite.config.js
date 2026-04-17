@@ -10,9 +10,9 @@ export default defineConfig({
   server: {
     port: 5173, // vite port
     proxy: {
-      // redirects every /api call goes to the docker container
+      // redirects every /api to the backend container
       '/api': {
-        target: 'http://localhost:5000',
+        target: 'http://backend:5000',
         changeOrigin: true,
         ws: true
       }

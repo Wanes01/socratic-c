@@ -1,5 +1,5 @@
 <script>
-    import { fs } from "../../state/FileState.svelte";
+    import { fs } from "../../state/files-state.svelte";
     import FileTabBar from "./FileTabBar.svelte";
     import FileEditor from "./FileEditor.svelte";
     import { marked } from "marked";

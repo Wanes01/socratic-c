@@ -1,8 +1,8 @@
 import type { Server } from 'http';
-import type { CompileOptions, CompilationResult } from '../types/terminalTypes';
+import type { CompileOptions, CompilationResult } from '../types/terminal-types';
 import { exec, spawn, ChildProcessWithoutNullStreams } from 'child_process';
 import { WebSocketServer } from 'ws';
-import { EXERCISES_DIR } from './filesService';
+import { EXERCISES_DIR } from './files-services';
 import fs from 'fs/promises';
 import path from 'path';
 import util from 'util';

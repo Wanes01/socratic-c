@@ -1,9 +1,9 @@
-import type { AiConfig, ExercisesMap, FileContent, FileTreeNode, NodeChildrenMap, OperationResult } from '../types/filesTypes';
+import type { AiConfig, ExercisesMap, FileContent, FileTreeNode, NodeChildrenMap, OperationResult } from '../types/files-types';
 import yaml from 'js-yaml';
 import fs from 'fs/promises';
 import path from 'path';
 import archiver from 'archiver';
-import { ExerciseAIConfig } from '../types/aiTypes';
+import { ExerciseAIConfig } from '../types/ai-types';
 
 export const EXERCISES_DIR = process.env.EXERCISES_DIR || path.join(__dirname, '../../exercises');
 export const EXERCISE_AI_CONFIG_FILE_NAME = 'exercise-config.yaml';

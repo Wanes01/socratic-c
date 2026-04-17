@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { cs } from "../../state/ChatState.svelte";
+    import { cs } from "../../state/chat-state.svelte";
     import Dropdown from "../ui/Dropdown.svelte";
 
     $inspect(cs.selectedProvider);

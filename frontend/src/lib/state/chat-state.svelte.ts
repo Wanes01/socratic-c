@@ -1,6 +1,6 @@
 import type { ChatMessage, ChatRole, LLMOption } from "../types"
 import { streamChat, fetchModels } from "../services/chat-api";
-import { fs } from "./FileState.svelte";
+import { fs } from "./files-state.svelte";
 
 /* maximum number of messages retained in the conversation context
 to optimize the tokens sent to the LLM model. */

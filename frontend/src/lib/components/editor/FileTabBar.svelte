@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { fs } from "../../state/FileState.svelte";
+    import { fs } from "../../state/files-state.svelte";
     import type { OpenedFile } from "../../types";
 
     const onTabClick = (file: OpenedFile): void => {

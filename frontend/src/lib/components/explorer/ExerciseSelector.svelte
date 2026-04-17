@@ -1,8 +1,8 @@
 <script lang="ts">
-    import { fs } from "../../state/FileState.svelte";
-    import { ts } from "../../state/TerminalState.svelte";
-    import { ui } from "../../state/UIState.svelte";
-    import { cs } from "../../state/ChatState.svelte";
+    import { fs } from "../../state/files-state.svelte";
+    import { ts } from "../../state/terminal-state.svelte";
+    import { ui } from "../../state/ui-state.svelte";
+    import { cs } from "../../state/chat-state.svelte";
     import type { ContextMenuOption } from "../../types";
     import ExplorerDropdown from "./ExplorerDropdown.svelte";
 

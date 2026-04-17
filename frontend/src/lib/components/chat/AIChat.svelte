@@ -1,6 +1,6 @@
 <script lang="ts">
-    import { cs } from "../../state/ChatState.svelte";
-    import { fs } from "../../state/FileState.svelte";
+    import { cs } from "../../state/chat-state.svelte";
+    import { fs } from "../../state/files-state.svelte";
     import { marked } from "marked";
     import Button from "../ui/Button.svelte";
 

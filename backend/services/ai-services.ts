@@ -1,4 +1,4 @@
-import type { StreamChatConfig, ChatStreamChunk, ChatMessage, LLMOption, Provider } from '../types/aiTypes';
+import type { StreamChatConfig, ChatStreamChunk, ChatMessage, LLMOption, Provider } from '../types/ai-types';
 import fs from 'fs/promises';
 import path from 'path';
 import isReachable from 'is-reachable';

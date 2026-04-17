@@ -1,5 +1,5 @@
 import type { Request, Response } from 'express';
-import * as terminalService from '../services/terminalService';
+import * as terminalService from '../services/terminal-services';
 
 /**
  * @param req the express http request

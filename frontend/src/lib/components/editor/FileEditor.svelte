@@ -1,9 +1,9 @@
 <script lang="ts">
-    import { fs } from "../../state/FileState.svelte";
+    import { fs } from "../../state/files-state.svelte";
     import { untrack } from "svelte";
     import { indentUnit } from "@codemirror/language";
     import { autocompletion, completeAnyWord } from "@codemirror/autocomplete";
-    import { cCompletionSource } from "../../util/cCompletitions";
+    import { cCompletionSource } from "../../util/c-completitions";
     import { EditorView, basicSetup } from "codemirror";
     import { keymap } from "@codemirror/view";
     import { indentMore, indentLess } from "@codemirror/commands";

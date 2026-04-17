@@ -1,12 +1,12 @@
 <script lang="ts">
-    import { cs } from "../../state/ChatState.svelte";
+    import { cs } from "../../state/chat-state.svelte";
     import AnsiToHtml from "ansi-to-html";
     import stripAnsi from "strip-ansi";
     import {
         ts,
         EXEC_MAX_OUTPUT_CHARS,
         MESSAGES,
-    } from "../../state/TerminalState.svelte";
+    } from "../../state/terminal-state.svelte";
     import Button from "../ui/Button.svelte";
     import { slide, scale } from "svelte/transition";
     import { cubicOut } from "svelte/easing";

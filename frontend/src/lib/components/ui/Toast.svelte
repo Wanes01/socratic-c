@@ -1,10 +1,10 @@
 <script lang="ts">
-    import { ui } from "../../state/UIState.svelte";
+    import { ui } from "../../state/ui-state.svelte";
     import { fly } from "svelte/transition";
     import { backOut } from "svelte/easing";
 
     const themes = {
-        info: "border-neutral-700 bg-neutral-800 text-neutral-200 shadow-lg shadow-purple-400",
+        info: "border-neutral-700 bg-neutral-800 text-neutral-200 shadow-md shadow-purple-400",
         success: "border-emerald-900/50 bg-neutral-800 text-emerald-400",
         error: "border-red-900/50 bg-neutral-800 text-red-400",
     };

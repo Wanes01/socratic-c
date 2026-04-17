@@ -1,6 +1,6 @@
 <script lang="ts">
-    import { fs } from "../../state/FileState.svelte";
-    import { ui } from "../../state/UIState.svelte";
+    import { fs } from "../../state/files-state.svelte";
+    import { ui } from "../../state/ui-state.svelte";
     import { tick } from "svelte";
     import type { FileNode, ContextMenuOption } from "../../types";
     import FileTreeNode from "./FileTreeNode.svelte";

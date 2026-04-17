@@ -1,5 +1,6 @@
 <script lang="ts">
-    import { ui } from "../../state/UIState.svelte";
+    import { ui } from "../../state/ui-state.svelte";
+    import Button from "./Button.svelte";
 
     let dialogRef: HTMLDialogElement;
 
@@ -23,21 +24,20 @@
         <p class="text-neutral-400 mb-6">{ui.modal?.message}</p>
 
         <div class="flex justify-end gap-3">
-            <button
+            <Button
                 onclick={() => ui.closeModal()}
-                class="px-4 py-2 rounded hover:bg-neutral-700 transition-colors cursor-pointer text-sm font-medium"
-            >
-                {ui.modal?.cancelText}
-            </button>
-            <button
+                text={ui.modal?.cancelText}
+                overrideClass="text-base bg-transparent border-none"
+            ></Button>
+            <Button
                 onclick={() => {
                     ui.modal?.onConfirm();
                     ui.closeModal();
                 }}
-                class="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded transition-colors cursor-pointer text-sm font-medium shadow-md"
-            >
-                {ui.modal?.confirmText}
-            </button>
+                variant="ai"
+                text={ui.modal?.confirmText}
+                overrideClass="text-base"
+            />
         </div>
     </div>
 </dialog>

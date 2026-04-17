@@ -1,5 +1,5 @@
 import type { Request, Response } from 'express';
-import * as filesService from '../services/filesService';
+import * as filesService from '../services/files-services';
 
 // function called when the exercises files tree is requested 
 export const getTree = async (_: Request, res: Response) => {

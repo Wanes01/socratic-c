@@ -1,7 +1,7 @@
 <script lang="ts">
-	import { ui } from "./lib/state/UIState.svelte";
-	import { fs } from "./lib/state/FileState.svelte";
-	import { cs } from "./lib/state/ChatState.svelte";
+	import { ui } from "./lib/state/ui-state.svelte";
+	import { fs } from "./lib/state/files-state.svelte";
+	import { cs } from "./lib/state/chat-state.svelte";
 	import { untrack } from "svelte";
 	import { PaneGroup, Pane } from "paneforge";
 	import HandleResizer from "./lib/components/ui/HandleResizer.svelte";

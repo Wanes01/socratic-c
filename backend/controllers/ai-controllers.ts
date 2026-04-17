@@ -1,12 +1,12 @@
 
 import type { Request, Response } from 'express';
-import type { ExerciseAIConfig } from '../types/aiTypes';
+import type { ExerciseAIConfig } from '../types/ai-types';
 import path from 'path';
 import fs from 'fs/promises';
 import yaml from 'js-yaml';
-import * as aiService from '../services/aiService';
-import { getFileTree, readFilesFromTree, EXERCISES_DIR, EXERCISE_AI_CONFIG_FILE_NAME } from '../services/filesService';
-import { FileContent } from '../types/filesTypes';
+import * as aiService from '../services/ai-services';
+import { getFileTree, readFilesFromTree, EXERCISES_DIR, EXERCISE_AI_CONFIG_FILE_NAME } from '../services/files-services';
+import { FileContent } from '../types/files-types';
 
 /**
  * Handles a streaming AI chat request for a specific exercise.

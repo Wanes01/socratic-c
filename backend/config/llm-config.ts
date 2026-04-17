@@ -1,4 +1,4 @@
-import { Provider, ProviderConfig } from "../types/aiTypes";
+import { Provider, ProviderConfig } from "../types/ai-types";
 
 const OLLAMA_URL = process.env.OLLAMA_URL || "";
 const GROQ_API = "https://api.groq.com/openai/v1/chat/completions";

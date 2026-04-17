@@ -1,6 +1,6 @@
 <script lang="ts">
-    import { fs } from "../../state/FileState.svelte";
-    import { ts } from "../../state/TerminalState.svelte";
+    import { fs } from "../../state/files-state.svelte";
+    import { ts } from "../../state/terminal-state.svelte";
     import Dropdown from "../ui/Dropdown.svelte";
 
     const options = [

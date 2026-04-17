@@ -1,6 +1,6 @@
 <script lang="ts">
     import ExplorerDropdown from "./ExplorerDropdown.svelte";
-    import { fs } from "../../state/FileState.svelte";
+    import { fs } from "../../state/files-state.svelte";
 
     let currentExercise = $derived(
         fs.selectedExercise ? (fs.fileTree as any)[fs.selectedExercise] : null,

@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { fs } from "../../state/FileState.svelte";
+    import { fs } from "../../state/files-state.svelte";
     import ExerciseSelector from "./ExerciseSelector.svelte";
     import FileTree from "./FileTree.svelte";
     import ExerciseInfo from "./ExerciseInfo.svelte";

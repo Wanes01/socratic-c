@@ -1,4 +1,4 @@
-import type { ContextMenuState, ModalState, ContextMenuOption, ToastState } from "../types"
+import type { ContextMenuState, ModalState, ContextMenuOption, ToastState } from "../types/ui-types"
 
 class UIState {
     contextMenu = $state<ContextMenuState | null>(null);
@@ -18,10 +18,10 @@ class UIState {
 
     // shows the confirmation modal
     showModal(
-        title: string, 
-        message: string, 
-        onConfirm: () => void | Promise<void>, 
-        confirmText: string = "Conferma", 
+        title: string,
+        message: string,
+        onConfirm: () => void | Promise<void>,
+        confirmText: string = "Conferma",
         cancelText: string = "Annulla"
     ): void {
         this.modal = { title, message, onConfirm, confirmText, cancelText };
@@ -37,7 +37,7 @@ class UIState {
         if (this.toastTimer) {
             clearTimeout(this.toastTimer);
         }
-        
+
         this.toast = { message, type };
 
         this.toastTimer = setTimeout(() => {

@@ -1,5 +1,5 @@
 <script lang="ts">
-    import type { FileNode } from "../../types";
+    import type { FileNode } from "../../types/files-types";
     import type { Snippet } from "svelte";
     import FileTreeNode from "./FileTreeNode.svelte";
     import ExplorerSection from "./ExplorerSection.svelte";

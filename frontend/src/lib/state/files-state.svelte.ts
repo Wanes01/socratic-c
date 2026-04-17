@@ -1,6 +1,6 @@
 import * as filesApi from '../services/files-api';
 import type { EditorView } from 'codemirror';
-import type { FileNode, OpenedFile } from '../types';
+import type { FileNode, OpenedFile } from '../types/files-types';
 
 class FileState {
     fileTree = $state<FileNode | {}>({});

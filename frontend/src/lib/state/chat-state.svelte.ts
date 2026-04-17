@@ -1,4 +1,4 @@
-import type { ChatMessage, ChatRole, LLMOption } from "../types"
+import type { ChatMessage, ChatRole, LLMOption } from "../types/chat-types"
 import { streamChat, fetchModels } from "../services/chat-api";
 import { fs } from "./files-state.svelte";
 

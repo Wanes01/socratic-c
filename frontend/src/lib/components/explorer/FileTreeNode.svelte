@@ -1,11 +1,12 @@
 <script lang="ts">
+    import type { FileNode } from "../../types/files-types";
+    import type { ContextMenuOption } from "../../types/ui-types";
     import { fs } from "../../state/files-state.svelte";
     import { ui } from "../../state/ui-state.svelte";
     import { tick } from "svelte";
-    import type { FileNode, ContextMenuOption } from "../../types";
-    import FileTreeNode from "./FileTreeNode.svelte";
     import { isValidFileName } from "../../util/utilities";
     import { slide } from "svelte/transition";
+    import FileTreeNode from "./FileTreeNode.svelte";
 
     let { node }: { node: FileNode } = $props();
 

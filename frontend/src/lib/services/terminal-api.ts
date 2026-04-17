@@ -1,4 +1,4 @@
-import type { CompileOptions } from "../types";
+import type { CompileOptions } from "../types/terminal-types";
 import { apiFetch } from "../util/utilities";
 
 const TERMINAL_API_BASE_URL = '/api/terminal';

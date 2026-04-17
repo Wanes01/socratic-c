@@ -1,15 +1,10 @@
 <script lang="ts">
+    import type { ContextMenuOption } from "../../types/ui-types";
     import { fs } from "../../state/files-state.svelte";
     import { ui } from "../../state/ui-state.svelte";
     import Dropdown from "../ui/Dropdown.svelte";
 
-    interface QuickAction {
-        label: string;
-        icon: string;
-        action: () => void;
-    }
-
-    const actions: QuickAction[] = [
+    const actions: ContextMenuOption[] = [
         {
             label: "Salva tutti i file aperti",
             icon: "save.svg",

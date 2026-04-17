@@ -1,9 +1,9 @@
 <script lang="ts">
+    import type { ContextMenuOption } from "../../types/ui-types";
     import { fs } from "../../state/files-state.svelte";
     import { ts } from "../../state/terminal-state.svelte";
     import { ui } from "../../state/ui-state.svelte";
     import { cs } from "../../state/chat-state.svelte";
-    import type { ContextMenuOption } from "../../types";
     import ExplorerDropdown from "./ExplorerDropdown.svelte";
 
     // the list of available exercises

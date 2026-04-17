@@ -1,4 +1,4 @@
-import { ChatMessage } from "../types";
+import { ChatMessage } from "../types/chat-types";
 import { apiFetch } from "../util/utilities";
 
 const AI_API_BASE = "/api/ai";

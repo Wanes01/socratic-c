@@ -1,5 +1,5 @@
 
-import type { FileNode } from '../types';
+import type { FileNode } from '../types/files-types';
 import { apiFetch } from '../util/utilities';
 
 const FILES_API_BASE_URL = '/api/files';

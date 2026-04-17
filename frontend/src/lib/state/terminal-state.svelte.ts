@@ -1,4 +1,5 @@
 import { compileExercise } from "../services/terminal-api";
+import { CompileOptions } from "../types/terminal-types";
 
 // the max amount of characters that the terminal can show before killing the process
 export const EXEC_MAX_OUTPUT_CHARS = 100_000;
@@ -20,11 +21,11 @@ class TerminalState {
     hasWarnings = $state<boolean>(false); // true if compilation produced warnings
     hasErrors = $state<boolean>(false); // true if the compilation or execution produced errors
     canExecute = $derived(this.lastCompileSuccess && !this.isCompiling && !this.isExecuting);
-    
+
     params = $state<string>(""); // the command line arguments/input to the program
     output = $state<string>(""); // the output/error of the program
-    
-    compileOptions = $state({
+
+    compileOptions = $state<CompileOptions>({
         ansi: true,
         wall: true,
         wpedantic: true,

@@ -6,7 +6,6 @@ services:
     environment:
       - EXERCISES_DIR=/app/exercises
       - OLLAMA_URL=http://ollama-service:11434
-      - OLLAMA_MODEL=qwen2.5-coder:3b
       - EXEC_MEMORY_LIMIT_MB=128
       - EXEC_TIMEOUT_SEC=90
     env_file:

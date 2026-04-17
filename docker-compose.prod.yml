@@ -1,3 +1,4 @@
+# compose configuration difference for production purposes.
 services:
   backend:
     build:

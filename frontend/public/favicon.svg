@@ -1,0 +1,11 @@
+<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+  <text x="50" y="67" dominant-baseline="central" text-anchor="middle"
+        font-family="'JetBrains Mono', 'Fira Code', monospace"
+        font-size="150" font-weight="700" fill="#60518f">&gt;</text>
+  <text x="50" y="28" dominant-baseline="central" text-anchor="middle"
+        font-family="'JetBrains Mono', 'Fira Code', monospace"
+        font-size="150" font-weight="700" fill="#a78bfa">&lt;</text>
+  <text x="49" y="50" dominant-baseline="central" text-anchor="middle"
+        font-family="'JetBrains Mono', 'Fira Code', monospace"
+        font-size="100" font-weight="700" fill="#e8e6df">C</text>
+</svg>

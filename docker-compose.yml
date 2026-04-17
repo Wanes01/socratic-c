@@ -1,3 +1,4 @@
+# base file for common docker compose configuration
 services:
   backend:
     build:
@@ -6,15 +7,13 @@ services:
     environment:
       - EXERCISES_DIR=/app/exercises
       - OLLAMA_URL=http://ollama-service:11434
-      - EXEC_MEMORY_LIMIT_MB=128
-      - EXEC_TIMEOUT_SEC=90
+      - EXEC_MEMORY_LIMIT_MB=128 # child process max memory usage in megabytes
+      - EXEC_TIMEOUT_SEC=90 # child process max run time in seconds
     env_file:
       - .env
     networks:
       - ollama-net
       - frontend-net
-    depends_on:
-      - ollama-service
 
   frontend:
     build:

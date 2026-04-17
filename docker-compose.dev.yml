@@ -1,3 +1,4 @@
+# compose configuration difference for development purposes.
 services:
   backend:
     build:
@@ -13,7 +14,7 @@ services:
     build:
       target: development
     ports:
-      - "5173:5173"
+      - "5173:5173" # uses vite live-reload
     volumes:
       - ./frontend:/app
       - /app/node_modules

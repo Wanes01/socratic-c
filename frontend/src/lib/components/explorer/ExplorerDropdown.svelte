@@ -31,7 +31,7 @@
         }}
         {disabled}
     >
-        <p class="tracking-widest text-[0.75rem] font-bold uppercase">
+        <p class="tracking-widest text-[0.75rem] text-left font-bold uppercase">
             {title}
         </p>
         <svg

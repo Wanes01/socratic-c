@@ -17,7 +17,7 @@
     title="info esercizio"
     disabled={fs.selectedExercise === null}
 >
-    <div class="flex flex-col divide-y divide-neutral-700/50 px-3 py-1">
+    <div class="flex flex-col divide-y divide-neutral-700/50 px-4 py-1">
         {#each sections as { key, label }}
             {#if currentExercise?.[key]}
                 <div class="flex flex-col gap-0.5 py-2">

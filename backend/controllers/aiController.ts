@@ -23,7 +23,7 @@ import { FileContent } from '../types/filesTypes';
  */
 export const chat = async (req: Request, res: Response): Promise<void> => {
     try {
-        const { messages, exerciseName } = req.body;
+        const { messages, exerciseName, provider } = req.body;
 
         if (!messages || !exerciseName) {
             res.status(400).json({ error: 'messages ed exerciseName sono obbligatori' });
@@ -121,7 +121,7 @@ export const chat = async (req: Request, res: Response): Promise<void> => {
         ];
 
         // provider selection
-        const chatConfig = aiService.buildChatConfig(fullMessages);
+        const chatConfig = aiService.buildChatConfig(fullMessages, provider);
 
         // SSE headers
         res.setHeader('Content-Type', 'text/event-stream');

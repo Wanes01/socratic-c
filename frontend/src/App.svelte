@@ -2,6 +2,7 @@
 	import { ui } from "./lib/state/UIState.svelte";
 	import { fs } from "./lib/state/FileState.svelte";
 	import { cs } from "./lib/state/ChatState.svelte";
+	import { untrack } from "svelte";
 	import { PaneGroup, Pane } from "paneforge";
 	import HandleResizer from "./lib/components/ui/HandleResizer.svelte";
 	import AppBar from "./lib/components/layout/AppBar.svelte";
@@ -33,7 +34,7 @@
 	);
 
 	$effect(() => {
-		// refreshed the models
+		// refreshes models
 		const refreshModels = async () => {
 			try {
 				await cs.refreshAvailableModels();
@@ -42,24 +43,24 @@
 			}
 		};
 
-		// fetches the file tree and the language model on component mount
-		const onMount = async () => {
+		untrack(async () => {
 			try {
+				// on mount fetches the available language models and the file tree
 				await Promise.all([refreshModels(), fs.loadFiles()]);
+				cs.setDefaultProvider();
 			} catch (err) {
 				console.error("Errore inizializzazione app:", err);
 			}
-		};
+		});
 
-		onMount();
+		/* Update the available models at regular intervals. This is done to notify
+		the user in the event of a network disconnection. */
 		const interval = setInterval(
 			refreshModels,
 			MODELS_REFETCH_SECONDS * 1000,
 		);
 
-		return () => {
-			clearInterval(interval);
-		};
+		return () => clearInterval(interval);
 	});
 </script>
 

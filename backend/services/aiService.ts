@@ -1,15 +1,10 @@
-import type { StreamChatConfig, ChatStreamChunk, ChatMessage, LLMOption } from '../types/aiTypes';
+import type { StreamChatConfig, ChatStreamChunk, ChatMessage, LLMOption, Provider } from '../types/aiTypes';
 import fs from 'fs/promises';
 import path from 'path';
 import isReachable from 'is-reachable';
+import { PROVIDER_CONFIGS } from '../config/llm-config';
 
-const OLLAMA_URL = process.env.OLLAMA_URL || "";
-const GROQ_API = "https://api.groq.com/openai/v1/chat/completions";
 const SYSTEM_PROMPT_PATH = path.join(__dirname, '../config/system-prompt.md');
-const LLM_TEMPERATURE = 0.3; // the model should be highly determistic, so a low temperature is appropriate
-const GROQ_MODEL = process.env.GROQ_MODEL || 'openai/gpt-oss-120b';
-const GROQ_API_KEY: string | undefined = process.env.GROQ_API_KEY?.trim();
-
 let cachedSystemPrompt: string = "";
 
 /**
@@ -70,37 +65,23 @@ export const streamChat = async function* (config: StreamChatConfig): AsyncGener
 };
 
 /**
- * Builds the config object for streamChat based on the global AI configuration.
- * Uses Groq if a valid api key is present, otherwise falls back to Ollama.
+ * Builds the config object for streamChat based on the selected provider.
  *
- * @param messages the full messages array to send to the LLM.
- * @returns {StreamChatConfig} the config object ready to be passed to streamChat.
+ * @param messages the full messages array to send to the LLM
+ * @param provider the language model service provider
+ * @returns the configuration to use in the request to the provider
  */
-export const buildChatConfig = (messages: ChatMessage[]): StreamChatConfig => {
-
-    if (GROQ_API_KEY) {
-        return {
-            provider: 'groq',
-            url: 'https://api.groq.com/openai/v1/chat/completions',
-            apiKey: GROQ_API_KEY,
-            body: {
-                model: GROQ_MODEL,
-                messages,
-                temperature: LLM_TEMPERATURE,
-                stream: true
-            }
-        };
+export const buildChatConfig = (messages: ChatMessage[], provider: Provider): StreamChatConfig => {
+    const config = PROVIDER_CONFIGS[provider];
+    if (!config) {
+        throw new Error(`Provider non disponibile: ${provider}`);
     }
 
     return {
-        provider: 'ollama',
-        url: `${OLLAMA_URL}/api/chat`,
-        body: {
-            model: process.env.OLLAMA_MODEL,
-            messages,
-            options: { temperature: LLM_TEMPERATURE },
-            stream: true
-        }
+        provider,
+        url: config.url,
+        apiKey: config.apiKey,
+        body: config.buildBody(messages)
     };
 };
 
@@ -109,7 +90,7 @@ export const buildChatConfig = (messages: ChatMessage[]): StreamChatConfig => {
  * @returns the content of the system prompt file
  */
 export const getSystemPrompt = async () => {
-    // sets it, so it does not have to be red again
+    // sets the system prompt for the first time, so it does not have to be red again
     if (!cachedSystemPrompt) {
         cachedSystemPrompt = await fs.readFile(SYSTEM_PROMPT_PATH, 'utf-8');
     }
@@ -120,18 +101,12 @@ export const getSystemPrompt = async () => {
  * Makes a list of all usable models and their providers.
  * @returns a list of moderls that can be used.
  */
-export const getAvailableModels = async () => {
-    const models: LLMOption[] = [
-        {
-            provider: 'ollama',
-            model: process.env.OLLAMA_MODEL || "",
-            available: await isReachable(OLLAMA_URL)
-        },
-        {
-            provider: 'groq',
-            model: GROQ_MODEL,
-            available: await isReachable(GROQ_API)
-        }
-    ];
-    return models;
-}
+export const getAvailableModels = async (): Promise<LLMOption[]> => {
+    return Promise.all(
+        Object.entries(PROVIDER_CONFIGS).map(async ([provider, config]) => ({
+            provider: provider as Provider,
+            model: config.model,
+            available: await isReachable(config.url)
+        }))
+    );
+};

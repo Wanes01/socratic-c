@@ -23,7 +23,7 @@ export interface GlobalAIConfig {
 /**
  * Supported LLM providers.
  */
-type Provider = 'groq' | 'ollama';
+export type Provider = 'groq' | 'ollama';
 
 /**
  * Internal configuration for the streamChat function.
@@ -51,3 +51,13 @@ export interface LLMOption {
     model: string,
     available: boolean
 }
+
+/**
+ * The configuration of a LLM provider.
+ */
+export type ProviderConfig = {
+    url: string;
+    model: string;
+    apiKey?: string;
+    buildBody: (messages: ChatMessage[]) => object;
+};

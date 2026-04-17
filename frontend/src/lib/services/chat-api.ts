@@ -1,4 +1,4 @@
-import { ChatMessage, LLMOption } from "../types";
+import { ChatMessage } from "../types";
 import { apiFetch } from "../util/utilities";
 
 const AI_API_BASE = "/api/ai";
@@ -12,12 +12,13 @@ const AI_API_BASE = "/api/ai";
  */
 export const streamChat = async function* (
     messages: ChatMessage[],
-    exerciseName: string
+    exerciseName: string,
+    provider: string
 ): AsyncGenerator<string> {
     const response = await fetch(`${AI_API_BASE}/chat`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ messages, exerciseName })
+        body: JSON.stringify({ messages, exerciseName, provider })
     });
 
     if (!response.ok) throw new Error(`HTTP error: ${response.status}`);

@@ -1,37 +1,37 @@
 <script lang="ts">
     import { cs } from "../../state/ChatState.svelte";
     import Dropdown from "../ui/Dropdown.svelte";
+
+    $inspect(cs.selectedProvider);
 </script>
 
 <Dropdown label="Modello chat">
     <div class="flex flex-col min-w-60 p-1.5 gap-1">
         {#each cs.models as modelOption}
-            {@const isLocal = modelOption.provider === "ollama"}
+            {@const isLocal = modelOption.provider === cs.LOCAL_PROVIDER}
             {@const isSelected = cs.selectedProvider === modelOption.provider}
-            {@const isAvailable = modelOption.available}
 
             <button
-                onclick={() =>
-                    isAvailable && (cs.selectedProvider = modelOption.provider)}
-                disabled={!isAvailable}
+                onclick={() => {
+                    if (modelOption.available) {
+                        cs.selectedProvider = modelOption.provider;
+                    }
+                }}
+                disabled={!modelOption.available}
                 class="w-full text-left px-3 py-2 rounded-sm transition-all duration-150 border disabled:cursor-not-allowed cursor-pointer
-                {!isAvailable
+                {!modelOption.available
                     ? 'opacity-50 border-transparent grayscale-[0.5]'
                     : isSelected
-                      ? 'bg-violet-600/20 text-violet-400 border-violet-600/30'
-                      : 'hover:bg-neutral-700/50 text-neutral-400 border-transparent'}"
+                      ? 'bg-violet-300/10 border-violet-400/20'
+                      : 'hover:bg-neutral-700/50 border-transparent'}"
             >
                 <div class="flex items-center justify-between gap-3">
                     <div class="flex flex-col">
                         <div class="flex items-center gap-2">
-                            <span
-                                class="text-sm font-medium {isSelected
-                                    ? 'text-violet-300'
-                                    : 'text-neutral-200'}"
-                            >
+                            <span class="text-sm font-medium text-neutral-200">
                                 {modelOption.model}
                             </span>
-                            {#if !isAvailable}
+                            {#if !modelOption.available}
                                 <span
                                     class="text-[9px] text-red-400 font-bold mt-2 uppercase tracking-tighter"
                                 >

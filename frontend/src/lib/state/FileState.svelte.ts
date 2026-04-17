@@ -11,22 +11,22 @@ class FileState {
     exerciseOpenedFiles = $derived( // files that are open of the current exercise
         this.openedFiles.filter(f => f.path.startsWith(this.selectedExercise || ""))
     );
-    
+
     hasTests = $derived( // if the current exercise has any test
-        this.selectedExercise 
-        && (this.fileTree as any)[this.selectedExercise]?.tests 
+        this.selectedExercise
+        && (this.fileTree as any)[this.selectedExercise]?.tests
         && Object.keys((this.fileTree as any)[this.selectedExercise].tests).length > 0
     );
-    
+
     editorViews = $state<Record<string, EditorView>>({});
 
     // gets the content of an already open file
     getContent = (path: string): string | null => {
-       return this.editorViews[path]?.state.doc.toString() ?? null;
+        return this.editorViews[path]?.state.doc.toString() ?? null;
     }
 
     // loads the file tree
-    loadFiles = async(): Promise<void> => {
+    loadFiles = async (): Promise<void> => {
         try {
             this.fileTree = await filesApi.fetchFileTree();
         } catch (e) {
@@ -65,11 +65,9 @@ class FileState {
         }
     }
 
-    // saves all specified files
+    // saves all specified files in parallel
     saveFiles = async (files: OpenedFile[]): Promise<void> => {
-        for (const file of files) {
-            await this.saveFile(file);
-        }
+        await Promise.all(files.map(f => this.saveFile(f)));
     }
 
     // saves all the files related to the current exercise
@@ -121,7 +119,7 @@ class FileState {
             await this.loadFiles();
 
         } catch (err) {
-            console.error("Impossibile rinominare il file");
+            console.error("Impossibile rinominare il file", err);
         }
     }
 
@@ -149,8 +147,8 @@ class FileState {
 
             await this.loadFiles();
 
-        } catch (err: any) {
-            console.error("Errore durante l'eliminazione: " + err.message);
+        } catch (err) {
+            console.error("Errore durante l'eliminazione: ", err);
         }
     }
 
@@ -159,7 +157,7 @@ class FileState {
         try {
             await filesApi.createNodeApi(path, type);
 
-            // relaods the file tree
+            // reloads the file tree
             await this.loadFiles();
 
         } catch (err) {

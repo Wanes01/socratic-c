@@ -2,13 +2,12 @@ import type { ChatMessage, ChatRole, LLMOption } from "../types"
 import { streamChat, fetchModels } from "../services/chat-api";
 import { fs } from "./FileState.svelte";
 
-const LOCAL_PROVIDER = 'ollama';
-
 /* maximum number of messages retained in the conversation context
 to optimize the tokens sent to the LLM model. */
 export const MAX_CONTEXT_MESSAGES = 15;
 
 class ChatState {
+    LOCAL_PROVIDER = 'ollama';
     models = $state<LLMOption[]>([]);
     selectedProvider = $state<string>("");
     isServiceAvailable = $derived(this.models.some(opt => opt.available));
@@ -46,7 +45,7 @@ class ChatState {
         this.addMessage("assistant", "");
 
         try {
-            for await (const token of streamChat(this.LLMContext, fs.selectedExercise)) {
+            for await (const token of streamChat(this.LLMContext, fs.selectedExercise, this.selectedProvider)) {
                 this.appendToLastMessage(token);
             }
         } catch (err) {
@@ -73,17 +72,20 @@ class ChatState {
         if (this.models.length === 0) {
             return;
         }
+    }
 
+    // sets the default provider. To be used on app startup.
+    setDefaultProvider = () => {
         // selects a cloud model by default, if present
         this.selectedProvider =
-            this.models.find(opt => opt.provider !== LOCAL_PROVIDER && opt.available)?.provider || "";
+            this.models.find(opt => opt.provider !== this.LOCAL_PROVIDER && opt.available)?.provider || "";
 
         if (this.selectedProvider) {
             return;
         }
 
         // tries to use the local, if available
-        this.selectedProvider = this.models.find(opt => opt.provider === LOCAL_PROVIDER && opt.available)?.provider || ""
+        this.selectedProvider = this.models.find(opt => opt.provider === this.LOCAL_PROVIDER && opt.available)?.provider || ""
     }
 }
 

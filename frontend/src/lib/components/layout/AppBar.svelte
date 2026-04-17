@@ -5,7 +5,7 @@
     import { ui } from "../../state/UIState.svelte";
     import Button from "../ui/Button.svelte";
     import CompileSettings from "../dropdowns/CompileSettings.svelte";
-    import ModelSelector from "../dropdowns/ModelSelector.svelte";
+    import ProviderSelector from "../dropdowns/ProviderSelector.svelte";
 
     const compileClick = async () => {
         if (fs.selectedExercise === null) {
@@ -64,7 +64,7 @@
     </div>
 
     <div class="flex flex-row gap-2">
-        <ModelSelector />
+        <ProviderSelector />
         <CompileSettings />
         <Button
             text="Compila"

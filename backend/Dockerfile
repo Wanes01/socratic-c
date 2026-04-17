@@ -20,9 +20,8 @@ COPY . .
 RUN npm run build
 
 # stage 4: production (minifies the image size)
-FROM node:20-bookworm-slim AS production
+FROM base AS production
 WORKDIR /app
-COPY package*.json ./
 RUN npm install --omit=dev && rm -rf /root/.npm
 # copies the code compiled from the previews stage
 COPY --from=build-step /app/dist ./dist

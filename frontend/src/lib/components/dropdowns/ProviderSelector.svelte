@@ -1,8 +1,6 @@
 <script lang="ts">
     import { cs } from "../../state/chat-state.svelte";
     import Dropdown from "../ui/Dropdown.svelte";
-
-    $inspect(cs.selectedProvider);
 </script>
 
 <Dropdown label="Modello chat">

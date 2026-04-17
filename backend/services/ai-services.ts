@@ -106,7 +106,7 @@ export const getAvailableModels = async (): Promise<LLMOption[]> => {
         Object.entries(PROVIDER_CONFIGS).map(async ([provider, config]) => ({
             provider: provider as Provider,
             model: config.model,
-            available: await isReachable(config.url)
+            available: await isReachable(config.url) && (!config.keyNeeded || !!config.apiKey)
         }))
     );
 };

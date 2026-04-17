@@ -58,6 +58,7 @@ export interface LLMOption {
 export type ProviderConfig = {
     url: string;
     model: string;
+    keyNeeded: boolean;
     apiKey?: string;
     buildBody: (messages: ChatMessage[]) => object;
 };

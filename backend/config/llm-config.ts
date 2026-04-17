@@ -14,7 +14,8 @@ export const PROVIDER_CONFIGS: Record<Provider, ProviderConfig> = {
     groq: {
         url: GROQ_API,
         apiKey: GROQ_API_KEY,
-        model: process.env.OLLAMA_MODEL || "",
+        model: GROQ_MODEL,
+        keyNeeded: true,
         buildBody: (messages) => ({
             model: GROQ_MODEL,
             messages,
@@ -24,7 +25,8 @@ export const PROVIDER_CONFIGS: Record<Provider, ProviderConfig> = {
     },
     ollama: {
         url: `${OLLAMA_URL}/api/chat`,
-        model: GROQ_MODEL,
+        model: process.env.OLLAMA_MODEL || "",
+        keyNeeded: false,
         buildBody: (messages) => ({
             model: process.env.OLLAMA_MODEL,
             messages,

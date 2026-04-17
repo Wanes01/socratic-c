@@ -49,7 +49,7 @@
             {@const isSelected = fs.selectedExercise === exName}
             <li
                 class="w-full {isSelected
-                    ? 'border-l-2 border-purple-500'
+                    ? 'border-l-2 border-violet-400'
                     : ''}"
             >
                 <button

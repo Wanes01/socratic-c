@@ -14,7 +14,7 @@ COPY . .
 CMD ["npm", "run", "dev"]
 
 # stage 3: build (compiles typescript into javascript)
-FROM base AS build-step
+FROM base AS build
 RUN npm install
 COPY . .
 RUN npm run build
@@ -24,6 +24,7 @@ FROM base AS production
 WORKDIR /app
 RUN npm install --omit=dev && rm -rf /root/.npm
 # copies the code compiled from the previews stage
-COPY --from=build-step /app/dist ./dist
+COPY --from=build /app/dist ./dist
+COPY --from=build /app/static ./static
 EXPOSE 5000
 CMD ["node", "dist/index.js"]

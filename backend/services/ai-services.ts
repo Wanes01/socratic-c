@@ -4,7 +4,7 @@ import path from 'path';
 import isReachable from 'is-reachable';
 import { PROVIDER_CONFIGS } from '../config/llm-config';
 
-const SYSTEM_PROMPT_PATH = path.join(__dirname, '../config/system-prompt.md');
+const SYSTEM_PROMPT_PATH = path.join(process.cwd(), '/static/system-prompt.md');
 let cachedSystemPrompt: string = "";
 
 /**

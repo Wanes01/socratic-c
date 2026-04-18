@@ -6,7 +6,6 @@ services:
       context: ./backend
     container_name: socratic-backend
     environment:
-      - EXERCISES_DIR=/app/exercises
       - EXEC_MEMORY_LIMIT_MB=128 # child process max memory usage in megabytes
       - EXEC_TIMEOUT_SEC=90 # child process max run time in seconds
     env_file:

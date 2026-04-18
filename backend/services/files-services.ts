@@ -5,7 +5,7 @@ import path from 'path';
 import archiver from 'archiver';
 import { ExerciseAIConfig } from '../types/ai-types';
 
-export const EXERCISES_DIR = process.env.EXERCISES_DIR || path.join(__dirname, '../../exercises');
+export const EXERCISES_DIR = path.join(process.cwd(), '/exercises');
 export const EXERCISE_AI_CONFIG_FILE_NAME = 'exercise-config.yaml';
 
 const viewableDirs = ['root', 'tests'];

@@ -4,7 +4,7 @@ import { fs } from "./files-state.svelte";
 
 /* maximum number of messages retained in the conversation context
 to optimize the tokens sent to the LLM model. */
-export const MAX_CONTEXT_MESSAGES = 15;
+export const MAX_CONTEXT_MESSAGES = 8;
 
 class ChatState {
     LOCAL_PROVIDER = 'ollama';

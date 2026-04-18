@@ -72,51 +72,56 @@ export const chat = async (req: Request, res: Response): Promise<void> => {
         } catch {
         }
 
-        // builds the briefing message
-        let briefing = `## Exercise description\n${exerciseAIConfig.description}\n\n`;
+        // static part (cachable: limits the token usage)
+        // they have to come first in the final prompt
+        let staticBriefing = `## Exercise description\n${exerciseAIConfig.description}\n\n`;
 
         if (exerciseAIConfig.learningGoals) {
-            briefing += `## Learning goals\n${exerciseAIConfig.learningGoals}\n\n`;
+            staticBriefing += `## Learning goals\n${exerciseAIConfig.learningGoals}\n\n`;
         }
 
         if (exerciseAIConfig.constraints) {
-            briefing += `## Constraints\n${exerciseAIConfig.constraints}\n\n`;
+            staticBriefing += `## Constraints\n${exerciseAIConfig.constraints}\n\n`;
         }
 
-        briefing += `## Student source files\n`;
-        for (const file of studentFiles) {
-            briefing += `### ${file.name}\n\`\`\`c\n${file.content}\n\`\`\`\n\n`;
-        }
-
-        if (testFiles.length > 0) {
-            briefing += `## Tests to pass\n`;
-            for (const file of testFiles) {
-                briefing += `### ${file.name}\n\`\`\`c\n${file.content}\n\`\`\`\n\n`;
-            }
-        }
-
+        // solutions files cannot vary
         if (solutionFiles.length > 0) {
-            briefing += `## Reference solution\n`;
+            staticBriefing += `## Reference solution\n`;
             for (const file of solutionFiles) {
-                briefing += `### ${file.name}\n\`\`\`c\n${file.content}\n\`\`\`\n\n`;
+                staticBriefing += `### ${file.name}\n\`\`\`c\n${file.content}\n\`\`\`\n\n`;
             }
+        }
+
+        // prompt part that may vary between messages
+        let dynamicBriefing = `## Tests to pass\n`;
+        // usally test files do not change but they may
+        if (testFiles.length > 0) {
+            for (const file of testFiles) {
+                dynamicBriefing += `### ${file.name}\n\`\`\`c\n${file.content}\n\`\`\`\n\n`;
+            }
+        }
+
+        // student code is intrinsically dynamic
+        dynamicBriefing += `## Student source files\n`;
+        for (const file of studentFiles) {
+            dynamicBriefing += `### ${file.name}\n\`\`\`c\n${file.content}\n\`\`\`\n\n`;
         }
 
         const fullMessages = [
+            { role: 'system', content: await aiService.getSystemPrompt() },
             {
-                role: 'system',
-                content: await aiService.getSystemPrompt()
+                role: 'user',
+                content: staticBriefing
+            },
+            {
+                role: 'assistant',
+                content: 'Ho preso visione dell\'esercizio. Sono pronto ad aiutarti.'
             },
             {
                 role: 'user',
-                content: briefing
+                content: dynamicBriefing
             },
-            // Fake assistant confirmation so that the first visible message
-            // is not the LLM acknowledging its own instructions
-            {
-                role: 'assistant',
-                content: 'Ho preso visione dell\'esercizio e del codice dello studente. Sono pronto ad aiutarti.'
-            },
+            { role: 'assistant', content: 'Ho preso visione del codice attuale dello studente.' },
             ...messages
         ];
 

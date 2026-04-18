@@ -1,4 +1,4 @@
-import { compileExercise } from "../services/terminal-api";
+import { compileExercise, checkExecutableExistance } from "../services/terminal-api";
 import { CompileOptions } from "../types/terminal-types";
 
 // the max amount of characters that the terminal can show before killing the process
@@ -16,11 +16,9 @@ class TerminalState {
     isCompiling = $state<boolean>(false); // true if the server is currently compiling the program
     isExecuting = $state<boolean>(false); // true if the program is under execution right now
     lastAction = $state<"none" | "compile" | "execute">("none"); // last action performed
-    lastCompileSuccess = $state<boolean>(false); // true if the last compilation was successful
-    lastExecutionSuccess = $state<boolean>(false); // true if the last execution was successful
     hasWarnings = $state<boolean>(false); // true if compilation produced warnings
     hasErrors = $state<boolean>(false); // true if the compilation or execution produced errors
-    canExecute = $derived(this.lastCompileSuccess && !this.isCompiling && !this.isExecuting);
+    canExecute = $state<boolean>(false); // true if the current exercise can be executed
 
     params = $state<string>(""); // the command line arguments/input to the program
     output = $state<string>(""); // the output/error of the program
@@ -43,14 +41,12 @@ class TerminalState {
     compile = async (exerciseName: string): Promise<void> => {
         this.isCompiling = true;
         this.lastAction = "none";
-        this.lastCompileSuccess = false;
         this.hasWarnings = false;
         this.hasErrors = false;
         this.output = MESSAGES.COMPILATION_IN_PROGRESS;
 
         try {
             const result = await compileExercise(exerciseName, this.compileOptions);
-            this.lastCompileSuccess = result.success;
             this.lastAction = "compile";
             this.output = result.success
                 /* if it is a warning, show it; if it is an empty string then
@@ -60,6 +56,8 @@ class TerminalState {
                 : result.output;
             this.hasWarnings = result.success && !!result.output;
             this.hasErrors = !result.success;
+
+            this.checkExecutable(exerciseName);
         } catch (e) {
             this.lastAction = "compile";
             this.output = MESSAGES.NETWORK_ERROR;
@@ -72,7 +70,6 @@ class TerminalState {
     execute = (exerciseName: string): void => {
         this.isExecuting = true;
         this.lastAction = "none";
-        this.lastExecutionSuccess = false;
         this.hasWarnings = false;
         this.hasErrors = false;
         this.output = "";
@@ -91,7 +88,6 @@ class TerminalState {
             exit code 0 = success, anything else = error */
             if (msg.type === 'exit') {
                 this.lastAction = "execute";
-                this.lastExecutionSuccess = msg.code === 0;
                 this.hasErrors = msg.code !== 0;
                 this.hasWarnings = false;
 
@@ -119,6 +115,12 @@ class TerminalState {
             this.isExecuting = false;
             this.ws = null;
         };
+    }
+
+    // checks if the executable of an exercise is present and can be executed
+    checkExecutable = async (exerciseName: string): Promise<void> => {
+        const { exists } = await checkExecutableExistance(exerciseName);
+        this.canExecute = exists && !this.isCompiling && !this.isExecuting;
     }
 
     // sends the current params value as stdin input to the running process

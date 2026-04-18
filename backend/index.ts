@@ -1,5 +1,4 @@
 import express, { Application } from 'express';
-import path from 'path';
 import { initWebSocket } from './services/terminal-services';
 // the routers that handle the HTTP requests
 import filesRouter from './routes/files-routes';

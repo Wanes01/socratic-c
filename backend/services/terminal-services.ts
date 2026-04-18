@@ -148,3 +148,18 @@ export const initWebSocket = (server: Server) => {
         ws.on('close', () => currentProcess?.kill());
     });
 }
+
+/**
+ * Checks if the executable of an exercise exists and can be executed
+ * @param exerciseName the name of the exercise related to the executable
+ * @returns true if the executable exists and can be executed
+ */
+export const executableExists = async (exerciseName: string) => {
+    const execPath = path.join(EXERCISES_DIR, exerciseName, EXEC_DIR, EXEC_NAME);
+    try {
+        await fs.access(execPath, fs.constants.X_OK);
+        return true;
+    } catch {
+        return false;
+    }
+}

@@ -20,12 +20,20 @@ class FileState {
 
     editorViews = $state<Record<string, EditorView>>({});
 
-    // gets the content of an already open file
+    /**
+     * gets the content of an opened file
+     * @param path the path of the opened file
+     * @returns the content of the file of null if it's empty
+     */
     getContent = (path: string): string | null => {
         return this.editorViews[path]?.state.doc.toString() ?? null;
     }
 
-    // loads the file tree
+    /**
+     * loads the file tree. The file tree consist
+     * of a map that associates each exercise with the student root
+     * folder and the tests folder, if it exists
+     */
     loadFiles = async (): Promise<void> => {
         try {
             this.fileTree = await filesApi.fetchFileTree();
@@ -34,7 +42,10 @@ class FileState {
         }
     }
 
-    // reads the content of a file on the server
+    /**
+     * reads the content of a file on the server
+     * @param file the file which content has to be red
+     */
     openFile = async (file: FileNode): Promise<void> => {
         // checks if the file to open already exists
         const alreadyOpen = this.openedFiles.find(f => f.path === file.path);
@@ -57,7 +68,10 @@ class FileState {
         }
     }
 
-    // saves the file content on the server
+    /**
+     * saves the file content on the server
+     * @param file the file which content must saved on the server
+     */
     saveFile = async (file: OpenedFile): Promise<void> => {
         const content = this.getContent(file.path);
         if (content !== null) {
@@ -65,12 +79,17 @@ class FileState {
         }
     }
 
-    // saves all specified files in parallel
+    /**
+     * saves all specified files in parallel
+     * @param files the files which content must be saved on the server
+     */
     saveFiles = async (files: OpenedFile[]): Promise<void> => {
         await Promise.all(files.map(f => this.saveFile(f)));
     }
 
-    // saves all the files related to the current exercise
+    /**
+     * saves all the files related to the currently selected exercise
+     */
     saveCurrentExerciseFiles = async (): Promise<void> => {
         if (this.selectedExercise === null) {
             return;
@@ -79,12 +98,18 @@ class FileState {
         await this.saveFiles(this.exerciseOpenedFiles);
     }
 
-    // saves all the opened files
+    /**
+     * saves all the opened files
+     */
     saveAllFiles = async (): Promise<void> => {
         await this.saveFiles(this.openedFiles);
     }
 
-    // renames a file/directory
+    /**
+     * renames a file/directory
+     * @param node the node (file/directory) that has to be renamed 
+     * @param replName the new name of the node
+     */
     renameNode = async (node: FileNode, replName: string): Promise<void> => {
         const oldPath = node.path;
         const newName = replName.trim();
@@ -123,7 +148,10 @@ class FileState {
         }
     }
 
-    // deletes a file/directory (recursively)
+    /**
+     * deletes a file/directory (recursively)
+     * @param node the node that must be deleted
+     */
     deleteNode = async (node: FileNode): Promise<void> => {
         try {
             await filesApi.deleteFile(node.path);
@@ -152,7 +180,11 @@ class FileState {
         }
     }
 
-    // creates a new file/directory
+    /**
+     * creates a new file/directory
+     * @param path the path of the new node
+     * @param type a string specifing if the node is a file / directory
+     */
     createNode = async (path: string, type: 'file' | 'directory'): Promise<void> => {
         try {
             await filesApi.createNodeApi(path, type);
@@ -165,7 +197,10 @@ class FileState {
         }
     }
 
-    // downloads the entire exercise as a ZIP
+    /**
+     * downloads the entire exercise as a ZIP
+     * @param exerciseName the name of the exercise which must be downloaded as a ZIP file
+     */
     downloadExercise = (exerciseName: string): void => {
         try {
             filesApi.downloadExerciseZip(exerciseName);

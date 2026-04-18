@@ -6,8 +6,6 @@
     import { cs } from "../../state/chat-state.svelte";
     import ExplorerDropdown from "./ExplorerDropdown.svelte";
 
-    $inspect(fs.fileTree);
-
     // the list of available exercises
     let exercises = $derived(Object.keys(fs.fileTree));
 
@@ -30,13 +28,14 @@
     };
 
     // user selects an exercise
-    const onclick = (exerciseName: string): void => {
+    const onclick = async (exerciseName: string): Promise<void> => {
         // another exersicise is already selected. Cleans chat history.
         if (fs.selectedExercise) {
             cs.cleanChat();
         }
 
         fs.selectedExercise = exerciseName;
+        await ts.checkExecutable(fs.selectedExercise);
 
         // if the exercise has a test folder, include it by default in the compilation process
         if (fs.hasTests) {

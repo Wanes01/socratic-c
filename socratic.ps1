@@ -83,6 +83,23 @@ if ($USE_PROD) {
     $ENV_LABEL  = "dev"
 }
 
+# validates required environment variables
+if ($USE_OLLAMA) {
+    $ollamaModel = $env:OLLAMA_MODEL
+    if (Test-Path ".env") {
+        Get-Content ".env" | ForEach-Object {
+            if ($_ -match "^\s*OLLAMA_MODEL\s*=\s*(.+)$") {
+                $ollamaModel = $matches[1].Trim()
+            }
+        }
+    }
+    if (-not $ollamaModel) {
+        Write-Host "Error: OLLAMA_MODEL is not set. Add it to your .env file."
+        Write-Host "Example: OLLAMA_MODEL=qwen2.5-coder:3b"
+        exit 1
+    }
+}
+
 Write-Host "Environment : $ENV_LABEL"
 Write-Host "Ollama      : $USE_OLLAMA"
 Write-Host "Command     : $COMMAND"

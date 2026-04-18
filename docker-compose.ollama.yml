@@ -13,6 +13,32 @@ services:
       - ollama_data:/root/.ollama
     networks:
       - ollama-net
+    healthcheck:
+      test: ["CMD", "ollama", "list"]
+      interval: 5s
+      retries: 5
+
+  # pulls the model specified in OLLAMA_MODEL after ollama-service is ready.
+  # if the model name is invalid, the container exits with a non-zero code
+  # and logs an error message.
+  ollama-pull:
+    image: ollama/ollama:latest
+    container_name: socratic-ollama-pull
+    volumes:
+      - ollama_data:/root/.ollama
+    networks:
+      - ollama-net
+    depends_on:
+      ollama-service:
+        condition: service_healthy
+    entrypoint: >
+      /bin/sh -c "
+        ollama pull ${OLLAMA_MODEL} || {
+          echo 'ERROR: failed to pull model \"${OLLAMA_MODEL}\". Check OLLAMA_MODEL in your .env file.';
+          exit 1;
+        }
+      "
+    restart: "no"
 
 networks:
   ollama-net:

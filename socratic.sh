@@ -85,6 +85,18 @@ else
   ENV_LABEL="dev"
 fi
 
+# validates required environment variables
+if $USE_OLLAMA; then
+  if [ -f ".env" ]; then
+    source .env
+  fi
+  if [ -z "${OLLAMA_MODEL:-}" ]; then
+    echo "Error: OLLAMA_MODEL is not set. Add it to your .env file."
+    echo "Example: OLLAMA_MODEL=qwen2.5-coder:3b"
+    exit 1
+  fi
+fi
+
 echo "Environment : $ENV_LABEL"
 echo "Ollama      : $USE_OLLAMA"
 echo "Command     : $COMMAND"

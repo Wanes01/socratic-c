@@ -1,4 +1,4 @@
-# compose configuration difference for development purposes.
+# compose configuration override for development purposes.
 services:
   backend:
     build:

@@ -4,7 +4,7 @@
 
 @theme {
   --font-inter: 'Inter', sans-serif;
-  --font-jetbrains: "JetBrains Mono", monospace;
+  --font-jetbrains: 'JetBrains Mono', monospace;
 }
 
 /* marked converts markdown into HTML tags.

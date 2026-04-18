@@ -1,4 +1,5 @@
 # base file for common docker compose configuration
+# sets the backend and frontend services
 services:
   backend:
     build:
@@ -6,13 +7,12 @@ services:
     container_name: socratic-backend
     environment:
       - EXERCISES_DIR=/app/exercises
-      - OLLAMA_URL=http://ollama-service:11434
       - EXEC_MEMORY_LIMIT_MB=128 # child process max memory usage in megabytes
       - EXEC_TIMEOUT_SEC=90 # child process max run time in seconds
     env_file:
-      - .env
+      - path: .env
+        required: false
     networks:
-      - ollama-net
       - frontend-net
 
   frontend:
@@ -24,19 +24,6 @@ services:
     depends_on:
       - backend
 
-  ollama-service:
-    image: ollama/ollama:latest
-    container_name: socratic-ollama
-    volumes:
-      - ollama_data:/root/.ollama
-    networks:
-      - ollama-net
-
 networks:
   frontend-net:
     driver: bridge
-  ollama-net:
-    driver: bridge
-
-volumes:
-  ollama_data:

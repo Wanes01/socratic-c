@@ -1,0 +1,22 @@
+# compose configuration override to add the ollama service
+services:
+  backend:
+    networks:
+      - ollama-net
+    environment:
+      - OLLAMA_URL=http://ollama-service:11434
+
+  ollama-service:
+    image: ollama/ollama:latest
+    container_name: socratic-ollama
+    volumes:
+      - ollama_data:/root/.ollama
+    networks:
+      - ollama-net
+
+networks:
+  ollama-net:
+    driver: bridge
+
+volumes:
+  ollama_data:

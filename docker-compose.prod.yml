@@ -1,4 +1,4 @@
-# compose configuration difference for production purposes.
+# compose configuration override for production purposes.
 services:
   backend:
     build:

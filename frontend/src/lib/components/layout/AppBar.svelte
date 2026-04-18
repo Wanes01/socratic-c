@@ -46,14 +46,18 @@
     class="flex flex-row px-4 py-2 justify-between items-center bg-neutral-900 border-b border-neutral-800 select-none"
 >
     <div class="flex flex-row gap-10">
-        <div class="flex flex-col font-jetbrains leading-none">
-            <span class="text-[15px] text-violet-400">#include</span>
-            <span class="text-[19px] font-bold text-neutral-200">
-                <span class="text-neutral-500">&lt;</span>socratic_c<span
-                    class="text-neutral-500">&gt;</span
-                >
-            </span>
+        <div class="flex flex-row gap-2">
+            <img src="logo.png" alt="Socratic C" class="w-8 aspect-auto" />
+            <div class="flex flex-col font-jetbrains leading-none">
+                <span class="text-[15px] text-violet-400">#include</span>
+                <span class="text-[19px] font-bold text-neutral-200">
+                    <span class="text-neutral-500">&lt;</span>socratic_c<span
+                        class="text-neutral-500">&gt;</span
+                    >
+                </span>
+            </div>
         </div>
+
         <QuickActions />
     </div>
 

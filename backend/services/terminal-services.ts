@@ -57,13 +57,17 @@ export const compileExercise = async (exerciseName: string, options: CompileOpti
     if (options.werror) flags.push('-Werror');
     const flagsStr = flags.join(' ');
 
+    // includes all headers in all possible root subdirs
+    const includeDirs = `$(find . -type d -exec echo -I{} \\;)`;
+    // includes all headers in all possible test subdirs
+    const includeTestDirs = `$(find ../tests -type d -exec echo -I{} \\;)`;
     // command costruction
     const compileCmd = options.includeTests
         /* search and compile the ".c" files both in the student's root and in the test directory.
         Excludes the student's main so that the test's main can be used. */
-        ? `gcc $(find . -name "*.c" ! -name "main.c") $(find ../tests -name "*.c") -o "../${EXEC_DIR}/${EXEC_NAME}" -I. -I../tests -fdiagnostics-color=always ${flagsStr} -lm`
+        ? `gcc $(find . -name "*.c" ! -name "main.c") $(find ../tests -name "*.c") -o "../${EXEC_DIR}/${EXEC_NAME}" ${includeDirs} ${includeTestDirs} -fdiagnostics-color=always ${flagsStr} -lm`
         // compile only the ".c" files in the student's root, without considering any tests
-        : `gcc $(find . -name "*.c") -o "../${EXEC_DIR}/${EXEC_NAME}" -I. -fdiagnostics-color=always ${flagsStr} -lm`;
+        : `gcc $(find . -name "*.c") -o "../${EXEC_DIR}/${EXEC_NAME}" ${includeDirs} -fdiagnostics-color=always ${flagsStr} -lm`;
 
     try {
         const { stdout, stderr } = await execAsync(compileCmd, { cwd: studentRoot, timeout: 10000 });

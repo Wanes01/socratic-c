@@ -54,7 +54,11 @@
                        {isSelected ? 'opacity-100' : ''}
                        hover:bg-neutral-700 text-neutral-500 hover:text-neutral-300"
             >
-                <img src="close.svg" alt="" class="h-3 w-3 brightness-150" />
+                <img
+                    src="icons/close.svg"
+                    alt=""
+                    class="h-3 w-3 brightness-150"
+                />
             </button>
         </li>
     {/each}

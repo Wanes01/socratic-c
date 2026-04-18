@@ -64,7 +64,7 @@
         </div>
         <Button
             text="Compila"
-            icon="compile.svg"
+            icon="icons/compile.svg"
             variant="navBar"
             disabled={fs.selectedExercise === null || ts.isCompiling}
             onclick={compileClick}
@@ -73,7 +73,7 @@
         {#if !ts.isExecuting}
             <Button
                 text="Esegui"
-                icon="run.svg"
+                icon="icons/run.svg"
                 variant="navBar"
                 disabled={!ts.canExecute}
                 onclick={executeClick}
@@ -81,7 +81,7 @@
         {:else}
             <Button
                 text="Ferma"
-                icon="stop.svg"
+                icon="icons/stop.svg"
                 variant="navBar"
                 onclick={stopClick}
             />
@@ -91,7 +91,7 @@
         <div class="w-px h-6 bg-neutral-800 mx-1 self-center"></div>
         <Button
             text="Chiedi all'IA"
-            icon="bot.svg"
+            icon="icons/bot.svg"
             variant="ai"
             disabled={cs.isGenerating || !fs.selectedExercise}
             onclick={aiAdviceClick}

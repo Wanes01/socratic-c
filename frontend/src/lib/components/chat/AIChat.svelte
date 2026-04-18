@@ -98,7 +98,7 @@
             ></textarea>
             <Button
                 text="invia messaggio"
-                icon="bot.svg"
+                icon="icons/bot.svg"
                 variant="ai"
                 iconOnly={true}
                 disabled={cs.isGenerating || !fs.selectedExercise}
@@ -109,7 +109,9 @@
     {:else}
         <div class="flex flex-col items-center justify-center h-full">
             <p class="text-neutral-500 italic">Nessun modello configurato</p>
-            <p class="text-neutral-600 mt-1">Controlla il file .env o Ollama</p>
+            <p class="text-neutral-600 mt-1 px-5 text-center">
+                Controlla che il file .env abbia una configurazione valida.
+            </p>
         </div>
     {/if}
 </div>

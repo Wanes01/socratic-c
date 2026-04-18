@@ -7,7 +7,7 @@
     const actions: ContextMenuOption[] = [
         {
             label: "Salva tutti i file aperti",
-            icon: "save.svg",
+            icon: "icons/save.svg",
             action: async () => {
                 await fs.saveAllFiles();
                 ui.showToast("File salvati", "info", 1000);

@@ -76,7 +76,7 @@
             <div transition:scale={{ duration: 200, easing: cubicOut }}>
                 <Button
                     text="Chiedi un suggerimento all'IA"
-                    icon="bot.svg"
+                    icon="icons/bot.svg"
                     variant="ai"
                     overrideClass="font-sans py-1"
                     onclick={aiHelpClick}

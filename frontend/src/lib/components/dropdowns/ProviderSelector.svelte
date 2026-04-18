@@ -4,7 +4,7 @@
 </script>
 
 <Dropdown label="Modello chat">
-    <div class="flex flex-col min-w-60 p-1.5 gap-1">
+    <div class="flex flex-col min-w-60 p-1.5 gap-1 text-nowrap">
         {#each cs.models as modelOption}
             {@const isLocal = modelOption.provider === cs.LOCAL_PROVIDER}
             {@const isSelected = cs.selectedProvider === modelOption.provider}
@@ -24,10 +24,14 @@
                       : 'hover:bg-neutral-700/50 border-transparent'}"
             >
                 <div class="flex items-center justify-between gap-3">
-                    <div class="flex flex-col">
-                        <div class="flex items-center gap-2">
+                    <div class="flex flex-col w-full">
+                        <div
+                            class="flex flex-row items-center w-full justify-between gap-2"
+                        >
                             <span class="text-sm font-medium text-neutral-200">
-                                {modelOption.model}
+                                {modelOption.model
+                                    ? modelOption.model
+                                    : "non disponibile"}
                             </span>
                             {#if !modelOption.available}
                                 <span

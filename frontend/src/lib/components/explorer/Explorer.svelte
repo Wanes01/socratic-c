@@ -19,7 +19,7 @@
     <FileTree title="sorgenti" rootNode={studentRoot} />
     {#if fs.hasTests}
         {#snippet toolTip()}
-            <Tooltip iconSrc="info.svg" position="right">
+            <Tooltip iconSrc="icons/info.svg" position="right">
                 <p>
                     <span class="font-bold underline">Nota</span>: se vuoi
                     includere i test nella compilazione e mantenere una funzione

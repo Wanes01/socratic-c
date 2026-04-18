@@ -144,4 +144,8 @@
         height: 100%;
         overflow: auto;
     }
+    .editor-wrapper :global(.cm-content),
+    .editor-wrapper :global(.cm-gutters) {
+        font-family: "JetBrains Mono", monospace;
+    }
 </style>

@@ -230,7 +230,7 @@ This section describes the features offered by the user interface
     </td>
   </tr>
   <tr>
-	  <td>Clicking the “Compile” button will pass all source files and headers to the gcc command, using the current compilation settings. Before compilation, all open files in the exercise are saved to prevent desynchronization. If the executable is generated successfully, the program can be run by clicking the “Run” button. The AI Help button sends a predefined message to the text model to request general assistance on how to proceed with the exercise. </td>
+	  <td>Clicking the “Compile” button will pass all source files and headers of the currently selected exercise to the gcc command, using the current compilation settings. Before compilation, all open files in the exercise are saved to prevent desynchronization. If the executable is generated successfully, the program can be run by clicking the “Run” button. The AI Help button sends a predefined message to the text model to request general assistance on how to proceed with the exercise. </td>
 	  <td>You can pass various options to the gcc compiler, depending on how strict you want to be regarding the source code. If the “include tests” compilation option is not selected, then all files within the tests folder will be ignored. If the tests are included, the compiler will automatically exclude the main.c file from any location within the student’s root/ directory. This convention was chosen to avoid conflicts between multiple existing main functions, and also to allow the student to temporarily exclude the tests and use their own main function.</td>
   </tr>
 </table>

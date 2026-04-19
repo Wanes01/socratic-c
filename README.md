@@ -72,7 +72,7 @@ Create a `.env` file in the project root to configure your AI backend:
 > Optional: You can skip this step if you don't want to use the AI chat service
 
 ```properties
-# Groq (cloud, reccomented)
+# Groq (cloud, recommended)
 GROQ_API_KEY=your_api_key_here
 GROQ_MODEL=openai/gpt-oss-120b  # optional, this is the default
 

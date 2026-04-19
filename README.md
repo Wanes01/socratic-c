@@ -74,7 +74,7 @@ Create a `.env` file in the project root to configure your AI backend:
 ```properties
 # Groq (cloud, recommended)
 GROQ_API_KEY=your_api_key_here
-GROQ_MODEL=openai/gpt-oss-120b  # optional, this is the default
+GROQ_MODEL=qwen/qwen3-32b  # optional, this is the default
 
 # Ollama (local, optional)
 OLLAMA_MODEL=the_model_you_chose # there is no default value. This is required if you want to download a local model.
@@ -84,7 +84,7 @@ OLLAMA_MODEL=the_model_you_chose # there is no default value. This is required i
 
 **Where can I generate the Groq API key?** Sign up on the official GroqCloud website ([GroqCloud website](https://console.groq.com/login)), click on > **API Keys** > **Create API Key**, insert a name of your liking for the key and an expiration date. Once you click "Submit," you can copy the key, which you can then use.
 
-**Where can I choose which Groq model to use?** This step is optional if you want to use Groq, because by default the app uses the `openai/gpt-oss-120b` model. A list of all the free models can be found at this link: [Groq models](https://console.groq.com/docs/rate-limits). Please note that free plans are subject to a daily token limit, after which the service will no longer function.
+**Where can I choose which Groq model to use?** This step is optional if you want to use Groq, because by default the app uses the `qwen/qwen3-32b` model. A list of all the free models can be found at this link: [Groq models](https://console.groq.com/docs/rate-limits). Please note that free plans are subject to a daily token limit, after which the service will no longer function. I recommend using the default one or `openai/gpt-oss-120b` (it's much smarter but has stricter limits).
 
 **Where can I choose which Ollama model to use locally?** I recommend using Groq's cloud service, as local models can be very resource-intensive and take longer to respond. Cloud providers provide smarter models without slowing down your computer. If you still want to use a local model, you can find a list here: [Ollama models](https://ollama.com/search). Of the options available, I recommend using `qwen2.5-coder:3b`, as it is a very lightweight model. 
 

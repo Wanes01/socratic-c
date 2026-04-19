@@ -4,7 +4,7 @@ const OLLAMA_URL = process.env.OLLAMA_URL || "";
 const OLLAMA_MODEL = process.env.OLLAMA_MODEL || "";
 const GROQ_API = "https://api.groq.com/openai/v1/chat/completions";
 const LLM_TEMPERATURE = 0.3; // the model should be highly determistic, so a low temperature is appropriate
-const GROQ_MODEL = process.env.GROQ_MODEL || 'openai/gpt-oss-120b';
+const GROQ_MODEL = process.env.GROQ_MODEL || 'qwen/qwen3-32b';
 const GROQ_API_KEY: string | undefined = process.env.GROQ_API_KEY?.trim();
 
 /**
@@ -51,7 +51,8 @@ const GROQ_PROVIDER_CONFIG: ProviderConfig = {
         model: GROQ_MODEL,
         messages,
         temperature: LLM_TEMPERATURE,
-        stream: true
+        stream: true,
+        include_reasoning: false
     }),
     validateModel: async () => {
         if (!GROQ_MODEL || !GROQ_API_KEY) return false;

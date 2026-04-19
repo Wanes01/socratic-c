@@ -55,7 +55,7 @@ The tutor is intentionally **non-prescriptive**: rather than providing direct an
 ### Prerequisites
 
 - **On Linux**: [Docker Engine](https://docs.docker.com/engine/install/) + [Docker Compose plugin](https://docs.docker.com/compose/install/) (or just install [Docker Desktop](https://www.docker.com/products/docker-desktop/) that includes both)
-- **Windows / macOS**: [Docker Desktop](https://www.docker.com/products/docker-desktop/) installed and running
+- **On Windows / macOS**: [Docker Desktop](https://www.docker.com/products/docker-desktop/) installed and running
 - [Git](https://git-scm.com/install/)
 
 ### Installation

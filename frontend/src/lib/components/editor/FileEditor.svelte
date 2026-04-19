@@ -3,6 +3,7 @@
     import { untrack } from "svelte";
     import { indentUnit } from "@codemirror/language";
     import { autocompletion, completeAnyWord } from "@codemirror/autocomplete";
+    import { indentationMarkers } from "@replit/codemirror-indentation-markers";
     import { cCompletionSource } from "../../util/c-completitions";
     import { EditorView, basicSetup } from "codemirror";
     import { keymap } from "@codemirror/view";
@@ -102,6 +103,13 @@
             extensions: [
                 basicSetup,
                 oneDark,
+                indentationMarkers({
+                    highlightActiveBlock: false,
+                    colors: {
+                        dark: "#404040",
+                        light: "#404040",
+                    },
+                }),
                 darkBackground,
                 indentUnit.of("    "), // default indentation to 4 spaces
                 keyBinding,

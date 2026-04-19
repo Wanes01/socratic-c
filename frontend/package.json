@@ -24,6 +24,7 @@
     "@codemirror/view": "^6.41.0",
     "@fontsource/inter": "^5.2.8",
     "@fontsource/jetbrains-mono": "^5.2.8",
+    "@replit/codemirror-indentation-markers": "^6.5.3",
     "@tailwindcss/vite": "^4.2.2",
     "ansi-to-html": "^0.7.2",
     "codemirror": "^6.0.2",

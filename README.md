@@ -115,7 +115,7 @@ sudo ./socratic.sh install --prod --ollama
 Set-ExecutionPolicy -Scope CurrentUser RemoteSigned
 
 # with Groq configuration only (recommended)
-sudo .\socratic.ps1 install --prod
+.\socratic.ps1 install --prod
 
 # with Groq and local Ollama
 .\socratic.ps1 install --prod --ollama

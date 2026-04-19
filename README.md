@@ -199,7 +199,7 @@ This section describes the features offered by the user interface
 <table align="center">
   <tr>
     <th width="50%">Exercises</th>
-    <th width="50%">Files</th>
+    <th width="50%">Files/Directories</th>
   </tr>
   <tr>
     <td align="center">
@@ -210,8 +210,8 @@ This section describes the features offered by the user interface
     </td>
   </tr>
   <tr>
-	  <td>By right-clicking on a file or directory, you can edit, add, or delete it. Of course, you cannot delete or rename the `root` and `tests` directories.</td>
-	  <td>Right-click on an exercise to download it as a ZIP file.</td>
+   <td>Click on an exercise to select it. Changing exercises will clear the chat. Right-click on an exercise to download it as a ZIP file.</td>
+	  <td>Click on a directory to open or close it. Click on a file to open it in the file editor. By right-clicking on a file or directory, you can edit, add, or delete it. Of course, you cannot delete or rename the `root` and `tests` directories.</td>
   </tr>
 </table>
 

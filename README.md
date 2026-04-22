@@ -39,14 +39,14 @@ The tutor is intentionally **non-prescriptive**: rather than providing direct an
 
 - Guides students through questions and hints rather than providing direct answers
 - Supports two AI backends: **Groq** (cloud, recommended) and **Ollama** (local, offline-friendly)
-- Ollama model is freely configurable — any model available in the Ollama library can be used
+- Ollama model is freely configurable: any model available in the Ollama library can be used
 - Groq model is configurable via `.env`
 - System prompt defined in `system-prompt.md`, editable without touching the codebase
 - Per-exercise behavior configured by professors via `exercise-config.yaml`
 
 **Infrastructure**
 
-- Fully containerized via Docker Compose — no local dependencies beyond Docker
+- Fully containerized via Docker Compose: no local dependencies beyond Docker
 - Ollama service is optional and can be omitted when using Groq
 - Simple setup via shell script (`socratic.sh` on Linux/macOS, `socratic.ps1` on Windows)
 

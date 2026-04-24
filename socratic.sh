@@ -147,6 +147,7 @@ case "$COMMAND" in
     mkdir -p exercises
     docker compose $FILES build --no-cache
     docker compose $FILES up -d
+    docker image prune -f > /dev/null
     appReadyMessage
     ;;
   start)

@@ -127,6 +127,7 @@ switch ($COMMAND) {
         New-Item -ItemType Directory -Force -Path "exercises" | Out-Null
         Invoke-Expression "docker compose $FILES build --no-cache"
         Invoke-Expression "docker compose $FILES up -d"
+        docker image prune -f | Out-Null
         Show-AppReady
     }
     "start"  {

@@ -103,7 +103,9 @@ sudo groupadd -f docker
 # Adds the user to the group
 sudo usermod -aG docker $USER
 ```
-
+If you've completed the previous step, close the shell and reopen it.
+<br/>
+<br/>
 Installation using the script:
 ```bash
 # Make the script executable

@@ -15,9 +15,10 @@ Usage: $name <command> [options]
 
 Commands:
   install   Build images and start services (saves configuration for future use)
-              --dev     Use development configuration (default)
-              --prod    Use production configuration
-              --ollama  Include local Ollama service
+            [installation options]
+              --dev / --prod     Use development or production configuration (defaults to development)
+              --ollama           Include local Ollama service
+
   start     Start existing services (no build)
   stop      Stop services
   remove    Stop services and remove containers, networks, volumes
@@ -110,6 +111,7 @@ switch ($COMMAND) {
         "SAVED_OLLAMA=$USE_OLLAMA`nSAVED_PROD=$USE_PROD" | Set-Content $ENV_FILE
         Write-Host "Configuration saved to $ENV_FILE"
         Write-Host ""
+        New-Item -ItemType Directory -Force -Path "exercises" | Out-Null
         Invoke-Expression "docker compose $FILES up -d --build"
     }
     "start"  { Invoke-Expression "docker compose $FILES up -d" }

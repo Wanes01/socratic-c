@@ -1,4 +1,5 @@
 <script lang="ts">
+    import type { OpenedFile } from "../../types/files-types";
     import { fs } from "../../state/files-state.svelte";
     import { untrack } from "svelte";
     import { indentUnit } from "@codemirror/language";
@@ -13,7 +14,11 @@
     import { Compartment } from "@codemirror/state";
     import { oneDark } from "@codemirror/theme-one-dark";
 
-    let { file } = $props(); // { path, name, extension, initialContent }
+    interface Props {
+        file: OpenedFile;
+    }
+
+    let { file }: Props = $props();
 
     /* freezes the values on component creation with non reactive variables */
     const initialContent = untrack(() => file.initialContent);

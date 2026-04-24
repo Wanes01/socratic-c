@@ -17,9 +17,10 @@ Usage: $(basename "$0") <command> [options]
 
 Commands:
   install   Build images and start services (saves configuration for future use)
-              --dev     Use development configuration (default)
-              --prod    Use production configuration
-              --ollama  Include local Ollama service
+            [installation options]
+              --dev / --prod     Use development or production configuration (defaults to development)
+              --ollama           Include local Ollama service
+
   start     Start existing services (no build)
   stop      Stop services
   remove    Stop services and remove containers, networks, volumes
@@ -108,6 +109,7 @@ case "$COMMAND" in
     echo "SAVED_PROD=$USE_PROD"    >> "$ENV_FILE"
     echo "Configuration saved to $ENV_FILE"
     echo ""
+    mkdir -p exercises
     docker compose $FILES up -d --build
     ;;
   start)

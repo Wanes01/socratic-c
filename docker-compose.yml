@@ -13,6 +13,8 @@ services:
         required: false
     networks:
       - frontend-net
+    volumes:
+      - ./exercises:/app/exercises
 
   frontend:
     build:

@@ -5,8 +5,7 @@ services:
       target: production
     ports:
       - "5000:5000"
-    volumes:
-      - ./exercises:/app/exercises
+      
 
   frontend:
     build:

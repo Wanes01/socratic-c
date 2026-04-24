@@ -112,7 +112,8 @@ switch ($COMMAND) {
         Write-Host "Configuration saved to $ENV_FILE"
         Write-Host ""
         New-Item -ItemType Directory -Force -Path "exercises" | Out-Null
-        Invoke-Expression "docker compose $FILES up -d --build"
+        Invoke-Expression "docker compose $FILES build --no-cache"
+        Invoke-Expression "docker compose $FILES up -d"
     }
     "start"  { Invoke-Expression "docker compose $FILES up -d" }
     "stop"   { Invoke-Expression "docker compose $FILES stop" }

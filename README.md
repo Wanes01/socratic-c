@@ -95,14 +95,16 @@ Make sure Docker is running (Docker Desktop if you're using Windows or macOS) an
 <details>
 <summary>Linux</summary>
 
+Before the actual installation, the user must be a member of the docker group. (Skip this step if the user is already a member of the group)
+
 ```bash
-# (Optional, recommended) Add your user to the Docker group
-# so you won't need "sudo" for subsequent Docker commands.
-# Note: after running these two commands, open a new terminal before continuing.
+# Create the Docker group (if it doesn't already exist)
+sudo groupadd -f docker
+# Adds the user to the group
 sudo usermod -aG docker $USER
-newgrp docker
 ```
 
+Installation using the script:
 ```bash
 # Make the script executable
 chmod +x socratic.sh

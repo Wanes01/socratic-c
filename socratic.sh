@@ -38,6 +38,23 @@ USAGE
   exit 1
 }
 
+# check that the user is not running as root
+if [ "$EUID" -eq 0 ]; then
+  echo "Error: do not run this script as root or with sudo."
+  echo "Add your user to the Docker group instead:"
+  echo "  sudo usermod -aG docker \$USER"
+  echo "Then open a new terminal and try again."
+  exit 1
+fi
+
+# check that the user is in the docker group (Linux only)
+if [[ "$(uname)" == "Linux" ]] && ! groups | grep -q docker; then
+  echo "Error: your user is not in the docker group."
+  echo "Run the following command, then open a new terminal and try again:"
+  echo "  sudo usermod -aG docker \$USER"
+  exit 1
+fi
+
 # arguments parsing
 COMMAND=""
 USE_OLLAMA=false
@@ -110,7 +127,8 @@ case "$COMMAND" in
     echo "Configuration saved to $ENV_FILE"
     echo ""
     mkdir -p exercises
-    docker compose $FILES up -d --build
+    docker compose $FILES build --no-cache
+    docker compose $FILES up -d
     ;;
   start)
     docker compose $FILES up -d

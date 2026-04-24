@@ -1,11 +1,22 @@
 # the script stops immediately if an error occurs in a single statement
 $ErrorActionPreference = "Stop"
 
-$COMPOSE_BASE   = "-f docker-compose.yml"
+$COMPOSE_BASE = "-f docker-compose.yml"
 $COMPOSE_OLLAMA = "-f docker-compose.ollama.yml" # ollama local LLM override
-$COMPOSE_DEV    = "-f docker-compose.dev.yml" # development override
-$COMPOSE_PROD   = "-f docker-compose.prod.yml" # production override
-$ENV_FILE       = ".socratic-env" # the file in which the configuration from the last installation will be saved
+$COMPOSE_DEV = "-f docker-compose.dev.yml" # development override
+$COMPOSE_PROD = "-f docker-compose.prod.yml" # production override
+$ENV_FILE = ".socratic-env" # the file in which the configuration from the last installation will be saved
+
+# app url
+$APP_URL = "http://localhost"
+
+# shows app ready message
+function Show-AppReady {
+    Write-Host ""
+    Write-Host "App ready!" -ForegroundColor Green
+    Write-Host "Service available at " -NoNewline
+    Write-Host $APP_URL -ForegroundColor Cyan
+}
 
 # command usage
 function Show-Usage {
@@ -76,11 +87,13 @@ $FILES = $COMPOSE_BASE
 if ($USE_OLLAMA) { $FILES = "$FILES $COMPOSE_OLLAMA" }
 
 if ($USE_PROD) {
-    $FILES      = "$FILES $COMPOSE_PROD"
-    $ENV_LABEL  = "prod"
+    $FILES = "$FILES $COMPOSE_PROD"
+    $ENV_LABEL = "prod"
+    $APP_URL = "${APP_URL}:8080"
 } else {
-    $FILES      = "$FILES $COMPOSE_DEV"
-    $ENV_LABEL  = "dev"
+    $FILES = "$FILES $COMPOSE_DEV"
+    $ENV_LABEL = "dev"
+    $APP_URL = "${APP_URL}:5173"
 }
 
 # validates required environment variables
@@ -114,9 +127,13 @@ switch ($COMMAND) {
         New-Item -ItemType Directory -Force -Path "exercises" | Out-Null
         Invoke-Expression "docker compose $FILES build --no-cache"
         Invoke-Expression "docker compose $FILES up -d"
+        Show-AppReady
     }
-    "start"  { Invoke-Expression "docker compose $FILES up -d" }
-    "stop"   { Invoke-Expression "docker compose $FILES stop" }
+    "start"  {
+        Invoke-Expression "docker compose $FILES up -d"
+        Show-AppReady
+    }
+    "stop" { Invoke-Expression "docker compose $FILES stop" }
     "remove" {
         Invoke-Expression "docker compose $FILES down -v"
         if (Test-Path $ENV_FILE) { Remove-Item $ENV_FILE }

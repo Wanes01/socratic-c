@@ -38,6 +38,22 @@ USAGE
   exit 1
 }
 
+# colors for output
+GREEN='\033[0;32m'
+CYAN='\033[0;36m'
+BOLD='\033[1m'
+NC='\033[0m' # no color
+
+# app url
+APP_URL="http://localhost"
+
+# shows
+appReadyMessage() {
+  echo ""
+  printf "${GREEN}App ready!${NC}\n"
+  printf "Service available at ${BOLD}${CYAN}$APP_URL${NC}\n"
+}
+
 # check that the user is not running as root
 if [ "$EUID" -eq 0 ]; then
   echo "Error: do not run this script as root or with sudo."
@@ -97,9 +113,11 @@ fi
 if $USE_PROD; then
   FILES="$FILES $COMPOSE_PROD"
   ENV_LABEL="prod"
+  APP_URL="${APP_URL}:8080"
 else
   FILES="$FILES $COMPOSE_DEV"
   ENV_LABEL="dev"
+  APP_URL="${APP_URL}:5173"
 fi
 
 # validates required environment variables
@@ -129,9 +147,11 @@ case "$COMMAND" in
     mkdir -p exercises
     docker compose $FILES build --no-cache
     docker compose $FILES up -d
+    appReadyMessage
     ;;
   start)
     docker compose $FILES up -d
+    appReadyMessage
     ;;
   stop)
     docker compose $FILES stop

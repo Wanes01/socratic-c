@@ -102,8 +102,10 @@ Before the actual installation, the user must be a member of the docker group. (
 sudo groupadd -f docker
 # Adds the user to the group
 sudo usermod -aG docker $USER
+
+# Log out and log back in
 ```
-If you've completed the previous step, close the shell and reopen it.
+Log out and then log back in to ensure that the changes are applied correctly. 
 <br/>
 <br/>
 Installation using the script:

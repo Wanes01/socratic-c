@@ -93,16 +93,41 @@ OLLAMA_MODEL=the_model_you_chose # there is no default value. This is required i
 Make sure Docker is running (Docker Desktop if you're using Windows or macOS) and then...
 
 <details>
-<summary>Linux / macOS</summary>
+<summary>Linux</summary>
 
 ```bash
+# (Optional, recommended) Add your user to the Docker group
+# so you won't need "sudo" for subsequent Docker commands.
+# Note: after running these two commands, open a new terminal before continuing.
+sudo usermod -aG docker $USER
+newgrp docker
+```
+
+```bash
+# Make the script executable
 chmod +x socratic.sh
 
-# with Groq configuration only (recommended)
-sudo ./socratic.sh install --prod
+# Install WITHOUT a local LLM (Groq cloud only, recommended)
+./socratic.sh install --prod
 
-# with Groq and local Ollama
-sudo ./socratic.sh install --prod --ollama
+# Install WITH a local LLM (Groq cloud + local Ollama)
+./socratic.sh install --prod --ollama
+```
+
+</details>
+
+<details>
+<summary>macOS</summary>
+
+```bash
+# Make the script executable
+chmod +x socratic.sh
+
+# Install WITHOUT a local LLM (Groq cloud only, recommended)
+./socratic.sh install --prod
+
+# Install WITH a local LLM (Groq cloud + local Ollama)
+./socratic.sh install --prod --ollama
 ```
 
 </details>
@@ -114,10 +139,10 @@ sudo ./socratic.sh install --prod --ollama
 # If script execution has never been enabled before...
 Set-ExecutionPolicy -Scope CurrentUser RemoteSigned
 
-# with Groq configuration only (recommended)
+# Install WITHOUT a local LLM (Groq cloud only, recommended)
 .\socratic.ps1 install --prod
 
-# with Groq and local Ollama
+# Install WITH a local LLM (Groq cloud + local Ollama)
 .\socratic.ps1 install --prod --ollama
 ```
 
@@ -129,16 +154,29 @@ Once running, open your browser at [http://localhost:8080/](http://localhost:808
 
 ### Script usage
 
+#### Install
 ```bash
-# or .\socratic.ps1 if on Windows
-./socratic.sh start    # start services (no rebuild)
-./socratic.sh stop     # stop services
-./socratic.sh remove   # stop and remove containers, networks and volumes
+# installs and starts the application
+# --dev is the default if --prod is omitted
+./socratic.sh install --prod [--ollama]
 ```
 
-The script remembers the configuration used during `install`, no need to repeat `--prod` or `--ollama`.
+Once installed, the application is available at:
+- **Production:** `http://localhost:8080`
+- **Development:** `http://localhost:5173`
 
-The script will display a help message if it is called without any arguments: `./socratic.sh`
+#### Other commands
+```bash
+./socratic.sh start    # start services (no rebuild)
+./socratic.sh stop     # stop services
+./socratic.sh remove   # stop and remove containers, networks, and volumes
+```
+
+`start`, `stop`, and `remove` automatically reuse the configuration saved during `install`, no need to repeat `--prod` or `--ollama`.
+
+For a full list of commands and options, run `./socratic.sh` with no arguments.
+
+> On Windows, replace `./socratic.sh` with `.\socratic.ps1`.
 
 ## Exercise format
 
@@ -167,20 +205,23 @@ To be more specific:
 - `exercise-config.yaml` (**required**): the exercise configuration file, which contains useful information for both the student and the large language model. It has the following properties:
 
   ```yaml
-  # REQUIRED: General description of the exercise and what the final program should accomplish. Example:
+  # REQUIRED: General description of the exercise and what the final program should accomplish.
+  # Example:
   description: |
     Write a C program that manages a singly linked list of integers.
     The program must support the following operations via a menu:
     insert at head, insert at tail, delete by value, and print the list.
   
-  # optional: Learning objectives the student should develop by completing this exercise. Example:
+  # optional: Learning objectives the student should develop by completing this exercise.
+  # Example:
   learningGoals: |
     - Dynamic memory allocation with malloc and free
     - Pointer manipulation and linked list traversal
     - Struct definition and usage
     - Modular code organization with functions
   
-  # optional: Rules the student must follow or avoid during the exercise. Example:
+  # optional: Rules the student must follow or avoid during the exercise.
+  # Example:
   constraints: |
     - Must define a Node struct with an int field and a next pointer
     - Must free all allocated memory before the program exits

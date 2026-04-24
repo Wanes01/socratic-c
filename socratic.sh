@@ -16,21 +16,20 @@ usage() {
 Usage: $(basename "$0") <command> [options]
 
 Commands:
-  install   Build images and start services (saves configuration)
+  install   Build images and start services (saves configuration for future use)
+              --dev     Use development configuration (default)
+              --prod    Use production configuration
+              --ollama  Include local Ollama service
   start     Start existing services (no build)
   stop      Stop services
   remove    Stop services and remove containers, networks, volumes
 
-Options:
-  --ollama  Include local Ollama service
-  --dev     Use development configuration (default)
-  --prod    Use production configuration
-
-Note: start, stop and remove automatically reuse the configuration
-      saved by the last install if no options are provided.
+Note: start, stop, and remove automatically reuse the configuration
+      saved by the last install.
 
 Examples:
-  $(basename "$0") install --prod --ollama
+  $(basename "$0") install                  # dev mode, no Ollama
+  $(basename "$0") install --prod --ollama  # prod mode, with Ollama
   $(basename "$0") start
   $(basename "$0") stop
   $(basename "$0") remove

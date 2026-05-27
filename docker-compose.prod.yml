@@ -5,6 +5,7 @@ services:
       target: production
     ports:
       - "5000:5000"
+    restart: unless-stopped
       
 
   frontend:
@@ -12,3 +13,4 @@ services:
       target: production
     ports:
       - "8080:80"
+    restart: unless-stopped

@@ -1,0 +1,12 @@
+# compose configuration override to enable NVIDIA GPU support for ollama-service.
+# requires nvidia-container-toolkit installed and configured on the host.
+# MUST BE COMBINED WITH docker-compose.ollama.yml.
+services:
+  ollama-service:
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]

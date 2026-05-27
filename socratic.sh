@@ -8,6 +8,7 @@ COMPOSE_BASE="-f docker-compose.yml"
 COMPOSE_OLLAMA="-f docker-compose.ollama.yml" # ollama local LLM override
 COMPOSE_DEV="-f docker-compose.dev.yml" # development override
 COMPOSE_PROD="-f docker-compose.prod.yml" # production override
+COMPOSE_GPU="-f docker-compose.gpu.yml" # NVIDIA GPU support override
 ENV_FILE=".socratic-env" # the file in which the configuration from the last installation will be saved
 
 # command usage
@@ -20,6 +21,8 @@ Commands:
             [installation options]
               --dev / --prod     Use development or production configuration (defaults to development)
               --ollama           Include local Ollama service
+              --gpu              Enable NVIDIA GPU support for Ollama (requires --ollama)
+                                 [REQUIRES A COMPATIBLE NVIDIA GPU AND NVIDIA TOOLKIT INSTALLED]
 
   start     Start existing services (no build)
   stop      Stop services
@@ -75,14 +78,16 @@ fi
 COMMAND=""
 USE_OLLAMA=false
 USE_PROD=false
+USE_GPU=false
 FLAGS_PROVIDED=false
 
 for arg in "$@"; do
   case "$arg" in
     install|start|stop|remove) COMMAND="$arg" ;;
-    --ollama) USE_OLLAMA=true;  FLAGS_PROVIDED=true ;;
-    --prod)   USE_PROD=true;    FLAGS_PROVIDED=true ;;
-    --dev)    USE_PROD=false;   FLAGS_PROVIDED=true ;;
+    --ollama) USE_OLLAMA=true; FLAGS_PROVIDED=true ;;
+    --gpu) USE_GPU=true; FLAGS_PROVIDED=true ;;
+    --prod) USE_PROD=true; FLAGS_PROVIDED=true ;;
+    --dev) USE_PROD=false; FLAGS_PROVIDED=true ;;
     *) echo "Unknown option: $arg"; usage ;;
   esac
 done
@@ -95,6 +100,7 @@ if [ "$FLAGS_PROVIDED" = false ] && [ "$COMMAND" != "install" ]; then
     source "$ENV_FILE"
     USE_OLLAMA=$SAVED_OLLAMA
     USE_PROD=$SAVED_PROD
+    USE_GPU=$SAVED_GPU
     echo "Using saved configuration from $ENV_FILE"
   else
     echo "Warning: no saved configuration found and no options provided."
@@ -120,6 +126,10 @@ else
   APP_URL="${APP_URL}:5173"
 fi
 
+if $USE_OLLAMA && $USE_GPU; then
+  FILES="$FILES $COMPOSE_GPU"
+fi
+
 # validates required environment variables
 if $USE_OLLAMA; then
   if [ -f ".env" ]; then
@@ -134,6 +144,9 @@ fi
 
 echo "Environment : $ENV_LABEL"
 echo "Ollama      : $USE_OLLAMA"
+if $USE_OLLAMA; then
+  echo "GPU         : $USE_GPU"
+fi
 echo "Command     : $COMMAND"
 echo ""
 
@@ -141,6 +154,7 @@ echo ""
 case "$COMMAND" in
   install)
     echo "SAVED_OLLAMA=$USE_OLLAMA" > "$ENV_FILE"
+    echo "SAVED_GPU=$USE_GPU" >> "$ENV_FILE"
     echo "SAVED_PROD=$USE_PROD"    >> "$ENV_FILE"
     echo "Configuration saved to $ENV_FILE"
     echo ""

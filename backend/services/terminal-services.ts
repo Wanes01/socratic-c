@@ -106,7 +106,7 @@ export const initWebSocket = (server: Server) => {
                 /* spawns the program with stdbuf to disable output buffering,
                 so stdout is sent immediately without waiting for \n.
                 Also sets the max bytes that the process can take */
-                const cmd = `ulimit -v ${EXEC_MEMORY_LIMIT_KB} && stdbuf -o0 ${binPath} ${args.join(' ')}`;
+                const cmd = `ulimit -v ${EXEC_MEMORY_LIMIT_KB} && stdbuf -o0 "${binPath}" ${args.join(' ')}`;
                 currentProcess = spawn('bash', ['-c', cmd]);
 
                 // kills the process after the timeout

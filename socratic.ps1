@@ -5,6 +5,7 @@ $COMPOSE_BASE = "-f docker-compose.yml"
 $COMPOSE_OLLAMA = "-f docker-compose.ollama.yml" # ollama local LLM override
 $COMPOSE_DEV = "-f docker-compose.dev.yml" # development override
 $COMPOSE_PROD = "-f docker-compose.prod.yml" # production override
+$COMPOSE_GPU = "-f docker-compose.gpu.yml" # NVIDIA GPU support override
 $ENV_FILE = ".socratic-env" # the file in which the configuration from the last installation will be saved
 
 # app url
@@ -29,6 +30,8 @@ Commands:
             [installation options]
               --dev / --prod     Use development or production configuration (defaults to development)
               --ollama           Include local Ollama service
+              --gpu              Enable NVIDIA GPU support for Ollama (requires --ollama)
+                                 [REQUIRES A COMPATIBLE NVIDIA GPU AND NVIDIA TOOLKIT INSTALLED]
 
   start     Start existing services (no build)
   stop      Stop services
@@ -51,15 +54,17 @@ Examples:
 $COMMAND = ""
 $USE_OLLAMA = $false
 $USE_PROD = $false
+$USE_GPU = $false
 $FLAGS_PROVIDED = $false
 
 foreach ($arg in $args) {
     switch ($arg) {
         { $_ -in "install","start","stop","remove" } { $COMMAND = $arg }
         "--ollama" { $USE_OLLAMA = $true;  $FLAGS_PROVIDED = $true }
-        "--prod"   { $USE_PROD   = $true;  $FLAGS_PROVIDED = $true }
-        "--dev"    { $USE_PROD   = $false; $FLAGS_PROVIDED = $true }
-        default    { Write-Host "Unknown option: $arg"; Show-Usage }
+        "--prod" { $USE_PROD   = $true;  $FLAGS_PROVIDED = $true }
+        "--dev" { $USE_PROD   = $false; $FLAGS_PROVIDED = $true }
+        "--gpu" { $USE_GPU = $true; $FLAGS_PROVIDED = $true }
+        default { Write-Host "Unknown option: $arg"; Show-Usage }
     }
 }
 
@@ -72,7 +77,8 @@ if (-not $FLAGS_PROVIDED -and $COMMAND -ne "install") {
     if (Test-Path $ENV_FILE) {
         $saved = Get-Content $ENV_FILE | ConvertFrom-StringData
         $USE_OLLAMA = [System.Convert]::ToBoolean($saved.SAVED_OLLAMA)
-        $USE_PROD   = [System.Convert]::ToBoolean($saved.SAVED_PROD)
+        $USE_PROD = [System.Convert]::ToBoolean($saved.SAVED_PROD)
+        $USE_GPU = [System.Convert]::ToBoolean($saved.SAVED_GPU)
         Write-Host "Using saved configuration from $ENV_FILE"
     } else {
         Write-Host "Warning: no saved configuration found and no options provided."
@@ -85,6 +91,8 @@ if (-not $FLAGS_PROVIDED -and $COMMAND -ne "install") {
 $FILES = $COMPOSE_BASE
 
 if ($USE_OLLAMA) { $FILES = "$FILES $COMPOSE_OLLAMA" }
+
+if ($USE_OLLAMA -and $USE_GPU) { $FILES = "$FILES $COMPOSE_GPU" }
 
 if ($USE_PROD) {
     $FILES = "$FILES $COMPOSE_PROD"
@@ -115,13 +123,14 @@ if ($USE_OLLAMA) {
 
 Write-Host "Environment : $ENV_LABEL"
 Write-Host "Ollama      : $USE_OLLAMA"
+if ($USE_OLLAMA) { Write-Host "GPU         : $USE_GPU" }
 Write-Host "Command     : $COMMAND"
 Write-Host ""
 
 # executes the command
 switch ($COMMAND) {
     "install" {
-        "SAVED_OLLAMA=$USE_OLLAMA`nSAVED_PROD=$USE_PROD" | Set-Content $ENV_FILE
+        "SAVED_OLLAMA=$USE_OLLAMA`nSAVED_GPU=$USE_GPU`nSAVED_PROD=$USE_PROD" | Set-Content $ENV_FILE
         Write-Host "Configuration saved to $ENV_FILE"
         Write-Host ""
         New-Item -ItemType Directory -Force -Path "exercises" | Out-Null

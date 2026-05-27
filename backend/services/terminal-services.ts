@@ -90,7 +90,7 @@ export const compileExercise = async (exerciseName: string, options: CompileOpti
  */
 export const initWebSocket = (server: Server) => {
     // attaches the WebSocker server to the same HTTP server as Express, to share the same port
-    const wss = new WebSocketServer({ server });
+    const wss = new WebSocketServer({ server, path: '/api/terminal' });
 
     // every time the client opens a websocket connection...
     wss.on('connection', (ws) => {

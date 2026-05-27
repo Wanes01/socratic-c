@@ -74,7 +74,8 @@ class TerminalState {
         this.hasErrors = false;
         this.output = "";
 
-        this.ws = new WebSocket(`ws://localhost:5000`);
+        const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+        this.ws = new WebSocket(`${protocol}//${window.location.host}/api/terminal`);
 
         this.ws.onmessage = (event) => {
             const msg = JSON.parse(event.data);

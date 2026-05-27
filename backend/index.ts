@@ -7,7 +7,7 @@ import terminalRouter from './routes/terminal-routes';
 
 const app: Application = express();
 app.use(express.json());
-const server = app.listen(5000);
+const server = app.listen(5000, '0.0.0.0');
 
 // initializes the web socket server to read stdout, stderr and write on stdin of the current process
 initWebSocket(server);
